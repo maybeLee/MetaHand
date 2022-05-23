@@ -21,10 +21,11 @@ class PreTrainData(object):
         self.train_path = os.path.join(self.target_dir, "train.txt")
         self.valid_path = os.path.join(self.target_dir, "valid.txt")
         self.test_path = os.path.join(self.target_dir, "test.txt")
-        shutil.rmtree(self.target_dir)
         self.initiate_dirs()
 
     def initiate_dirs(self):
+        if os.path.exists(self.target_dir):
+            shutil.rmtree(self.target_dir)
         if not os.path.exists(self.target_dir):
             os.makedirs(self.target_dir)
         if not os.path.exists(self.obj_dir):
@@ -37,6 +38,11 @@ class PreTrainData(object):
             content = file.read().split("\n")[:-1]
         for line in content:
             self.img_list.append(line)
+        if self.data_path != "./data/training_id.txt":
+            with open("./data/training_id.txt", "r") as file:
+                content = file.read().split("\n")[:-1]
+            for line in content:
+                self.img_list.append(line)
 
     def _split_train_valid_test(self):
         train_list, valid_list = train_test_split(self.img_list, test_size=0.2)
@@ -100,19 +106,19 @@ class PreTrainData(object):
         with open(obj_data_path, "w") as file:
             file.write("classes = 1\n")
             file.write(f"train = {self.train_path}\n")
-            file.write(f"valid = {self.valid_path}\n")
+            file.write(f"valid = {self.test_path}\n")  # use test data for validation during the training
             file.write(f"test = {self.test_path}\n")
             file.write(f"names = {obj_names_path}\n")
             file.write(f"backup = {self.backup_dir}\n")
 
 
 if __name__ == "__main__":
-    parse = argparse.ArgumentParser()
-    parse.add_argument("--source_path", type=str, help="the path of train id")
-    parse.add_argument("--img_dir", type=str, help="The dir of image data")
-    parse.add_argument("--label_dir", type=str, help="The dir of label data")
-    parse.add_argument("--target_dir", type=str, help="The dir of train/test/valid data")
-    flags, _ = parse.parse_known_args(sys.argv[1:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source_path", type=str, help="the path of train id")
+    parser.add_argument("--img_dir", type=str, help="The dir of image data")
+    parser.add_argument("--label_dir", type=str, help="The dir of label data")
+    parser.add_argument("--target_dir", type=str, help="The dir of train/test/valid data")
+    flags, _ = parser.parse_known_args(sys.argv[1:])
     preTrainData = PreTrainData(flags)
     preTrainData.load_data()
     preTrainData.prepare_darknet_data()

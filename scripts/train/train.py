@@ -1,6 +1,8 @@
 import os
 import argparse
 import sys
+from scripts.utils.logger import Logger
+logger = Logger()
 
 
 class Trainer(object):
@@ -9,24 +11,29 @@ class Trainer(object):
         self.cfg_path = flags.cfg_path
         self.pretrained_path = flags.pretrained_path
         self.retrain = flags.retrain
-        # obj_path = "data/working_dir/data/obj.data"
-        # cfg_path = "./cfg/cross-hands.cfg"
+        self.gpu = flags.gpu
 
     def train(self, ):
-        if self.retrain is False:
-            os.system(f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -dont_show -map")
-        elif self.retrain is True and self.pretrained_path is not None:
+        logger.info(f"{self.retrain}, {self.pretrained_path}")
+        envs = f"CUDA_VISIBLE_DEVICES={self.gpu}"
+        if self.retrain == 1:
+            os.system(f"{envs} ./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -dont_show -map -clear")
+        elif self.retrain == 0 and self.pretrained_path is not None:
+            logger.info("Continue Training")
             os.system(
-                f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map -clear")
+                f"f{envs} ./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map")
+        else:
+            raise ValueError(f"Unknown Training Option! retrain: {self.retrain}, pretrained_path: {self.pretrained_path}")
 
 
 
 if __name__ == "__main__":
-    parse = argparse.ArgumentParser()
-    parse.add_argument("--obj_path", type=str, help="The path of objects")
-    parse.add_argument("--cfg_path", type=str, help="The path of configuration")
-    parse.add_argument("--retrain", type=bool, default=False, help="Whether to retrain the model")
-    parse.add_argument("--pretrained_path", type=str, default=None, help="Path of the pretrained model")
-    flags, _ = parse.parse_known_args(sys.argv[1:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--obj_path", type=str, help="The path of objects")
+    parser.add_argument("--cfg_path", type=str, help="The path of configuration")
+    parser.add_argument("--retrain", type=int, default=0, help="Whether to retrain the model")
+    parser.add_argument("--pretrained_path", type=str, default=None, help="Path of the pretrained model")
+    parser.add_argument("--gpu", type=int, default=1, help="Specify the gpu id")
+    flags, _ = parser.parse_known_args(sys.argv[1:])
     trainer = Trainer(flags)
     trainer.train()
