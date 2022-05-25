@@ -16,10 +16,15 @@ class Detector(object):
         self.yolo_size = flags.size
         self.yolo_confidence = flags.confidence
         self.source_path = flags.source_path
-        self.img_dir = flags.img_dir
-        self.save_dir = flags.save_dir
+        self.img_dir = flags.img_dir.rstrip("/")
+        self.save_dir = flags.save_dir.rstrip("/")
         self.weights_path = flags.weights_path
         self.images = []
+        self.initiate_dirs()
+
+    def initiate_dirs(self):
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
 
     def load_weights(self, ):
         self.yolo = YOLO(self.yolo_cfg, self.weights_path, ["hand"])
@@ -28,15 +33,21 @@ class Detector(object):
 
     def load_data(self, ):
         logger.info("Loading Images...")
-        with open(self.source_path, "r") as file:
-            image_list = file.read().split("\n")[:-1]
-        for img_id in image_list:
-            self.images.append(os.path.join(self.img_dir, f"{img_id}.jpg"))
+        if self.source_path == "all":
+            # we add all images in img_dir
+            self.images = glob.glob(f"{self.img_dir}/*.jpg")
+        else:
+            with open(self.source_path, "r") as file:
+                image_list = file.read().split("\n")[:-1]
+            for img_id in image_list:
+                self.images.append(os.path.join(self.img_dir, f"{img_id}.jpg"))
 
     def preprocess(self, ):
         pass
 
     def detect(self,):
+        # TODO: Currently this method is slow, not sure if it is caused by YOLO inference or frequent I/O.
+        #  Need to Check.
         conf_sum = 0
         detection_count = 0
         total_num = len(self.images)

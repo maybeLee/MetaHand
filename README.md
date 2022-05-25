@@ -10,8 +10,6 @@ git clone https://github.com/pjreddie/darknet.git
 cd darknet
 docker build -f Dockerfile .
 docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root {image_id} 
-apt-get update
-apt-get install sudo pkg-config vim
 
 ```
 
