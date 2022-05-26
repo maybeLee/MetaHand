@@ -14,14 +14,13 @@ class Trainer(object):
         self.gpu = flags.gpu
 
     def train(self, ):
-        logger.info(f"{self.retrain}, {self.pretrained_path}")
-        envs = f"CUDA_VISIBLE_DEVICES={self.gpu}"
+        logger.info(f"{self.retrain}, {self.pretrained_path}, {self.gpu}")
         if self.retrain == 1:
-            os.system(f"{envs} ./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -dont_show -map -clear")
+            os.system(f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -gpus {self.gpu} -dont_show -map -clear")
         elif self.retrain == 0 and self.pretrained_path is not None:
             logger.info("Continue Training")
             os.system(
-                f"f{envs} ./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map")
+                f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map")
         else:
             raise ValueError(f"Unknown Training Option! retrain: {self.retrain}, pretrained_path: {self.pretrained_path}")
 
@@ -33,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--cfg_path", type=str, help="The path of configuration")
     parser.add_argument("--retrain", type=int, default=0, help="Whether to retrain the model")
     parser.add_argument("--pretrained_path", type=str, default=None, help="Path of the pretrained model")
-    parser.add_argument("--gpu", type=int, default=1, help="Specify the gpu id")
+    parser.add_argument("--gpu", type=int, default=1, help="Specify the gpu id")  # note that in the docker environment, 0 gpu id means the 1 actual gpu id
     flags, _ = parser.parse_known_args(sys.argv[1:])
     trainer = Trainer(flags)
     trainer.train()
