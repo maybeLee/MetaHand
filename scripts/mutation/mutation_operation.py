@@ -3,6 +3,7 @@ import numpy as np
 #from google.colab.patches import cv2_imshow
 import glob, os
 from matplotlib import pyplot as plt
+import argparse
 
 class mutation_operation:
   
@@ -155,13 +156,10 @@ class mutation_operation:
           cv2.imwrite("B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           #cv2.waitKey(0)
 
-def main():
+def main(image_path,label_path,write_path):
     # image width and height
     WIDTH = 640
     HEIGHT = 480
-    image_path = "/data1/wcleungag/ImageSet/"
-    label_path = "/data1/wcleungag/labels/"
-    write_path = "/data1/wcleungag/mutated_dataset_all/"
     mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT)
     #create folder for mutated images
     os.chdir(write_path)
@@ -213,4 +211,12 @@ def main():
     print(mut, " sets of obj and bg generated")
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image_path', help='path to original images',required=True)
+    parser.add_argument('--label_path', help="path to labels",required=True)
+    parser.add_argument('--mutate_path', help="path to mutated images",required=True)
+    flags, unknown = parser.parse_known_args()
+    # image_path = "/data1/wcleungag/ImageSet/"
+    # label_path = "/data1/wcleungag/labels/"
+    # write_path = "/data1/wcleungag/mutated_dataset_all/"
     main()
