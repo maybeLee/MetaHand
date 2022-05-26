@@ -4,6 +4,7 @@ import numpy as np
 import glob, os
 from matplotlib import pyplot as plt
 import argparse
+import random
 
 class mutation_operation:
   
@@ -85,7 +86,7 @@ class mutation_operation:
         crop_img = img.copy()
         for i in range(h):
           for j in range(w):
-            crop_img[y+i][x+j] = [0, 0, 0]
+            crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
         #cv2_imshow(crop_img)
         cv2.imwrite("bkg/" + filename[:-4] + "-"+ str(cnt) + "B" + ".jpg", crop_img)      #save image
         #cv2.waitKey(0)
@@ -94,7 +95,7 @@ class mutation_operation:
   #Remove background of the image, only one object left
 
   def rm_bg(self, filename, bbox):
-    bg = np.uint8(0 * np.ones((480, 640, 3)))       #generate black background
+    bg = np.uint8(int(random.uniform(0,255)) * np.ones((480, 640, 3)))       #generate black background
 
     img = cv2.imread(self.image_path+filename)
     if len(bbox) != 0:
@@ -128,7 +129,7 @@ class mutation_operation:
                   cnt+=1
                   for i in range(h):
                       for j in range(w):
-                          crop_img[y+i][x+j] = [0, 0, 0]
+                          crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
               #cv2.imshow('image',crop_img)
               #img2 = crop_img.copy()
@@ -151,7 +152,7 @@ class mutation_operation:
 
               for i in range(h):
                   for j in range(w):
-                      crop_img[y+i][x+j] = [0, 0, 0]
+                      crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
           cv2.imwrite("B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           #cv2.waitKey(0)
