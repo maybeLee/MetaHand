@@ -143,9 +143,11 @@ class mutation_operation:
               #plt.imshow(img2)
               cv2.imwrite(self.write_path + "BwO/" + filename[:-4] + "-"+ str(obj) + "BwO" + ".jpg", crop_img)      #save image
               print("the bwo path is: " + "BwO/" + filename[:-4] + "-"+ str(obj) + "BwO" + ".jpg")
-
+    
+  # def random_erasing_hand(self):
+    
   #Remove all hands in the image
-  def rm_all_obj(self, filename, bbox):
+  def rm_all_obj(self, filename, bbox, random_erase=False):
       img = cv2.imread(self.image_path+filename)
 
       if len(bbox)!=0:
@@ -154,12 +156,21 @@ class mutation_operation:
           crop_img = img.copy()
           for box in bbox:
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
-
+              original_area = (x+w)*(y+h)
+              if random_erase == True:
+                x = int(x+w*random.uniform(0.0, 0.5))
+                y = int(y+h*random.uniform(0.0, 0.5))
+                h = int(h*random.uniform(0.5, 1.0))
+                w = int(w*random.uniform(0.5, 1.0))
+              print("the random erase shrinks by " + str((x+w)*(y+h)/original_area*100))
               for i in range(h):
                   for j in range(w):
-                      crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
-
-          cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
+                      crop_img[min(y+i,439)][min(x+j,679)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+          
+          if random_erase == False:
+              cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
+          else:
+              cv2.imwrite(self.write_path + "B-random-erase/" + filename[:-4] + "-"+ "B_random_erase" + ".jpg", crop_img)      #save image
           #cv2.waitKey(0)
 
 def main(image_path,label_path,write_path):
@@ -179,6 +190,8 @@ def main(image_path,label_path,write_path):
         os.mkdir(write_path + 'BwO')
     if not os.path.exists(write_path + 'B'):
         os.mkdir(write_path + 'B')
+    if not os.path.exists(write_path + 'B-random-erase'):
+        os.mkdir(write_path + 'B-random-erase')
 
     # copy list of labels
     # os.chdir(label_path)
@@ -210,7 +223,8 @@ def main(image_path,label_path,write_path):
         #remove the hand object
         mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
         mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
-        mo.rm_all_obj(id[:-4]+".jpg", bbox) #make all objects (including hands) become black
+        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
+        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=True)
         print(id+" -- done", len(labels), "labels")
         hv_label += 1
         mut += len(labels)
