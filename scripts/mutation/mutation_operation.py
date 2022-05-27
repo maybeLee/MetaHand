@@ -75,6 +75,14 @@ class mutation_operation:
       f.close()
       cnt+=1
       
+      filename = id[:-4] + "-" + "B.txt"
+      filepath = os.path.join(self.write_path+'label', filename)
+      f = open(filepath, "w")
+      for i in range(len(labels)):
+        f.write('\n')
+      f.close()
+      cnt+=1
+      
   def rm_object(self, filename, bbox):
     img = cv2.imread(self.image_path+filename)
     #cv2_imshow(img)
