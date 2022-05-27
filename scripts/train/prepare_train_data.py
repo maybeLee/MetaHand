@@ -68,10 +68,10 @@ class PreTrainData(object):
             os.system(f"cp {label_path} {target_label_path}")
             return target_file_path
 
-        os.system(f"cp {self.img_dir}/*.jpg {self.obj_dir}")
-        os.system(f"cp {self.label_dir}/*.txt {self.obj_dir}")
-        os.system(f"cp ./data/ImageSet/*.jpg {self.obj_dir}")
-        os.system(f"cp ./data/Labels/*.txt {self.obj_dir}")
+        os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        os.system(f"find ./data/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
         with open(self.train_path, "w") as file:
             for train_id in train_list:
                 # target_file_path = _prepare_img_label(train_id)

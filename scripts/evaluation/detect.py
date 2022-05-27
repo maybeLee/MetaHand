@@ -20,6 +20,7 @@ class Detector(object):
         self.save_dir = flags.save_dir.rstrip("/")
         self.weights_path = flags.weights_path
         self.images = []
+        self.only_train = flags.only_train
         self.initiate_dirs()
 
     def initiate_dirs(self):
@@ -51,10 +52,23 @@ class Detector(object):
         conf_sum = 0
         detection_count = 0
         total_num = len(self.images)
+        img_id_list = []
+        if self.only_train == 1:
+            # We only evaluate the image that belong to the training_id.txt
+            with open("./data/testing_id.txt") as file:
+                content = file.read().split("\n")[:-1]
+            for line in content:
+                img_id_list.append(line)
         for i, image in enumerate(self.images):
             logger.info(f"Iteration: {i}/{total_num}")
+            img_id = os.path.basename(image).split("-")[0]
+            if len(img_id_list) != 0:
+                # We only evaluate the image that belong to the training_id.txt
+                img_id = os.path.basename(image).split("-")[0]
+                if img_id in img_id_list:
+                    logger.info(f"Find Test Images, Exclude!")
+                    continue
             mat = cv2.imread(image)
-
             width, height, inference_time, results = self.yolo.inference(mat)
             # print("%s in %s seconds: %s classes found!" % (os.path.basename(file), round(inference_time, 2), len(results)))
             output = []
@@ -104,6 +118,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--device', default=0, help='Device to use')
     parser.add_argument('-s', '--size', default=416, help='Size for yolo')
     parser.add_argument('-c', '--confidence', default=0.25, help='Confidence for yolo')
+    parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
     flags, unknown = parser.parse_known_args()
     detector = Detector(flags)
     detector.load_weights()
