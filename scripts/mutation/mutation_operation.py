@@ -166,10 +166,10 @@ class mutation_operation:
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
               original_area = (x+w)*(y+h)
               if random_erase == True:
-                x = int(x+w*random.uniform(0.0, 0.5))
-                y = int(y+h*random.uniform(0.0, 0.5))
-                h = int(h*random.uniform(0.5, 1.0))
-                w = int(w*random.uniform(0.5, 1.0))
+                x = int(x+w*random.uniform(0.0, 0.3))
+                y = int(y+h*random.uniform(0.0, 0.3))
+                h = int(h*random.uniform(0.3, 1.0))
+                w = int(w*random.uniform(0.3, 1.0))
               print("the random erase shrinks by " + str((x+w)*(y+h)/original_area*100))
               for i in range(h):
                   for j in range(w):
