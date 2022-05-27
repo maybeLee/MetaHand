@@ -165,7 +165,10 @@ class mutation_operation:
               print("the random erase shrinks by " + str((x+w)*(y+h)/original_area*100))
               for i in range(h):
                   for j in range(w):
-                      crop_img[min(y+i,439)][min(x+j,679)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                    #y+i can exceed 480, x+j cannot exceed 640 i.e., image size
+                      # print("y+i: " + str(y+i))
+                      # print("x+j: " + str(x+j))
+                      crop_img[min(y+i,479)][min(x+j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
           
           if random_erase == False:
               cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
@@ -218,12 +221,12 @@ def main(image_path,label_path,write_path):
         mo.gen_labels_OB(id, labels) #use os.path.basename() to keep only base directory for id
 
         bbox = mo.unnormalize(labels)  
-        mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
+        # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
         
-        #remove the hand object
-        mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
-        mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
-        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
+        # #remove the hand object
+        # mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
+        # mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
+        # mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
         mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=True)
         print(id+" -- done", len(labels), "labels")
         hv_label += 1
