@@ -15,9 +15,9 @@ class mutation_operation:
     self.WIDTH = WIDTH
     self.HEIGHT = HEIGHT
   
-  def get_label(self,filename, path):
+  def get_label(self,filename):
     labels = []
-    f = open(path+filename, "r")
+    f = open(filename, "r")
     for line in f.readlines():
       line = line[:-1]
       arr = line.split(' ')
@@ -54,7 +54,7 @@ class mutation_operation:
       
       # save labels for object
       filename = id[:-4] + "-" + str(cnt) + "O.txt"
-      filepath = os.path.join(self.write_path+'label', filename)
+      filepath = os.path.join(self.write_path+'label', filename)#/ for ubuntu, \\ for window
       f = open(filepath, "w")
       temp = ""
       for value in label:
@@ -88,15 +88,19 @@ class mutation_operation:
           for j in range(w):
             crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
         #cv2_imshow(crop_img)
-        cv2.imwrite("bkg/" + filename[:-4] + "-"+ str(cnt) + "B" + ".jpg", crop_img)      #save image
+        cv2.imwrite(self.write_path + "bkg/" + filename[:-4] + "-"+ str(cnt) + "B" + ".jpg", crop_img)      #save image
         #cv2.waitKey(0)
         cnt+=1
         
   #Remove background of the image, only one object left
 
   def rm_bg(self, filename, bbox):
-    bg = np.uint8(int(random.uniform(0,255)) * np.ones((480, 640, 3)))       #generate black background
-
+    # bg = np.uint8(0 * np.ones((480, 640, 3)))       #generate black background
+    bg = np.random.randint(0,high=256,size=(480, 640, 3),dtype=np.uint8)
+    # for i in bg:
+    #   for j in bg[i]:
+    #     for k in bg[i][j]:
+    #       bg[i][j][k] = int(random.uniform(0,255))
     img = cv2.imread(self.image_path+filename)
     if len(bbox) != 0:
       cnt = 0
@@ -107,7 +111,7 @@ class mutation_operation:
           for j in range(w):
             obj[y+i][x+j] = img[y+i][x+j]
 
-        cv2.imwrite("objects/" + filename[:-4] + "-"+ str(cnt) + "O" + ".jpg", obj)      #save image
+        cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-"+ str(cnt) + "O" + ".jpg", obj)      #save image
         cnt+=1
         
   #Remove hands other than the label object
@@ -137,7 +141,8 @@ class mutation_operation:
               #plt.figure(figsize=(12, 12))
               #plt.axis('off')
               #plt.imshow(img2)
-              cv2.imwrite("BwO/" + filename[:-4] + "-"+ str(obj) + "BwO" + ".jpg", crop_img)      #save image
+              cv2.imwrite(self.write_path + "BwO/" + filename[:-4] + "-"+ str(obj) + "BwO" + ".jpg", crop_img)      #save image
+              print("the bwo path is: " + "BwO/" + filename[:-4] + "-"+ str(obj) + "BwO" + ".jpg")
 
   #Remove all hands in the image
   def rm_all_obj(self, filename, bbox):
@@ -154,7 +159,7 @@ class mutation_operation:
                   for j in range(w):
                       crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
-          cv2.imwrite("B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
+          cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           #cv2.waitKey(0)
 
 def main(image_path,label_path,write_path):
@@ -163,36 +168,41 @@ def main(image_path,label_path,write_path):
     HEIGHT = 480
     mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT)
     #create folder for mutated images
-    os.chdir(write_path)
-    if not os.path.exists('objects'):
-        os.mkdir('objects')
-    if not os.path.exists('bkg'):
-        os.mkdir('bkg')
-    if not os.path.exists('label'):
-        os.mkdir('label')
-    if not os.path.exists('BwO'):
-        os.mkdir('BwO')
-    if not os.path.exists('B'):
-        os.mkdir('B')
+    # os.chdir(write_path)
+    if not os.path.exists(write_path + 'objects'):
+        os.mkdir(write_path + 'objects')
+    if not os.path.exists(write_path + 'bkg'):
+        os.mkdir(write_path + 'bkg')
+    if not os.path.exists(write_path + 'label'):
+        os.mkdir(write_path + 'label')
+    if not os.path.exists(write_path + 'BwO'):
+        os.mkdir(write_path + 'BwO')
+    if not os.path.exists(write_path + 'B'):
+        os.mkdir(write_path + 'B')
 
     # copy list of labels
-    os.chdir(label_path)
-    label_list = glob.glob("*.txt")
-    print(len(label_list))
+    # os.chdir(label_path)
+    label_list = glob.glob(label_path + "*.txt")
+    # label_list = [os.path.basename(i) for i in all_paths] #drop parent directory path
+    # print("label path is : " + str(label_path + "*.txt"))
+    # print("number of labels obtained: " + str(len(label_list)))
 
 
     no_label = 0
     hv_label = 0
     mut = 0
     #iterate through a list of labels
+    if __debug__:
+      label_list = label_list[:5]
     for id in label_list:
-        labels = mo.get_label(id, label_path)
+        labels = mo.get_label(id)
+        id = os.path.basename(id)
         if len(labels)==0:#print message to show that the label does not exist
             print(id+" -- no label")
             no_label+=1
             continue
 
-        mo.gen_labels_OB(id, labels)
+        mo.gen_labels_OB(id, labels) #use os.path.basename() to keep only base directory for id
 
         bbox = mo.unnormalize(labels)  
         mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
@@ -212,12 +222,25 @@ def main(image_path,label_path,write_path):
     print(mut, " sets of obj and bg generated")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--image_path', help='path to original images',required=True)
-    parser.add_argument('--label_path', help="path to labels",required=True)
-    parser.add_argument('--mutate_path', help="path to mutated images",required=True)
-    flags, unknown = parser.parse_known_args()
+    image_path = None
+    label_path = None
+    mutate_path = None
+    if __debug__:
+      image_path = "data/ImageSet/"
+      label_path = "data/labels/"
+      mutate_path = "data/mutate/"
+    else:
+      parser = argparse.ArgumentParser()
+      parser.add_argument('--image_path', help='path to original images',required=True)
+      parser.add_argument('--label_path', help="path to labels",required=True)
+      parser.add_argument('--mutate_path', help="path to mutated images",required=True)
+      flags, unknown = parser.parse_known_args()
+      image_path = flags.image_path
+      label_path = flags.label_path
+      mutate_path = flags.mutate_path
+      
+    
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    main(flags.image_path,flags.label_path,flags.mutate_path)
+    main(image_path,label_path,mutate_path)

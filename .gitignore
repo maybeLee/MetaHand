@@ -70,3 +70,5 @@ uselib
 uselib_track
 vcpkg/
 
+#mutation operators
+scripts\mutation\data
