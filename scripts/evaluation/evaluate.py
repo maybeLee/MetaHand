@@ -17,9 +17,15 @@ class MetaTester(object):
     def __init__(self, flags):
         self.origin_img_dir = flags.origin_img_dir.rstrip("/")
         self.mutate_img_dir = flags.mutate_img_dir.rstrip("/")
+        self.mutate_type = ""
+        if "object" in self.mutate_img_dir or "Object" in self.mutate_img_dir:
+            self.mutate_type = "object"
+        if "B" in self.mutate_img_dir:
+            self.mutate_type = "background"
         self.origin_label_dir = flags.origin_label_dir.rstrip("/")
         self.output_dir = flags.output_dir
         self.weights_path = flags.weights_path
+        self.only_train = flags.only_train
         self.origin_images = glob.glob(f"{self.origin_img_dir}/*.jpg")
         self.mutate_images = glob.glob(f"{self.mutate_img_dir}/*.jpg")
         self.origin_pred = {}
@@ -59,6 +65,7 @@ class MetaTester(object):
                       f"--save_dir={origin_output_dir}")
         else:
             logger.info(f"Detection on {origin_img_name} Exists, Loading the Detection")
+        # origin_pred: {img_id: [label1, label2], ..., }
         self.origin_pred = self._get_label(origin_output_dir)
         if not os.path.exists(mutate_output_dir):
             # predict on mutate image
@@ -73,10 +80,12 @@ class MetaTester(object):
         def rename_img_id(pred):
             # we need to remove the "O" or "B" in the mutate filename
             return {k[:-1]: v for k, v in pred.items()}
+        # mutate_pred: {mutate_id: [label1, label2]}
         self.mutate_pred = rename_img_id(self.mutate_pred)
 
     def compare_prediction(self, ):
         res_id_list = {"11": [], "10": [], "01": [], "00": []}
+        # labels: {img_id1: [label1, label2], img_id2: [label1, label2]}
         labels = self._get_label(self.origin_label_dir)
 
         def _is_detected(hand_label, preds):
@@ -90,18 +99,43 @@ class MetaTester(object):
                     status = True
             return status
 
-        for i, img in enumerate(labels):
+        img_id_list = []
+        if self.only_train == 1:
+            # We only evaluate the image that belong to the training_id.txt
+            with open("./data/testing_id.txt") as file:
+                content = file.read().split("\n")[:-1]
+            for line in content:
+                img_id_list.append(line)
+        for i, img_id in enumerate(labels):
             if (i + 1) % 500 == 0:
                 logger.info(f'Progress: {str(i + 1)}')
-            img_labels = labels[img]  # obtain the hand labels for each image
-            origin_preds = self.origin_pred[img]
-            for j in range(len(img_labels)):
-                # iterate hands, each hand will have a mutate image and its prediction result
-                hand_id = f"{img}-{str(j)}"
-                mutate_preds = self.mutate_pred[hand_id]
-                origin_detection = _is_detected(img_labels[j], origin_preds)
-                mutate_detection = _is_detected(img_labels[j], mutate_preds)
-                res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(hand_id)
+            if len(img_id_list) != 0 and img_id in img_id_list:
+                # We only evaluate the image that belong to the training_id.txt
+                logger.info(f"Find Test Images, Exclude!")
+                continue
+            img_labels = labels[img_id]  # obtain the hand labels for each image
+            origin_preds = self.origin_pred[img_id]
+            if self.mutate_type == "object":
+                for j in range(len(img_labels)):
+                    # iterate hands, each hand will have a mutate image and its prediction result
+                    mutate_id = f"{img_id}-{str(j)}"
+                    if mutate_id not in self.mutate_pred:
+                        continue
+                    mutate_preds = self.mutate_pred[mutate_id]
+                    origin_detection = _is_detected(img_labels[j], origin_preds)
+                    mutate_detection = _is_detected(img_labels[j], mutate_preds)
+                    res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
+            elif self.mutate_type == "background":
+                mutate_id = f"{img_id}-"
+                if mutate_id not in self.mutate_pred:
+                    continue
+                mutate_preds = self.mutate_pred[mutate_id]
+                for j in range(len(img_labels)):
+                    origin_detection = _is_detected(img_labels[j], origin_preds)
+                    mutate_detection = _is_detected(img_labels[j], mutate_preds)
+                    res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
+            else:
+                raise ValueError("Unsupported Mutation Type!")
         logger.info("Finish Comparing Detection Result, Saving The Result")
         np.save(f"res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
         logger.info(f"11: {len(res_id_list['11'])}, 10: {len(res_id_list['10'])}, "
@@ -111,16 +145,23 @@ class MetaTester(object):
     def save_violate(self, res_id_list):
         mutate_base = os.path.basename(self.mutate_img_dir)
         identifier = ""
-        if "object" in self.mutate_img_dir:
-            violate_list = ["11", "01"]
+        if self.mutate_type == "object":
+            violate_list = ["10", "01"]
             identifier = "O"
+        if self.mutate_type == "background":
+            violate_list = ["01", "11"]
+            identifier = "B"
         violate_img_id = []
         for vio in violate_list:
             violate_img_id += res_id_list[vio]
         with open(f"{mutate_base}_violations.txt", "w") as file:
             text = ""
-            for img_id in violate_img_id:
-                text += img_id + identifier + "\n"
+            if "B" in self.mutate_img_dir:
+                for img_id in violate_img_id:
+                    text += identifier + "\n"
+            else:
+                for img_id in violate_img_id:
+                    text += img_id + identifier + "\n"
             file.write(text)
 
     def evaluate(self, ):
@@ -137,6 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("-od", "--output_dir", default="./outputs", help="The dir of yolo output")
     parser.add_argument("-w", "--weights_path", default="./data/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
+    parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
     flags, unknown = parser.parse_known_args(sys.argv[1:])
     metaTester = MetaTester(flags)
     metaTester.evaluate()
