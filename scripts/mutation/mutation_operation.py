@@ -187,9 +187,9 @@ class mutation_operation:
                       crop_img[min(y+i,479)][min(x+j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
           
           if random_erase == False:
-              cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
+              cv2.imwrite(self.write_path + "object_removal_/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           else:
-              cv2.imwrite(self.write_path + "B-random-erase/" + filename[:-4] + "-"+ "B_random_erase" + ".jpg", crop_img)      #save image
+              cv2.imwrite(self.write_path + "object_removal_random_erase/" + filename[:-4] + "-"+ "B-random-erase" + ".jpg", crop_img)      #save image
           #cv2.waitKey(0)
 
 def main(image_path,label_path,write_path):
