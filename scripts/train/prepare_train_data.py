@@ -44,12 +44,15 @@ class PreTrainData(object):
             for line in content:
                 self.img_list.append(line)
 
-    def _split_train_valid_test(self):
-        train_list, valid_list = train_test_split(self.img_list, test_size=0.2)
-        return train_list, valid_list
+    def _split_train_valid_test(self, test_ratio=0.2):
+        if test_ratio == 0:
+            return self.img_list, []
+        else:
+            train_list, valid_list = train_test_split(self.img_list, test_size=0.2)
+            return train_list, valid_list
 
     def prepare_darknet_data(self):
-        train_list, valid_list = self._split_train_valid_test()
+        train_list, valid_list = self._split_train_valid_test(test_ratio=0.0)
         test_list = []
         with open("./data/testing_id.txt", "r") as file:
             content = file.read().split("\n")[:-1]

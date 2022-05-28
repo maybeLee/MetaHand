@@ -18,6 +18,7 @@ class MetaTester(object):
         self.origin_img_dir = flags.origin_img_dir.rstrip("/")
         self.mutate_img_dir = flags.mutate_img_dir.rstrip("/")
         self.mutate_type = ""
+        self.idntfr = ""
         if "object" in self.mutate_img_dir or "Object" in self.mutate_img_dir:
             self.mutate_type = "object"
         if "B" in self.mutate_img_dir:
@@ -36,19 +37,19 @@ class MetaTester(object):
     def _get_label(label_dir):
         """
         param label_dir: the dir of label files
-        return labels: {img_id1: [label1, label2], img_id2: [label1, label2]}
+        return labels: {file_name1: [label1, label2], file_name2: [label1, label2]}
         """
         labels = {}
         for label_path in glob.glob(f"{label_dir}/*.txt"):
-            img_id = os.path.basename(label_path)[:-4]
-            labels[img_id] = []
+            file_name = os.path.basename(label_path)[:-4]
+            labels[file_name] = []
             with open(label_path, "r") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 arr = line.split(" ")
                 arr = list(map(float, arr))
                 arr[0] = int(arr[0])
-                labels[img_id].append(arr)
+                labels[file_name].append(arr)
         return labels
 
     def get_prediction(self):
@@ -76,12 +77,8 @@ class MetaTester(object):
                       f"--save_dir={mutate_output_dir}")
         else:
             logger.info(f"Detection on {mutate_output_dir} Exists, Loading the Detection")
+        # mutate_pred: {file_name: [label1, label2]}
         self.mutate_pred = self._get_label(mutate_output_dir)
-        def rename_img_id(pred):
-            # we need to remove the "O" or "B" in the mutate filename
-            return {k[:-1]: v for k, v in pred.items()}
-        # mutate_pred: {mutate_id: [label1, label2]}
-        self.mutate_pred = rename_img_id(self.mutate_pred)
 
     def compare_prediction(self, ):
         res_id_list = {"11": [], "10": [], "01": [], "00": []}
@@ -106,30 +103,23 @@ class MetaTester(object):
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
-        for i, img_id in enumerate(labels):
+        for i, mutate_id in enumerate(self.mutate_pred):
             if (i + 1) % 500 == 0:
                 logger.info(f'Progress: {str(i + 1)}')
+            img_id = mutate_id.split("-")[0]
+            img_labels = labels[img_id]
             if len(img_id_list) != 0 and img_id in img_id_list:
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
                 continue
-            img_labels = labels[img_id]  # obtain the hand labels for each image
             origin_preds = self.origin_pred[img_id]
+            mutate_preds = self.mutate_pred[mutate_id]
             if self.mutate_type == "object":
-                for j in range(len(img_labels)):
-                    # iterate hands, each hand will have a mutate image and its prediction result
-                    mutate_id = f"{img_id}-{str(j)}"
-                    if mutate_id not in self.mutate_pred:
-                        continue
-                    mutate_preds = self.mutate_pred[mutate_id]
-                    origin_detection = _is_detected(img_labels[j], origin_preds)
-                    mutate_detection = _is_detected(img_labels[j], mutate_preds)
-                    res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
+                hand_id = int(mutate_id.split("-")[1].rstrip("O"))
+                origin_detection = _is_detected(img_labels[hand_id], origin_preds)
+                mutate_detection = _is_detected(img_labels[hand_id], mutate_preds)
+                res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
             elif self.mutate_type == "background":
-                mutate_id = f"{img_id}-"
-                if mutate_id not in self.mutate_pred:
-                    continue
-                mutate_preds = self.mutate_pred[mutate_id]
                 for j in range(len(img_labels)):
                     origin_detection = _is_detected(img_labels[j], origin_preds)
                     mutate_detection = _is_detected(img_labels[j], mutate_preds)
@@ -148,20 +138,18 @@ class MetaTester(object):
         if self.mutate_type == "object":
             violate_list = ["10", "01"]
             identifier = "O"
-        if self.mutate_type == "background":
+        elif self.mutate_type == "background":
             violate_list = ["01", "11"]
             identifier = "B"
-        violate_img_id = []
+        else:
+            raise ValueError("Unsupported Mutation Type!")
+        violate_mutate_id_list = []
         for vio in violate_list:
-            violate_img_id += res_id_list[vio]
+            violate_mutate_id_list += res_id_list[vio]
         with open(f"{mutate_base}_violations.txt", "w") as file:
             text = ""
-            if "B" in self.mutate_img_dir:
-                for img_id in violate_img_id:
-                    text += identifier + "\n"
-            else:
-                for img_id in violate_img_id:
-                    text += img_id + identifier + "\n"
+            for violate_mutate_id in violate_mutate_id_list:
+                text += violate_mutate_id + "\n"
             file.write(text)
 
     def evaluate(self, ):
