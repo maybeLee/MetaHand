@@ -48,7 +48,7 @@ class mutation_operation:
       f.close()
       cnt+=1
 
-  def gen_labels_OB(self, id, labels, random_erase=0.0):
+  def gen_labels_OB(self, id, labels, random_erase=0.0, guassian_variance=0.0):
     cnt = 0
     for label in labels:
       
@@ -75,17 +75,15 @@ class mutation_operation:
       f.close()
       cnt+=1
       
-      filename = id[:-4] + "-" + "B.txt"
-      filepath = os.path.join(self.write_path+'label', filename)
-      f = open(filepath, "w")
-      for i in range(len(labels)):
-        f.write('\n')
-      f.close()
-      cnt+=1
-      
+      filename_list = [id[:-4] + "-" + "B.txt"]
       if random_erase > 0.0:
-        filename = id[:-4] + "-" + "B_random_erase_" + str(random_erase) + ".txt"
-      # else:
+        filename_list.append(id[:-4] + "-" + "B_random_erase_" + str(random_erase) + ".txt")
+      if guassian_variance > 0.0:
+        filename_list.append("B_guassian_" + str(guassian_variance) + ".txt")
+      if guassian_variance > 0.0 and random_erase > 0.0:
+        raise RuntimeError("invalid operation: guassian_variance and random_erase cannot be larger than zero at the same time.")
+      
+      for filename in filename_list:
         filepath = os.path.join(self.write_path+'label', filename)
         f = open(filepath, "w")
         for i in range(len(labels)):
@@ -165,7 +163,7 @@ class mutation_operation:
   # def random_erasing_hand(self):
     
   #Remove all hands in the image
-  def rm_all_obj(self, filename, bbox, random_erase=0.0):
+  def rm_all_obj(self, filename, bbox, random_erase=0.0, guassian_variance=0.0):
       img = cv2.imread(self.image_path+filename)
 
       if len(bbox)!=0:
@@ -186,15 +184,28 @@ class mutation_operation:
                     #y+i can exceed 480, x+j cannot exceed 640 i.e., image size
                       # print("y+i: " + str(y+i))
                       # print("x+j: " + str(x+j))
-                      crop_img[min(y+i,479)][min(x+j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                      if guassian_variance > 0.0:
+                          mean = 0.0
+                          # sd = 0.0
+                          r_g_b = crop_img[min(y+i,479)][min(x+j,639)]
+                          r_noise = np.random.normal(mean, guassian_variance)
+                          g_noise = np.random.normal(mean, guassian_variance)
+                          b_noise = np.random.normal(mean, guassian_variance)
+                          crop_img[min(y+i,479)][min(x+j,639)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
+                      else:
+                          crop_img[min(y+i,479)][min(x+j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+
+
           
-          if random_erase > 0.0:
+          if random_erase == 0.0:
               cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
-          else:
-              cv2.imwrite(self.write_path + "B_random_erase_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_" + str(random_erase) + ".jpg", crop_img)      #save image
+          elif random_erase > 0.0:
+              cv2.imwrite(self.write_path + "B_random_erase_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_" + str(random_erase) + ".jpg", crop_img) #save image
+          elif guassian_variance > 0.0:
+              cv2.imwrite(self.write_path + "B_guassian_noise_" + str(guassian_variance) + "/" + filename[:-4] + "-"+ "B_guassian_noise_" + str(guassian_variance) + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
 
-def main(image_path,label_path,write_path,random_erase):
+def main(image_path,label_path,write_path,random_erase,guassian_variance):
     # image width and height
     WIDTH = 640
     HEIGHT = 480
@@ -236,7 +247,7 @@ def main(image_path,label_path,write_path,random_erase):
             no_label+=1
             continue
 
-        mo.gen_labels_OB(id, labels,random_erase) #use os.path.basename() to keep only base directory for id
+        mo.gen_labels_OB(id, labels,random_erase, guassian_variance) #use os.path.basename() to keep only base directory for id
 
         bbox = mo.unnormalize(labels)  
         # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
@@ -245,7 +256,7 @@ def main(image_path,label_path,write_path,random_erase):
         # mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
         # mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
         # mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
-        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase)
+        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,guassian_variance=guassian_variance)
         print(id+" -- done", len(labels), "labels")
         hv_label += 1
         mut += len(labels)
@@ -272,14 +283,16 @@ if __name__ == "__main__":
       parser.add_argument('--label_path', help="path to labels",required=True)
       parser.add_argument('--mutate_path', help="path to mutated images",required=True)
       parser.add_argument('--random_erase', help="proportion of an object region being erased",required=True)
+      parser.add_argument('--guassian_variance', help="the guassian noise's variance",required=True)
       flags, unknown = parser.parse_known_args()
       image_path = flags.image_path
       label_path = flags.label_path
       mutate_path = flags.mutate_path
       random_erase = flags.random_erase
+      guassian_variance = flags.guassian_variance
       
     
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    main(image_path,label_path,mutate_path,float(random_erase))
+    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_variance))
