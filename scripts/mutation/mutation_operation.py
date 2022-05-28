@@ -172,13 +172,13 @@ class mutation_operation:
           crop_img = img.copy()
           for box in bbox:
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
-              original_area = (x+w)*(y+h)
+              original_area = w*h
               if random_erase == True:
-                x = int(x+w*random.uniform(0.0, 0.1))
-                y = int(y+h*random.uniform(0.0, 0.1))
-                h = int(h*random.uniform(0.01, 1.0))
-                w = int(w*random.uniform(0.01, 1.0))
-              print("the random erase shrinks by " + str((x+w)*(y+h)/original_area*100))
+                # x = int(x+w*random.uniform(0.0, 0.1))
+                # y = int(y+h*random.uniform(0.0, 0.1))
+                h = int(h*random.uniform(0.5, 1.0))
+                w = int(w*random.uniform(0.5, 1.0))
+              print("the random erase shrinks by " + str(w*h/original_area*100))
               for i in range(h):
                   for j in range(w):
                     #y+i can exceed 480, x+j cannot exceed 640 i.e., image size
