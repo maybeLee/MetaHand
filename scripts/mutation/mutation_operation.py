@@ -163,7 +163,7 @@ class mutation_operation:
   # def random_erasing_hand(self):
     
   #Remove all hands in the image
-  def rm_all_obj(self, filename, bbox, random_erase=False):
+  def rm_all_obj(self, filename, bbox, random_erase=0.0):
       img = cv2.imread(self.image_path+filename)
 
       if len(bbox)!=0:
@@ -173,9 +173,9 @@ class mutation_operation:
           for box in bbox:
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
               original_area = (x+w)*(y+h)
-              if random_erase == True:
-                x = int(x+w*random.uniform(0.0, 0.3))
-                y = int(y+h*random.uniform(0.0, 0.3))
+              if random_erase > 0.0:
+                x = int(x+w*random.uniform(0.0, 0.2))
+                y = int(y+h*random.uniform(0.0, 0.2))
                 h = int(h*random.uniform(0.01, 1.0))
                 w = int(w*random.uniform(0.01, 1.0))
               print("the random erase shrinks by " + str((x+w)*(y+h)/original_area*100))
