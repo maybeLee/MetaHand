@@ -83,7 +83,7 @@ class mutation_operation:
       f.close()
       cnt+=1
       
-      filename = id[:-4] + "-" + "'B-random-erase.txt"
+      filename = id[:-4] + "-" + "'B_random_erase.txt"
       filepath = os.path.join(self.write_path+'label', filename)
       f = open(filepath, "w")
       for i in range(len(labels)):
@@ -176,8 +176,8 @@ class mutation_operation:
               if random_erase == True:
                 # x = int(x+w*random.uniform(0.0, 0.1))
                 # y = int(y+h*random.uniform(0.0, 0.1))
-                h = int(h*random.uniform(0.5, 1.0))
-                w = int(w*random.uniform(0.5, 1.0))
+                h = int(h*random.uniform(0.6, 1.0))
+                w = int(w*random.uniform(0.6, 1.0))
               print("the random erase shrinks by " + str(w*h/original_area*100))
               for i in range(h):
                   for j in range(w):
@@ -187,9 +187,9 @@ class mutation_operation:
                       crop_img[min(y+i,479)][min(x+j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
           
           if random_erase == False:
-              cv2.imwrite(self.write_path + "object_removal_/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
+              cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           else:
-              cv2.imwrite(self.write_path + "object_removal_random_erase/" + filename[:-4] + "-"+ "B-random-erase" + ".jpg", crop_img)      #save image
+              cv2.imwrite(self.write_path + "B_random_erase/" + filename[:-4] + "-"+ "B_random_erase" + ".jpg", crop_img)      #save image
           #cv2.waitKey(0)
 
 def main(image_path,label_path,write_path):
