@@ -5,6 +5,7 @@ import glob, os
 from matplotlib import pyplot as plt
 import argparse
 import random
+import pathlib
 
 class mutation_operation:
   
@@ -197,12 +198,17 @@ class mutation_operation:
 
 
           
-          if random_erase == 0.0:
-              cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
+          if random_erase == 0.0 and guassian_variance == 0.0:
+            pathlib.Path(self.write_path + 'B').mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           elif random_erase > 0.0:
-              cv2.imwrite(self.write_path + "B_random_erase_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_" + str(random_erase) + ".jpg", crop_img) #save image
+            # print("INFO: creating")
+            pathlib.Path(self.write_path + "B_random_erase_" + str(random_erase)).mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "B_random_erase_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_" + str(random_erase) + ".jpg", crop_img) #save image
           elif guassian_variance > 0.0:
-              cv2.imwrite(self.write_path + "B_guassian_noise_" + str(guassian_variance) + "/" + filename[:-4] + "-"+ "B_guassian_noise_" + str(guassian_variance) + ".jpg", crop_img) #save image
+            print("INFO: creating")
+            pathlib.Path(self.write_path + "B_guassian_noise_" + str(guassian_variance)).mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "B_guassian_noise_" + str(guassian_variance) + "/" + filename[:-4] + "-"+ "B_guassian_noise_" + str(guassian_variance) + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
 
 def main(image_path,label_path,write_path,random_erase,guassian_variance):
@@ -222,8 +228,10 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance):
         os.mkdir(write_path + 'BwO')
     if not os.path.exists(write_path + 'B'):
         os.mkdir(write_path + 'B')
-    if not os.path.exists(write_path + 'B-random-erase'):
-        os.mkdir(write_path + 'B-random-erase')
+    # if not os.path.exists(write_path + 'B_random_erase'):
+    #     os.mkdir(write_path + 'B_random_erase')
+    # if not os.path.exists(write_path + 'B_random_erase'):
+    #     os.mkdir(write_path + 'B_random_erase')
 
     # copy list of labels
     # os.chdir(label_path)
@@ -272,11 +280,13 @@ if __name__ == "__main__":
     label_path = None
     mutate_path = None
     random_erase = None
+    guassian_variance = None
     if __debug__:
       image_path = "data/ImageSet/"
       label_path = "data/labels/"
       mutate_path = "data/mutate/"
       random_erase = 0.5
+      guassian_variance = 0.0
     else:
       parser = argparse.ArgumentParser()
       parser.add_argument('--image_path', help='path to original images',required=True)
