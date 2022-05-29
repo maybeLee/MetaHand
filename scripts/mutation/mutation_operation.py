@@ -78,7 +78,7 @@ class mutation_operation:
       
       filename_list = [id[:-4] + "-" + "B.txt"]
       if random_erase > 0.0:
-        filename_list.append(id[:-4] + "-" + "B_random_erase_" + str(random_erase) + ".txt")
+        filename_list.append(id[:-4] + "-" + "B_random_erase_varyxy_" + str(random_erase) + ".txt")
       if guassian_variance > 0.0:
         filename_list.append("B_guassian_" + str(guassian_variance) + ".txt")
       if guassian_variance > 0.0 and random_erase > 0.0:
@@ -175,8 +175,8 @@ class mutation_operation:
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
               original_area = w*h
               if random_erase > 0.0:
-                # x = int(x+w*random.uniform(0.0, 0.1))
-                # y = int(y+h*random.uniform(0.0, 0.1))
+                x = int(x+w*random.uniform(0.0, 1.0-random_erase))
+                y = int(y+h*random.uniform(0.0, 1.0-random_erase))
                 h = int(h*random.uniform(random_erase, 1.0))
                 w = int(w*random.uniform(random_erase, 1.0))
               print("the random erase shrinks by " + str(w*h/original_area*100))
@@ -203,8 +203,8 @@ class mutation_operation:
             cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           elif random_erase > 0.0:
             # print("INFO: creating")
-            pathlib.Path(self.write_path + "B_random_erase_" + str(random_erase)).mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(self.write_path + "B_random_erase_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_" + str(random_erase) + ".jpg", crop_img) #save image
+            pathlib.Path(self.write_path + "B_random_erase_varyxy_" + str(random_erase)).mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "B_random_erase_varyxy_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_varyxy_" + str(random_erase) + ".jpg", crop_img) #save image
           elif guassian_variance > 0.0:
             print("INFO: creating")
             pathlib.Path(self.write_path + "B_guassian_noise_" + str(guassian_variance)).mkdir(parents=True, exist_ok=True)
