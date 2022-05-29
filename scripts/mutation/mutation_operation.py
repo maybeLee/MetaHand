@@ -78,9 +78,9 @@ class mutation_operation:
       
       filename_list = [id[:-4] + "-" + "B.txt"]
       if random_erase > 0.0:
-        filename_list.append(id[:-4] + "-" + "B_random_erase_" + random_erase_mode + "_" + str(random_erase) + ".txt")
+        filename_list.append(id[:-4] + "-" + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt")
       if guassian_variance > 0.0:
-        filename_list.append("B_guassian_" + str(guassian_variance) + ".txt")
+        filename_list.append("B_guassian_" + str(guassian_variance).replace(".","") + ".txt")
       if guassian_variance > 0.0 and random_erase > 0.0:
         raise RuntimeError("invalid operation: guassian_variance and random_erase cannot be larger than zero at the same time.")
       
@@ -204,12 +204,12 @@ class mutation_operation:
             cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           elif random_erase > 0.0:
             # print("INFO: creating")
-            pathlib.Path(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase)).mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase) + "/" + filename[:-4] + "-"+ "B_random_erase_" + random_erase_mode + "_" + str(random_erase) + ".jpg", crop_img) #save image
+            pathlib.Path(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
           elif guassian_variance > 0.0:
             print("INFO: creating")
-            pathlib.Path(self.write_path + "B_guassian_noise_" + str(guassian_variance)).mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(self.write_path + "B_guassian_noise_" + str(guassian_variance) + "/" + filename[:-4] + "-"+ "B_guassian_noise_" + str(guassian_variance) + ".jpg", crop_img) #save image
+            pathlib.Path(self.write_path + "B_guassian_noise_" + str(guassian_variance).replace(".","")).mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "B_guassian_noise_" + str(guassian_variance).replace(".","") + "/" + filename[:-4] + "-"+ "B_guassian_noise_" + str(guassian_variance).replace(".","") + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
 
 def main(image_path,label_path,write_path,random_erase,guassian_variance,random_erase_mode):
