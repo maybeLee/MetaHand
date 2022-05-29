@@ -178,8 +178,14 @@ class mutation_operation:
                 if "varyXY" in random_erase_mode:
                   x = int(x+w*random.uniform(0.0, 1.0-random_erase))
                   y = int(y+h*random.uniform(0.0, 1.0-random_erase))
-                h = int(h*random.uniform(random_erase, 1.0) if "varyMutRatio" in random_erase_mode else h*random_erase)
-                w = int(w*random.uniform(random_erase, 1.0) if "varyMutRatio" in random_erase_mode else w*random_erase)
+                else:
+                  if "fixXY" not in random_erase_mode:
+                    raise ValueError("invalid operation, random erase mode must be varyXY or fixXY")
+                h = int(h*random.uniform(random_erase, 1.0) if "varyMutRatio" in random_erase_mode else h*random_erase if "fixMutRatio" in random_erase_mode else -1)
+                w = int(w*random.uniform(random_erase, 1.0) if "varyMutRatio" in random_erase_mode else w*random_erase if "fixMutRatio" in random_erase_mode else -1)
+                if h == -1 or w == -1:
+                  raise ValueError("invlid operation, random erase mode must be varyMutRatio or fixMutRatio")
+                
               print("the random erase shrinks by " + str(w*h/original_area*100))
               for i in range(h):
                   for j in range(w):
