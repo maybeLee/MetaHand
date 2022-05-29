@@ -305,7 +305,7 @@ if __name__ == "__main__":
       mutate_path = flags.mutate_path
       random_erase = flags.random_erase
       guassian_variance = flags.guassian_variance
-      random_erase_mode = flags.guassian_variance
+      random_erase_mode = flags.random_erase_mode
       
     
     # image_path = "/data1/wcleungag/ImageSet/"
