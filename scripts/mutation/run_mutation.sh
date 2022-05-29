@@ -12,13 +12,13 @@ do
 for guass_noise in 0.0 0.1 0.5 1.0 2.0 4.0 8.0 16.0
 do
     echo "fixMutRatio_fixXY\n"
-    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fix_mut_ratio_fixxy --guassian_variance $guass_noise & 
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_fixXY --guassian_variance $guass_noise & 
     echo "varyMutRatio_fixXY\n"
-    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode vary_mut_ratio_fixxy --guassian_variance $guass_noise &
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode varyMutRatio_fixXY --guassian_variance $guass_noise &
     echo "fixMutRatio_varyXY\n"
-    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fix_mut_ratio_varyxy --guassian_variance $guass_noise &
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_varyXY --guassian_variance $guass_noise &
     echo "varyMutRatio_varyXY\n"
-    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode vary_mut_ratio_varyxy --guassian_variance $guass_noise &
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode varyMutRatio_varyXY --guassian_variance $guass_noise &
 done
 done
 
