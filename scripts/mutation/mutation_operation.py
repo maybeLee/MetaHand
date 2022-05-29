@@ -212,7 +212,7 @@ class mutation_operation:
             cv2.imwrite(self.write_path + "B_guassian_noise_" + str(guassian_variance) + "/" + filename[:-4] + "-"+ "B_guassian_noise_" + str(guassian_variance) + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
 
-def main(image_path,label_path,write_path,random_erase,guassian_variance):
+def main(image_path,label_path,write_path,random_erase,guassian_variance,random_erase_mode):
     # image width and height
     WIDTH = 640
     HEIGHT = 480
@@ -256,7 +256,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance):
             no_label+=1
             continue
 
-        mo.gen_labels_OB(id, labels,random_erase, guassian_variance) #use os.path.basename() to keep only base directory for id
+        mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id
 
         bbox = mo.unnormalize(labels)  
         # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
@@ -265,7 +265,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance):
         # mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
         # mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
         # mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
-        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,guassian_variance=guassian_variance)
+        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,random_erase_mode=random_erase_mode,guassian_variance=guassian_variance)
         print(id+" -- done", len(labels), "labels")
         hv_label += 1
         mut += len(labels)
@@ -282,12 +282,14 @@ if __name__ == "__main__":
     mutate_path = None
     random_erase = None
     guassian_variance = None
+    random_erase_mode = None
     if __debug__:
       image_path = "data/ImageSet/"
       label_path = "data/labels/"
       mutate_path = "data/mutate/"
       random_erase = 0.5
       guassian_variance = 0.0
+      random_erase_mode = "fix_mut_ratio_varyxy"
     else:
       #random_erase_mode
       parser = argparse.ArgumentParser()
@@ -303,9 +305,10 @@ if __name__ == "__main__":
       mutate_path = flags.mutate_path
       random_erase = flags.random_erase
       guassian_variance = flags.guassian_variance
+      random_erase_mode = flags.guassian_variance
       
     
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_variance))
+    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_variance),random_erase_mode)
