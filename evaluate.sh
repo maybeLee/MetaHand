@@ -1,1 +1,1 @@
-python -u -m scripts.evaluation.evaluate
+python -u -m scripts.evaluation.evaluate -mi ./data/RandomNoiseMutation/B 

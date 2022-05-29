@@ -154,8 +154,8 @@ class MetaTester(object):
 
     def evaluate(self, ):
         self.get_prediction()
-        res_id_list = self.compare_prediction()
-        self.save_violate(res_id_list)
+        # res_id_list = self.compare_prediction()
+        # self.save_violate(res_id_list)
 
 
 if __name__ == "__main__":
