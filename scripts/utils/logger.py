@@ -1,4 +1,5 @@
 import logging
+import sys
 
 
 def singleton(cls):
@@ -21,7 +22,12 @@ class Logger(object):
         'critical':logging.CRITICAL
     }
 
-    def __init__(self,level='info',when='D',backCount=3,fmt='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'):
+    def __init__(self, filename=None, level='info',when='D',backCount=3,fmt='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'):
+        if filename is not None:
+            logging.basicConfig(filename=filename,
+                                format='%(asctime)s %(message)s',
+                                filemode='a')
+        logging.basicConfig(stream=sys.stdout)
         self.logger = logging.getLogger()
         format_str = logging.Formatter(fmt)
         self.logger.setLevel(self.level_relations.get(level))
