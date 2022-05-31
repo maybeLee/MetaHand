@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import argparse
 import random
 import pathlib
+import os
 
 class mutation_operation:
   
@@ -178,30 +179,43 @@ class mutation_operation:
                 if "varyXY" in random_erase_mode:
                   x = int(x+w*random.uniform(0.0, 1.0-random_erase))
                   y = int(y+h*random.uniform(0.0, 1.0-random_erase))
+                  h = int(h*random.uniform(random_erase, 1.0))
+                  w = int(w*random.uniform(random_erase, 1.0))
+                elif "centerXY" in random_erase_mode:
+                  height_randomize_factor = random.uniform(0.1, 1.0)
+                  x = int(x+w/2)
+                  y = int(y+h/2)    
+                  h = int(h*height_randomize_factor)
+                  w = int(w*random_erase/height_randomize_factor)        
                 else:
                   if "fixXY" not in random_erase_mode:
-                    raise ValueError("invalid operation, random erase mode must be varyXY or fixXY")
-                h = int(h*random.uniform(random_erase, 1.0) if "varyMutRatio" in random_erase_mode else h*random_erase if "fixMutRatio" in random_erase_mode else -1)
-                w = int(w*random.uniform(random_erase, 1.0) if "varyMutRatio" in random_erase_mode else w*random_erase if "fixMutRatio" in random_erase_mode else -1)
-                if h == -1 or w == -1:
-                  raise ValueError("invlid operation, random erase mode must be varyMutRatio or fixMutRatio")
+                    raise ValueError("invalid operation, random erase mode must be varyXY, centerXY and fixXY")
+                  h = int(h*random_erase)
+                  w = int(w*random_erase)
+                # if h == -1 or w == -1:
+                #   raise ValueError("invlid operation, random erase mode must be varyMutRatio or fixMutRatio")
                 
               print("the random erase shrinks by " + str(w*h/original_area*100))
-              for i in range(h):
-                  for j in range(w):
+              
+              y_start = y if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else y-h/2
+              y_end = y+h if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else y+h/2
+              x_start = x if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else x-w/2
+              x_end = x+w if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else x+w/2
+              for i in range(int(y_start),int(y_end) + 1):
+                  for j in range(int(x_start),int(x_end)+1):
                     #y+i can exceed 480, x+j cannot exceed 640 i.e., image size
                       # print("y+i: " + str(y+i))
                       # print("x+j: " + str(x+j))
                       if guassian_variance > 0.0:
                           mean = 0.0
                           # sd = 0.0
-                          r_g_b = crop_img[min(y+i,479)][min(x+j,639)]
+                          r_g_b = crop_img[min(i,479)][min(j,639)]
                           r_noise = np.random.normal(mean, guassian_variance)
                           g_noise = np.random.normal(mean, guassian_variance)
                           b_noise = np.random.normal(mean, guassian_variance)
-                          crop_img[min(y+i,479)][min(x+j,639)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
+                          crop_img[min(i,479)][min(j,639)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
                       else:
-                          crop_img[min(y+i,479)][min(x+j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                          crop_img[min(i,479)][min(j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
 
           
@@ -217,6 +231,24 @@ class mutation_operation:
             pathlib.Path(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
             cv2.imwrite(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
+          
+  def gen_log_name(self,random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_variance=0.0):
+    log_name = ""
+    if random_erase > 0.0 and guassian_variance == 0.0:
+      log_name = "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt"
+    elif guassian_variance > 0.0:
+      log_name = "B_guassian_" + str(guassian_variance).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt"
+    return log_name
+  
+  def remove_log(self,log_name):
+    if os.path.exists(self.write_path + "log/" + log_name + ".txt"):
+      # print("file exists")
+      os.remove(self.write_path + "log/" + log_name + ".txt")
+  
+  def log_finish(self,log_name):
+    f = open(self.write_path + "log/" + log_name + ".txt", "w") 
+    f.write("finished") 
+    f.close()
 
 def main(image_path,label_path,write_path,random_erase,guassian_variance,random_erase_mode):
     # image width and height
@@ -246,8 +278,8 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
     # label_list = [os.path.basename(i) for i in all_paths] #drop parent directory path
     # print("label path is : " + str(label_path + "*.txt"))
     # print("number of labels obtained: " + str(len(label_list)))
-
-
+    log_name = mo.gen_log_name(random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance)
+    mo.remove_log(log_name)
     no_label = 0
     hv_label = 0
     mut = 0
@@ -262,8 +294,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
             no_label+=1
             continue
 
-        mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id
-
+        mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id        
         bbox = mo.unnormalize(labels)  
         # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
         
@@ -281,6 +312,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
     print("images with labels: ", hv_label)
     print("images without labels: ", no_label)
     print(mut, " sets of obj and bg generated")
+    mo.log_finish(log_name)
 
 if __name__ == "__main__":
     image_path = None
@@ -293,9 +325,9 @@ if __name__ == "__main__":
       image_path = "data/ImageSet/"
       label_path = "data/labels/"
       mutate_path = "data/mutate/"
-      random_erase = 0.0
+      random_erase = 0.9
       guassian_variance = 0.0
-      random_erase_mode = "fixMutRatio_varyXY"
+      random_erase_mode = "fixMutRatio_centerXY"
     else:
       #random_erase_mode
       parser = argparse.ArgumentParser()
@@ -304,7 +336,7 @@ if __name__ == "__main__":
       parser.add_argument('--mutate_path', help="path to mutated images",required=True)
       parser.add_argument('--random_erase', help="proportion of an object region being erased",required=True)
       parser.add_argument('--guassian_variance', help="the guassian noise's variance",required=True)
-      parser.add_argument('--random_erase_mode', help="random erase mode: fixMutRatio, varyMutRatio, fixXY, varyXY. fixMutRatio means every hand has exactly the same mutaton ratio e.g., 0.7, varyMutRatio means every hand has slightly different mutation ratio, but on average a particular value. Use underscore to connect the parameters, e.g., fixMutRatio_fixXY",required=True)
+      parser.add_argument('--random_erase_mode', help="random erase mode: fixMutRatio, varyMutRatio, fixXY, varyXY, centerXY. fixMutRatio means every hand has exactly the same mutaton ratio e.g., 0.7, varyMutRatio means every hand has slightly different mutation ratio, but on average a particular value. Use underscore to connect the parameters, e.g., fixMutRatio_fixXY",required=True)
       flags, unknown = parser.parse_known_args()
       image_path = flags.image_path
       label_path = flags.label_path
