@@ -241,12 +241,12 @@ class mutation_operation:
     return log_name
   
   def remove_log(self,log_name):
-    if os.path.exists(self.write_path + "log/" + log_name + ".txt"):
+    if os.path.exists(self.write_path + "log/" + log_name):
       # print("file exists")
-      os.remove(self.write_path + "log/" + log_name + ".txt")
+      os.remove(self.write_path + "log/" + log_name)
   
   def log_finish(self,log_name):
-    f = open(self.write_path + "log/" + log_name + ".txt", "w") 
+    f = open(self.write_path + "log/" + log_name, "w") 
     f.write("finished") 
     f.close()
 
