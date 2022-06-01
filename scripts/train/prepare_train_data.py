@@ -13,11 +13,11 @@ class PreTrainData(object):
     def __init__(self, flags):
         self.data_path = flags.source_path
         self.img_list = []
-        self.target_dir = flags.target_dir
-        self.img_dir = flags.img_dir
-        self.label_dir = flags.label_dir
-        self.obj_dir = os.path.join(self.target_dir, "obj")
-        self.backup_dir = os.path.join(self.target_dir, "backup")
+        self.target_dir = flags.target_dir.rstrip("/")
+        self.img_dir = flags.img_dir.rstrip("/")
+        self.label_dir = flags.label_dir.rstrip("/")
+        self.obj_dir = os.path.join(self.target_dir, "obj").rstrip("/")
+        self.backup_dir = os.path.join(self.target_dir, "backup").rstrip("/")
         self.train_path = os.path.join(self.target_dir, "train.txt")
         self.valid_path = os.path.join(self.target_dir, "valid.txt")
         self.test_path = os.path.join(self.target_dir, "test.txt")
@@ -25,7 +25,7 @@ class PreTrainData(object):
 
     def initiate_dirs(self):
         if os.path.exists(self.target_dir):
-            shutil.rmtree(self.target_dir)
+            shutil.rmtree(self.target_dir, ignore_errors=True)
         if not os.path.exists(self.target_dir):
             os.makedirs(self.target_dir)
         if not os.path.exists(self.obj_dir):
@@ -72,9 +72,18 @@ class PreTrainData(object):
             return target_file_path
 
         os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
         os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
         os.system(f"find ./data/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        if self.label_dir != "empty":
+            os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        elif self.label_dir == "empty":
+            img_list = os.listdir(self.img_dir)
+            for img in img_list:
+                img_name = img[:-4]
+                label_path = os.path.join(self.obj_dir, f"{img_name}.txt")
+                os.system(f"touch {label_path}")
+        else:
+            raise ValueError("Error State When Preparing The Training Data and Training Label")
         with open(self.train_path, "w") as file:
             for train_id in train_list:
                 # target_file_path = _prepare_img_label(train_id)

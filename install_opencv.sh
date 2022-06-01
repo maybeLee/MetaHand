@@ -38,6 +38,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
 -D CUDA_ARCH_BIN=7.5 \
 -D WITH_CUBLAS=1 \
 -D OPENCV_EXTRA_MODULES_PATH=~/tools/opencv_contrib/modules \
+-D OPENCV_PYTHON3_INSTALL_PATH=$site_package_path \
 -D HAVE_opencv_python3=ON \
 -D PYTHON_INCLUDE_DIR=$include_dir \
 -D PYTHON3_LIBRARY="${library}/libpython3.7m.so" \
@@ -48,3 +49,4 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
 # Build
 make -j28
 
+ln -s /root/tools/opencv/build/lib/python3/cv2.cpython-37m-x86_64-linux-gnu.so /opt/conda/lib/python3.7/site-packages/cv2.so

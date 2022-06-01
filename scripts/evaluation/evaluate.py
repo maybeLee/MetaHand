@@ -127,7 +127,7 @@ class MetaTester(object):
             else:
                 raise ValueError("Unsupported Mutation Type!")
         logger.info("Finish Comparing Detection Result, Saving The Result")
-        np.save(f"res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
+        np.save(f"./results/res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
         logger.info(f"11: {len(res_id_list['11'])}, 10: {len(res_id_list['10'])}, "
                     f"01: {len(res_id_list['01'])}, 00: {len(res_id_list['00'])}")
         return res_id_list
@@ -154,8 +154,8 @@ class MetaTester(object):
 
     def evaluate(self, ):
         self.get_prediction()
-        # res_id_list = self.compare_prediction()
-        # self.save_violate(res_id_list)
+        res_id_list = self.compare_prediction()
+        self.save_violate(res_id_list)
 
 
 if __name__ == "__main__":
