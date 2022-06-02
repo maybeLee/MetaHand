@@ -19,7 +19,8 @@ class coco_train_mut_class:
     def preserve_label_of_one_object(self,json_data):
         file_name_to_category_bbox_dict = {}
         # image_file_prefix = "000000"
-        for each_image_label in json_data["annotations"]:
+        for counter, each_image_label in enumerate(json_data["annotations"]):
+            print("processing " + str(counter) + "th image\n")
             # image_file_name = "000000" + each_image_label["image_id"] + ".jpg"
             image_category = str(each_image_label["category_id"])
             # print("category_id is: " + str(image_category))
@@ -85,7 +86,7 @@ class coco_train_mut_class:
             # cnt+=1
 
     def write_label(self,file_name_to_category_bbox_dict,each_image_id,file_name):
-        f = open(self.working_dir_path + "labels/" + file_name + "-" + "B.txt", 'w+')
+        f = open(self.working_dir_path + "labels/" + file_name.replace(".jpg",".txt"), 'w+')
         for each_label in file_name_to_category_bbox_dict[each_image_id]:
             f.write(each_label)
         f.close()
@@ -164,9 +165,9 @@ def main():
     source_image_path = flags.source_image_path
     source_label_path = flags.source_label_path
     working_dir_path = flags.working_dir_path
-    object_category = flags.object_category
+    # object_category = flags.object_category
     json_file = flags.json
-    cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
+    cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path)
     json_data = cc_o.read_label(source_label_path + json_file) #get label data
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
     cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict)
