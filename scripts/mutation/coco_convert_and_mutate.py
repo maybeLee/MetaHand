@@ -30,7 +30,7 @@ class coco_train_mut_class:
                 
                 for each_coordinate in bbox:
                     if image_id not in file_name_to_category_bbox_dict:
-                        file_name_to_category_bbox_dict[image_id] == []
+                        file_name_to_category_bbox_dict[image_id] = []
                     if counter%4 == 0:
                         write_to_file_line = "0 " + str(each_coordinate) + " "
                         counter += 1
