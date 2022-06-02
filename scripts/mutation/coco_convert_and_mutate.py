@@ -35,10 +35,10 @@ class coco_train_mut_class:
                         write_to_file_line = "0 " + str(each_coordinate) + " "
                         counter += 1
                     elif counter%4 == 3:
-                        write_to_file_line += write_to_file_line + each_coordinate + "\n"
+                        write_to_file_line += write_to_file_line + str(each_coordinate) + "\n"
                         file_name_to_category_bbox_dict[image_id].append(write_to_file_line)
                     else:
-                        write_to_file_line += write_to_file_line + each_coordinate + " "
+                        write_to_file_line += write_to_file_line + str(each_coordinate) + " "
                     # if each_coordinate == bbox[-1]:
                     #     write_to_file_line = write_to_file_line + str(each_coordinate)
                     #     break
