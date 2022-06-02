@@ -6,7 +6,7 @@ import os
 import logging
 class coco_train_mut_class:
     
-    def __init__(self,source_image_path,source_label_path,working_dir_path,object_category):
+    def __init__(self,source_image_path,source_label_path,working_dir_path,object_category="dummy"):
         self.source_image_path = source_image_path
         self.source_label_path = source_label_path
         self.working_dir_path = working_dir_path
@@ -169,7 +169,7 @@ def main():
     cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
     json_data = cc_o.read_label(source_label_path + json_file) #get label data
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
-    cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="airplane")
+    cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict)
     
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
