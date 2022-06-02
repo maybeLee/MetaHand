@@ -1,3 +1,4 @@
+cd ../
 MutateName=B_random_erase_05
 MutateType=RandomEraseMutation
 python -u -m scripts.evaluation.evaluate -mi=./data/${MutateType}/$MutateName --threshold=0.3

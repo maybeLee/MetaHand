@@ -1,6 +1,16 @@
 import os
 
 
+def deprecated(func):
+    """
+    This is a decorator for deprecated functions.
+    """
+    def wrapper(*args, **kwargs):
+        print(f"[Warning] Function '{func.__name__}' is deprecated.")
+        return func(*args, **kwargs)
+    return wrapper
+
+
 def get_files(target_dir, end_pattern):
     # input: root path of specific frameworks
     # output: list format: ["file_dir_1", "file_dir_2", ...]

@@ -1,7 +1,7 @@
 import os
 from sklearn.model_selection import train_test_split
 from scripts.utils.logger import Logger
-from scripts.utils.utils import get_files
+from scripts.utils.utils import get_files, deprecated
 import glob
 import shutil
 import argparse
@@ -22,6 +22,19 @@ class PreTrainData(object):
         self.valid_path = os.path.join(self.target_dir, "valid.txt")
         self.test_path = os.path.join(self.target_dir, "test.txt")
         self.initiate_dirs()
+
+    @deprecated
+    def _prepare_img_label(self, id: str):
+        file_list = get_files(self.img_dir, f"{id}.jpg")
+        label_list = get_files(self.label_dir, f"{id}.txt")
+        assert len(file_list) == len(label_list) == 1
+        file_path = file_list[0]
+        label_path = label_list[0]
+        target_file_path = os.path.join(self.obj_dir, f"{id}.jpg")
+        target_label_path = os.path.join(self.obj_dir, f"{id}.txt")
+        os.system(f"cp {file_path} {target_file_path}")
+        os.system(f"cp {label_path} {target_label_path}")
+        return target_file_path
 
     def initiate_dirs(self):
         if os.path.exists(self.target_dir):
@@ -51,39 +64,37 @@ class PreTrainData(object):
             train_list, valid_list = train_test_split(self.img_list, test_size=0.2)
             return train_list, valid_list
 
-    def prepare_darknet_data(self):
+    def prepare_label(self):
+        logger.info("Preparing Labels")
+        os.system(f"find ./data/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        if self.label_dir == "empty":
+            img_list = os.listdir(self.img_dir)
+            for img in img_list:
+                img_name = img[:-4]
+                label_path = os.path.join(self.obj_dir, f"{img_name}.txt")
+                os.system(f"touch {label_path}")
+        elif self.label_dir == "same":
+            img_list = os.listdir(self.img_dir)
+            for img in img_list:
+                mutate_id = img[:-4]
+                img_id = mutate_id.split("-")[0]
+                label_path = os.path.join(self.obj_dir, f"{mutate_id}.txt")
+                shutil.copy(f"./data/Labels/{img_id}.txt", f"{label_path}")
+        else:
+            os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+
+    def prepare_img(self):
+        logger.info("Preparing Images")
+        os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+
+    def prepare_train_valid_test(self):
         train_list, valid_list = self._split_train_valid_test(test_ratio=0.0)
         test_list = []
         with open("./data/testing_id.txt", "r") as file:
             content = file.read().split("\n")[:-1]
             for line in content:
                 test_list.append(line)
-
-        def _prepare_img_label(id: str):
-            file_list = get_files(self.img_dir, f"{id}.jpg")
-            label_list = get_files(self.label_dir, f"{id}.txt")
-            assert len(file_list) == len(label_list) == 1
-            file_path = file_list[0]
-            label_path = label_list[0]
-            target_file_path = os.path.join(self.obj_dir, f"{id}.jpg")
-            target_label_path = os.path.join(self.obj_dir, f"{id}.txt")
-            os.system(f"cp {file_path} {target_file_path}")
-            os.system(f"cp {label_path} {target_label_path}")
-            return target_file_path
-
-        os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        os.system(f"find ./data/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        if self.label_dir != "empty":
-            os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        elif self.label_dir == "empty":
-            img_list = os.listdir(self.img_dir)
-            for img in img_list:
-                img_name = img[:-4]
-                label_path = os.path.join(self.obj_dir, f"{img_name}.txt")
-                os.system(f"touch {label_path}")
-        else:
-            raise ValueError("Error State When Preparing The Training Data and Training Label")
         with open(self.train_path, "w") as file:
             for train_id in train_list:
                 # target_file_path = _prepare_img_label(train_id)
@@ -102,6 +113,8 @@ class PreTrainData(object):
         logger.info(f"Total Number of Training Set: {len(train_list)}")
         logger.info(f"Total Number of Validation Set: {len(valid_list)}")
         logger.info(f"Total Number of Test Set: {len(test_list)}")
+
+    def prepare_obj(self):
         for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
             write_content = ""
             with open(file_path, "r") as file:
@@ -122,6 +135,12 @@ class PreTrainData(object):
             file.write(f"test = {self.test_path}\n")
             file.write(f"names = {obj_names_path}\n")
             file.write(f"backup = {self.backup_dir}\n")
+
+    def prepare_darknet_data(self):
+        self.prepare_img()
+        self.prepare_label()
+        self.prepare_train_valid_test()
+        self.prepare_obj()
 
 
 if __name__ == "__main__":

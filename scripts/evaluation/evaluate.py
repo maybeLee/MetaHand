@@ -23,6 +23,8 @@ class MetaTester(object):
             self.mutate_type = "object"
         if "B" in self.mutate_img_dir:
             self.mutate_type = "background"
+        if "Gaussian" in self.mutate_img_dir:
+            self.mutate_type = "gaussian"
         self.origin_label_dir = flags.origin_label_dir.rstrip("/")
         self.output_dir = flags.output_dir
         self.weights_path = flags.weights_path
@@ -119,7 +121,7 @@ class MetaTester(object):
                 origin_detection = _is_detected(img_labels[hand_id], origin_preds)
                 mutate_detection = _is_detected(img_labels[hand_id], mutate_preds)
                 res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
-            elif self.mutate_type == "background":
+            elif self.mutate_type == "background" or self.mutate_type == "gaussian":
                 for j in range(len(img_labels)):
                     origin_detection = _is_detected(img_labels[j], origin_preds)
                     mutate_detection = _is_detected(img_labels[j], mutate_preds)
@@ -134,13 +136,12 @@ class MetaTester(object):
 
     def save_violate(self, res_id_list):
         mutate_base = os.path.basename(self.mutate_img_dir)
-        identifier = ""
         if self.mutate_type == "object":
             violate_list = ["10", "01"]
-            identifier = "O"
         elif self.mutate_type == "background":
             violate_list = ["01", "11"]
-            identifier = "B"
+        elif self.mutate_type == "gaussian":
+            violate_list = ["01", "10"]
         else:
             raise ValueError("Unsupported Mutation Type!")
         violate_mutate_id_list = []
