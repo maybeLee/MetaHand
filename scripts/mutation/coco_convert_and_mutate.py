@@ -28,8 +28,27 @@ class coco_train_mut_class:
                 bbox = each_image_label["bbox"]
                 counter = 0
                 if image_id not in file_name_to_category_bbox_dict:
-                        file_name_to_category_bbox_dict[image_id] = []
-                logging.debug("bbox is: " + str(bbox))       
+                        file_name_to_category_bbox_dict[image_id] = []  
+                
+                write_to_file_line = "0 "
+                for each_coordinate in bbox:
+                    if each_coordinate == bbox[-1]:
+                        write_to_file_line = write_to_file_line + str(each_coordinate) + "\n"
+                    else:
+                        write_to_file_line = write_to_file_line + str(each_coordinate) + " "
+                file_name_to_category_bbox_dict[image_id].append(write_to_file_line)
+                
+                if __debug__:
+                    # file_name_to_category_bbox_dict[image_id].append(bbox)
+                    logging.debug("file_name_to_category_bbox_dict[image_id] is: image id " + str(image_id) + ", value: " + str(file_name_to_category_bbox_dict[image_id]))
+                        # break
+                #     write_to_file_line = write_to_file_line + str(each_coordinate) + " "
+                # if image_id not in file_name_to_category_bbox_dict:
+                #     file_name_to_category_bbox_dict[image_id] = [write_to_file_line]
+                # else:
+                #     file_name_to_category_bbox_dict[image_id].append([write_to_file_line])
+            # else:
+            #     raise ValueError("category id not exists")     
                 # for each_coordinate in bbox:
                 #     # logging.info("counter is: " + str(counter))
                 #     if counter > 3:
