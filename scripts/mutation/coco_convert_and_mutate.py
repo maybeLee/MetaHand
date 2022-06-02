@@ -2,7 +2,8 @@ import json
 import pathlib
 import shutil
 import argparse
-
+import os
+import logging
 class coco_train_mut_class:
     
     def __init__(self,source_image_path,source_label_path,working_dir_path,object_category):
@@ -25,18 +26,28 @@ class coco_train_mut_class:
             if image_category == self.category_to_id(self.object_category):
                 image_id = str(each_image_label["image_id"])
                 bbox = each_image_label["bbox"]
-                write_to_file_line = image_category + " "
+                counter = 0
+                
                 for each_coordinate in bbox:
-                    if each_coordinate == bbox[-1]:
-                        write_to_file_line = write_to_file_line + str(each_coordinate)
-                        break
-                    write_to_file_line = write_to_file_line + str(each_coordinate) + " "
-                if image_id not in file_name_to_category_bbox_dict:
-                    file_name_to_category_bbox_dict[image_id] = [write_to_file_line]
-                else:
-                    file_name_to_category_bbox_dict[image_id].append([write_to_file_line])
-            else:
-                raise ValueError("category id not exists")
+                    if image_id not in file_name_to_category_bbox_dict:
+                        file_name_to_category_bbox_dict[image_id] == []
+                    if counter%4 == 0:
+                        write_to_file_line = "0 " + str(each_coordinate) + " "
+                        counter += 1
+                    elif counter%4 == 3:
+                        write_to_file_line += write_to_file_line + each_coordinate + "\n"
+                        file_name_to_category_bbox_dict[image_id].append(write_to_file_line)
+                    else:
+                        write_to_file_line += write_to_file_line + each_coordinate + " "
+                    # if each_coordinate == bbox[-1]:
+                    #     write_to_file_line = write_to_file_line + str(each_coordinate)
+                    #     break
+                    # write_to_file_line = write_to_file_line + str(each_coordinate) + " "
+
+                # else:
+                    
+            # if len(file_name_to_category_bbox_dict[image_id]) == 0:
+            #     raise ValueError("no")
         return file_name_to_category_bbox_dict
 
     def create_empty_file(self):
@@ -61,11 +72,17 @@ class coco_train_mut_class:
         pathlib.Path(self.object_dir_path + "images").mkdir(parents=True, exist_ok=True)
         pathlib.Path(self.object_dir_path + "labels").mkdir(parents=True, exist_ok=True)
         pathlib.Path(self.object_dir_path + "mutate").mkdir(parents=True, exist_ok=True)
+        num_image_processed = 0
+        num_image_found = 0
         self.create_empty_file()
         for each_image_id in file_name_to_category_bbox_dict:
+            num_image_processed += 1
             file_name = "000000" + each_image_id + ".jpg"
-            shutil.copy2(self.source_image_path + file_name, self.object_dir_path + "images")
+            if os.path.isfile(self.source_image_path + file_name):
+                num_image_found += 1
+                shutil.copy2(self.source_image_path + file_name, self.object_dir_path + "images")
             self.write_label(file_name_to_category_bbox_dict,each_image_id,file_name)
+        logging.info("num_image_processed: " + str(num_image_processed) + ", num_image_found: " + str(num_image_found))
             # shutil.copy2(self.source_image_path + file_name, self.object_dir_path + "images")
             
 
@@ -113,13 +130,14 @@ def parse_arguement():
     return flags
 
 def main():
-    flags, _ = parse_arguement()
+    logging.basicConfig(level=logging.INFO)
+    flags = parse_arguement()
     source_image_path = flags.source_image_path
     source_label_path = flags.source_label_path
     working_dir_path = flags.working_dir_path
     object_category = flags.object_category
     cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
-    json_data = cc_o.read_label(source_label_path) #get label data
+    json_data = cc_o.read_label(source_label_path + "instances_train2017.json") #get label data
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
     cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
     
