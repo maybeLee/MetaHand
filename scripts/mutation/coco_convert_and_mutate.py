@@ -118,7 +118,7 @@ def test1():
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
     print(str(file_name_to_category_bbox_dict))
     cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
-        # datastore = json.loads(json_string)
+        # datastore = json.loads(json_string)1
 
 def parse_arguement():
     parser = argparse.ArgumentParser()
