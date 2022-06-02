@@ -113,7 +113,7 @@ def parse_arguement():
     return flags
 
 def main():
-    flags = parse_arguement()
+    flags, _ = parse_arguement()
     source_image_path = flags.source_image_path
     source_label_path = flags.source_label_path
     working_dir_path = flags.working_dir_path
@@ -126,4 +126,4 @@ def main():
     
     
 if __name__ == "__main__":
-    test1()
+    main()
