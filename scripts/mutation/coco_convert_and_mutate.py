@@ -131,7 +131,8 @@ class coco_train_mut_class:
         
     def category_to_id(self,category):
         category_to_id_dict = {
-            "person":"1"
+            "person":"1",
+            "airplane":"5"
         }
         return category_to_id_dict[category]
         
@@ -139,13 +140,13 @@ def test1():
     source_image_path = "source_data/data/"
     source_label_path = "source_data/label/label_example.json"
     working_dir_path = "working_dir/"
-    object_category = "person"
+    object_category = "airplane"
     # json_path = source_label_path + ""
     cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
     json_data = cc_o.read_label(source_label_path)
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
     #print(str(file_name_to_category_bbox_dict))
-    # cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
+    cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
         # datastore = json.loads(json_string)1
 
 def parse_arguement():
@@ -154,6 +155,7 @@ def parse_arguement():
     parser.add_argument('--source_label_path', help="path to original labels",required=True)
     parser.add_argument('--working_dir_path', help="path to working directory (i.e., dir for gen mutated ",required=True)
     parser.add_argument('--object_category', help="object category",required=True)
+    parser.add_argument('--json', help="which json file to read",required=True)
     flags, unknown = parser.parse_known_args()
     return flags
 
@@ -163,10 +165,11 @@ def main():
     source_label_path = flags.source_label_path
     working_dir_path = flags.working_dir_path
     object_category = flags.object_category
+    json_file = flags.json
     cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
-    json_data = cc_o.read_label(source_label_path + "instances_val2017.json") #get label data
+    json_data = cc_o.read_label(source_label_path + json_file) #get label data
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
-    cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
+    cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="airplane")
     
     
     
