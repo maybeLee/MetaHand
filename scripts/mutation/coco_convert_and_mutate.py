@@ -27,10 +27,9 @@ class coco_train_mut_class:
                 image_id = str(each_image_label["image_id"])
                 bbox = each_image_label["bbox"]
                 counter = 0
-                
-                for each_coordinate in bbox:
-                    if image_id not in file_name_to_category_bbox_dict:
+                if image_id not in file_name_to_category_bbox_dict:
                         file_name_to_category_bbox_dict[image_id] = []
+                for each_coordinate in bbox:
                     if counter%4 == 0:
                         write_to_file_line = "0 " + str(each_coordinate) + " "
                         counter += 1
@@ -137,7 +136,7 @@ def main():
     working_dir_path = flags.working_dir_path
     object_category = flags.object_category
     cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
-    json_data = cc_o.read_label(source_label_path + "instances_train2017.json") #get label data
+    json_data = cc_o.read_label(source_label_path + "instances_val2017.json") #get label data
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
     cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
     
