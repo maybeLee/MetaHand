@@ -154,7 +154,7 @@ def parse_arguement():
     parser.add_argument('--source_image_path', help='path to original images',required=True)
     parser.add_argument('--source_label_path', help="path to original labels",required=True)
     parser.add_argument('--working_dir_path', help="path to working directory (i.e., dir for gen mutated ",required=True)
-    parser.add_argument('--object_category', help="object category",required=True)
+    # parser.add_argument('--object_category', help="object category",required=True)
     parser.add_argument('--json', help="which json file to read",required=True)
     flags, unknown = parser.parse_known_args()
     return flags
