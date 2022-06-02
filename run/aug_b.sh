@@ -1,3 +1,4 @@
+cd ../
 MutateName=RandomNoiseB
 python -u -m scripts.evaluation.evaluate -mi=./data/RandomNoiseMutation/$MutateName
 mkdir -p ./data/working_dir/RandomNoiseMutation/$MutateName/

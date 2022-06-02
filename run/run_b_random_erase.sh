@@ -1,3 +1,4 @@
+cd ../
 MutateType=RandomEraseMutation
 log_dir=logs/${MutateType}
 mkdir -p $log_dir
