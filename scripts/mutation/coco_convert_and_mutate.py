@@ -22,22 +22,27 @@ class coco_train_mut_class:
         for each_image_label in json_data["annotations"]:
             # image_file_name = "000000" + each_image_label["image_id"] + ".jpg"
             image_category = str(each_image_label["category_id"])
-            print("category_id is: " + str(image_category))
+            # print("category_id is: " + str(image_category))
             if image_category == self.category_to_id(self.object_category):
                 image_id = str(each_image_label["image_id"])
                 bbox = each_image_label["bbox"]
                 counter = 0
                 if image_id not in file_name_to_category_bbox_dict:
                         file_name_to_category_bbox_dict[image_id] = []
-                for each_coordinate in bbox:
-                    if counter%4 == 0:
-                        write_to_file_line = "0 " + str(each_coordinate) + " "
-                        counter += 1
-                    elif counter%4 == 3:
-                        write_to_file_line += write_to_file_line + str(each_coordinate) + "\n"
-                        file_name_to_category_bbox_dict[image_id].append(write_to_file_line)
-                    else:
-                        write_to_file_line += write_to_file_line + str(each_coordinate) + " "
+                logging.debug("bbox is: " + str(bbox))       
+                # for each_coordinate in bbox:
+                #     # logging.info("counter is: " + str(counter))
+                #     if counter > 3:
+                #         logging.info("counter larger than4, the bbox is: " + str(bbox))
+                #     if counter%4 == 0:
+                #         write_to_file_line = "0 " + str(each_coordinate) + " "
+                #     elif counter%4 == 3:
+                #         write_to_file_line += write_to_file_line + str(each_coordinate) + "\n"
+                #         file_name_to_category_bbox_dict[image_id].append(write_to_file_line)
+                #     else:
+                #         write_to_file_line += write_to_file_line + str(each_coordinate) + " "
+                #     counter += 1
+                    
                     # if each_coordinate == bbox[-1]:
                     #     write_to_file_line = write_to_file_line + str(each_coordinate)
                     #     break
@@ -76,10 +81,15 @@ class coco_train_mut_class:
         self.create_empty_file()
         for each_image_id in file_name_to_category_bbox_dict:
             num_image_processed += 1
-            file_name = "000000" + each_image_id + ".jpg"
+            each_image_id_with_zero_ahead = "000000" + each_image_id
+            file_name = "000000" + each_image_id_with_zero_ahead[-6:] + ".jpg"
+            # logging.info("each_image_id_with_zero_ahead[-6:] is: " + str(each_image_id_with_zero_ahead[-6:]))
             if os.path.isfile(self.source_image_path + file_name):
                 num_image_found += 1
                 shutil.copy2(self.source_image_path + file_name, self.object_dir_path + "images")
+            else:
+                # if len(file_name) != 16:
+                logging.info("the image cannot be found is: " + str(file_name))
             self.write_label(file_name_to_category_bbox_dict,each_image_id,file_name)
         logging.info("num_image_processed: " + str(num_image_processed) + ", num_image_found: " + str(num_image_found))
             # shutil.copy2(self.source_image_path + file_name, self.object_dir_path + "images")
@@ -115,8 +125,8 @@ def test1():
     cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
     json_data = cc_o.read_label(source_label_path)
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
-    print(str(file_name_to_category_bbox_dict))
-    cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
+    #print(str(file_name_to_category_bbox_dict))
+    # cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="person")
         # datastore = json.loads(json_string)1
 
 def parse_arguement():
@@ -129,7 +139,6 @@ def parse_arguement():
     return flags
 
 def main():
-    logging.basicConfig(level=logging.INFO)
     flags = parse_arguement()
     source_image_path = flags.source_image_path
     source_label_path = flags.source_label_path
@@ -143,4 +152,5 @@ def main():
     
     
 if __name__ == "__main__":
-    main()
+    logging.basicConfig(level=logging.DEBUG)
+    test1()
