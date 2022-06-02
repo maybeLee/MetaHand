@@ -171,8 +171,9 @@ def main():
     file_name_to_category_bbox_dict = cc_o.preserve_label_of_one_object(json_data)
     cc_o.cp_file_to_working_directory(file_name_to_category_bbox_dict,object_name="airplane")
     
-    
-    
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    test1()
+    if __debug__:
+        test1()
+    else:
+        main()
