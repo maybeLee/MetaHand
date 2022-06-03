@@ -168,10 +168,10 @@ class mutation_operation:
   #Remove all hands in the image
   def rm_all_obj(self, filename, bbox, random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_variance=0.0):
       img = cv2.imread(self.image_path+filename)
-      print("DEBUG: the file path is " + str(self.image_path+filename))
-
+      # print("DEBUG: the file path is " + str(self.image_path+filename))
+      # print("height of an img: " + str(len(img)))
+      height, width, channels = img.shape
       if len(bbox)!=0:
-      
           cnt = 0
           crop_img = img.copy()
           for box in bbox:
@@ -211,13 +211,13 @@ class mutation_operation:
                       if guassian_variance > 0.0:
                           mean = 0.0
                           # sd = 0.0
-                          r_g_b = crop_img[min(i,479)][min(j,639)]
+                          r_g_b = crop_img[min(i,height)][min(j,width)]
                           r_noise = np.random.normal(mean, guassian_variance)
                           g_noise = np.random.normal(mean, guassian_variance)
                           b_noise = np.random.normal(mean, guassian_variance)
-                          crop_img[min(i,479)][min(j,639)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
+                          crop_img[min(i,height)][min(j,width)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
                       else:
-                          crop_img[min(i,479)][min(j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                          crop_img[min(i,height)][min(j,width)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
 
           
