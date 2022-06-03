@@ -7,6 +7,8 @@ import argparse
 import random
 import pathlib
 import os
+from multiprocessing import Pool
+import time
 
 class mutation_operation:
   
@@ -167,9 +169,10 @@ class mutation_operation:
   #Remove all hands in the image
   def rm_all_obj(self, filename, bbox, random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_variance=0.0):
       img = cv2.imread(self.image_path+filename)
-
+      # print("DEBUG: the file path is " + str(self.image_path+filename))
+      # print("height of an img: " + str(len(img)))
+      height, width, channels = img.shape
       if len(bbox)!=0:
-      
           cnt = 0
           crop_img = img.copy()
           for box in bbox:
@@ -209,13 +212,13 @@ class mutation_operation:
                       if guassian_variance > 0.0:
                           mean = 0.0
                           # sd = 0.0
-                          r_g_b = crop_img[min(i,479)][min(j,639)]
+                          r_g_b = crop_img[min(i,height-1)][min(j,width-1)]
                           r_noise = np.random.normal(mean, guassian_variance)
                           g_noise = np.random.normal(mean, guassian_variance)
                           b_noise = np.random.normal(mean, guassian_variance)
-                          crop_img[min(i,479)][min(j,639)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
+                          crop_img[min(i,height-1)][min(j,width-1)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
                       else:
-                          crop_img[min(i,479)][min(j,639)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                          crop_img[min(i,height-1)][min(j,width-1)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
 
           
@@ -249,6 +252,30 @@ class mutation_operation:
     f = open(self.write_path + "log/" + log_name, "w") 
     f.write("finished") 
     f.close()
+    
+def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_variance):
+      print("INFO: processing id: " + str(id) + "\n")
+      labels = mo.get_label(id)
+      id = os.path.basename(id)
+      if len(labels)==0:#print message to show that the label does not exist
+          print(id+" -- no label")
+          no_label+=1
+          return
+
+      mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id        
+      bbox = mo.unnormalize(labels)  
+      # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
+      
+      # #remove the hand object
+      # mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
+      # mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
+      # mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
+      mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,random_erase_mode=random_erase_mode,guassian_variance=guassian_variance)
+      print(id+" -- done", len(labels), "labels")
+      # hv_label += 1
+      # mut += len(labels)
+      return 
+  
 
 def main(image_path,label_path,write_path,random_erase,guassian_variance,random_erase_mode):
     # image width and height
@@ -284,34 +311,27 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
     hv_label = 0
     mut = 0
     #iterate through a list of labels
+    n_jobs_parameter=30
     if __debug__:
-      label_list = label_list[:5]
+      label_list = label_list[:12]
+      n_jobs_parameter=5
+    # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
+    pool = Pool(processes=10)
+    start_time = time.time()
     for id in label_list:
-        labels = mo.get_label(id)
-        id = os.path.basename(id)
-        if len(labels)==0:#print message to show that the label does not exist
-            print(id+" -- no label")
-            no_label+=1
-            continue
-
-        mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id        
-        bbox = mo.unnormalize(labels)  
-        # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
-        
-        # #remove the hand object
-        # mo.rm_object(id[:-4]+".jpg", bbox) #make hands become black
-        # mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
-        # mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
-        mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,random_erase_mode=random_erase_mode,guassian_variance=guassian_variance)
-        print(id+" -- done", len(labels), "labels")
-        hv_label += 1
-        mut += len(labels)
-
-    print("--------finished-------")
-    print("total: ", no_label+hv_label, "images")
-    print("images with labels: ", hv_label)
-    print("images without labels: ", no_label)
-    print(mut, " sets of obj and bg generated")
+      print("INFO: processing id " + str(id))
+      result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance,))
+    print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
+    pool.close()
+    pool.join()
+      # p = Process(target=perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance))
+      # p.start()
+      # p.join()
+    # print("--------finished-------")
+    # print("total: ", no_label+hv_label, "images")
+    # print("images with labels: ", hv_label)
+    # print("images without labels: ", no_label)
+    # print(mut, " sets of obj and bg generated")
     mo.log_finish(log_name)
 
 if __name__ == "__main__":
@@ -322,9 +342,9 @@ if __name__ == "__main__":
     guassian_variance = None
     random_erase_mode = None
     if __debug__:
-      image_path = "data/ImageSet/"
-      label_path = "data/labels/"
-      mutate_path = "data/mutate/"
+      image_path = "working_dir/images/"
+      label_path = "working_dir/labels/"
+      mutate_path = "working_dir/mutate/"
       random_erase = 0.9
       guassian_variance = 0.0
       random_erase_mode = "fixMutRatio_centerXY"
