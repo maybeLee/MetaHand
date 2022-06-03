@@ -18,6 +18,7 @@ class mutation_operation:
     self.write_path = write_path
     self.WIDTH = WIDTH
     self.HEIGHT = HEIGHT
+    self.dataset = dataset
   
   def get_label(self,filename):
     labels = []
@@ -36,6 +37,8 @@ class mutation_operation:
   def unnormalize(self,labels):
     return_labels = []
     for label in labels:
+      # if __debug__:
+        # print("DEBUG: label original: " + str(label))
       return_labels.append(self.center_to_topleft([label[1]*self.WIDTH, label[2]*self.HEIGHT, label[3]*self.WIDTH, label[4]*self.HEIGHT]))
     return return_labels
 
@@ -176,6 +179,8 @@ class mutation_operation:
           cnt = 0
           crop_img = img.copy()
           for box in bbox:
+              if __debug__:
+                print("the bbox being proceesed: " + str(box))
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
               original_area = w*h
               if random_erase > 0.0:
@@ -204,6 +209,11 @@ class mutation_operation:
               y_end = y+h if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else y+h/2
               x_start = x if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else x-w/2
               x_end = x+w if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else x+w/2
+              if __debug__:
+                print("DEBUG: y_start is : " + str(y_start))
+                print("DEBUG: y_end is : " + str(y_end))
+                print("DEBUG: x_start is : " + str(x_start))
+                print("DEBUG: x_end is : " + str(x_end))
               for i in range(int(y_start),int(y_end) + 1):
                   for j in range(int(x_start),int(x_end)+1):
                     #y+i can exceed 480, x+j cannot exceed 640 i.e., image size
@@ -218,6 +228,8 @@ class mutation_operation:
                           b_noise = np.random.normal(mean, guassian_variance)
                           crop_img[max(min(i,height-1),0)][max(min(j,width-1),0)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
                       else:
+                          # if __debug__:
+                          #     print("DEBUG: the coordinate being erased: " + str(max(min(i,height-1),0)) + "," + str(max(min(j,width-1),0)))
                           crop_img[max(min(i,height-1),0)][max(min(j,width-1),0)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
 
@@ -261,9 +273,13 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_variance):
           print(id+" -- no label")
           no_label+=1
           return
-
+        
+      bbox = None
       mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id        
-      bbox = mo.unnormalize(labels)  
+      if mo.dataset == "company":
+          bbox = mo.unnormalize(labels)
+      else:
+          bbox = labels
       # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
       
       # #remove the hand object
@@ -342,7 +358,8 @@ if __name__ == "__main__":
     random_erase = None
     guassian_variance = None
     random_erase_mode = None
-    if __debug__:
+    window = False
+    if __debug__ and window == True:
       image_path = "working_dir/images/"
       label_path = "working_dir/labels/"
       mutate_path = "working_dir/mutate/"
@@ -358,6 +375,7 @@ if __name__ == "__main__":
       parser.add_argument('--random_erase', help="proportion of an object region being erased",required=True)
       parser.add_argument('--guassian_variance', help="the guassian noise's variance",required=True)
       parser.add_argument('--random_erase_mode', help="random erase mode: fixMutRatio, varyMutRatio, fixXY, varyXY, centerXY. fixMutRatio means every hand has exactly the same mutaton ratio e.g., 0.7, varyMutRatio means every hand has slightly different mutation ratio, but on average a particular value. Use underscore to connect the parameters, e.g., fixMutRatio_fixXY",required=True)
+      parser.add_argument('--dataset', help="coco or company",required=True)
       flags, unknown = parser.parse_known_args()
       image_path = flags.image_path
       label_path = flags.label_path
@@ -365,9 +383,10 @@ if __name__ == "__main__":
       random_erase = flags.random_erase
       guassian_variance = flags.guassian_variance
       random_erase_mode = flags.random_erase_mode
+      dataset = flags.dataset
       
     
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_variance),random_erase_mode)
+    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_variance),random_erase_mode,dataset)
