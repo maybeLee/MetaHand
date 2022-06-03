@@ -5,9 +5,9 @@
 # label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/
 # mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/
 
-img=/ssddata/metahand/coco/images
-label=/ssddata/metahand/coco/labels
-mutate=/ssddata/metahand/coco/mutate
+img=/ssddata/metahand/coco/images/
+label=/ssddata/metahand/coco/labels/
+mutate=/ssddata/metahand/coco/mutate/
 
 mkdir -p /ssddata/metahand/coco/mutate
 mkdir -p /ssddata/metahand/coco/mutate/log #for recording which process finishes during multi-processing
