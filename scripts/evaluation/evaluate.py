@@ -8,11 +8,6 @@ from scripts.utils.utils import YoloUtils
 import numpy as np
 
 
-# image width and height
-WIDTH = 640
-HEIGHT = 48
-
-
 class MetaTester(object):
     def __init__(self, flags):
         self.origin_img_dir = flags.origin_img_dir.rstrip("/")
