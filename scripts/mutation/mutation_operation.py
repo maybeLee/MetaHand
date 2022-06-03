@@ -12,7 +12,7 @@ import time
 
 class mutation_operation:
   
-  def __init__(self,image_path,label_path,write_path,WIDTH,HEIGHT):
+  def __init__(self,image_path,label_path,write_path,WIDTH,HEIGHT,dataset):
     self.image_path = image_path
     self.label_path = label_path
     self.write_path = write_path
@@ -34,12 +34,17 @@ class mutation_operation:
   def center_to_topleft(self,label):
     return [label[0]-label[2]/2, label[1]-label[3]/2, label[2], label[3]]
 
-  def unnormalize(self,labels):
+  def unnormalize(self,labels,dataset):
     return_labels = []
     for label in labels:
       # if __debug__:
         # print("DEBUG: label original: " + str(label))
-      return_labels.append(self.center_to_topleft([label[1]*self.WIDTH, label[2]*self.HEIGHT, label[3]*self.WIDTH, label[4]*self.HEIGHT]))
+      if dataset == "company":
+          return_labels.append(self.center_to_topleft([label[1]*self.WIDTH, label[2]*self.HEIGHT, label[3]*self.WIDTH, label[4]*self.HEIGHT]))
+      elif dataset == "coco":
+          return_labels.append([label[1], label[2], label[3], label[4]])
+      else:
+          raise ValueError("invalid dataset")
     return return_labels
 
   def gen_labels(self, id, labels):
@@ -183,6 +188,10 @@ class mutation_operation:
                 print("the bbox being proceesed: " + str(box))
               x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
               original_area = w*h
+              if __debug__:
+                print("DEBUG: w is : " + str(w))
+                print("DEBUG: h is : " + str(h))
+                print("DEBUG: original_area is : " + str(original_area))
               if random_erase > 0.0:
                 if "varyXY" in random_erase_mode:
                   x = int(x+w*random.uniform(0.0, 1.0-random_erase))
@@ -276,10 +285,9 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_variance):
         
       bbox = None
       mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_variance=guassian_variance) #use os.path.basename() to keep only base directory for id        
-      if mo.dataset == "company":
-          bbox = mo.unnormalize(labels)
-      else:
-          bbox = labels
+      
+      bbox = mo.unnormalize(labels,mo.dataset)
+
       # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
       
       # #remove the hand object
@@ -293,11 +301,11 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_variance):
       return 
   
 
-def main(image_path,label_path,write_path,random_erase,guassian_variance,random_erase_mode):
+def main(image_path,label_path,write_path,random_erase,guassian_variance,random_erase_mode,dataset):
     # image width and height
     WIDTH = 640
     HEIGHT = 480
-    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT)
+    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset)
     #create folder for mutated images
     # os.chdir(write_path)
     if not os.path.exists(write_path + 'objects'):
