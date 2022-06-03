@@ -315,9 +315,9 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
       label_list = label_list[:12]
       n_jobs_parameter=5
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
-    pool = Pool(processes=3)
+    pool = Pool(processes=10)
     for id in label_list:
-      print("DEBUG: apply async\n")
+      print("INFO: processing id " + str(id))
       result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance,))
     pool.close()
     pool.join()
