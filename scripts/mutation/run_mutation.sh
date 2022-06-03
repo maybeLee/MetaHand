@@ -19,7 +19,7 @@ do
 for rand_erase in 0.5
 do
     # echo "fixMutRatio_fixXY\n"
-    python mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_variance $guass_noise --dataset coco
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_variance $guass_noise --dataset coco
     # echo "varyMutRatio_fixXY\n"
     # python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode varyMutRatio_fixXY --guassian_variance $guass_noise &
     # echo "fixMutRatio_varyXY\n"

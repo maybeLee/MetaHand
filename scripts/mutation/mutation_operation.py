@@ -335,12 +335,12 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
     hv_label = 0
     mut = 0
     #iterate through a list of labels
-    n_jobs_parameter=30
+    n_jobs_parameter=15
     if __debug__:
       label_list = label_list[:12]
       n_jobs_parameter=5
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
-    pool = Pool(processes=5)
+    pool = Pool(processes=n_jobs_parameter)
     start_time = time.time()
     for id in label_list:
       print("INFO: processing id " + str(id))
