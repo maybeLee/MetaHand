@@ -211,13 +211,13 @@ class mutation_operation:
                       if guassian_variance > 0.0:
                           mean = 0.0
                           # sd = 0.0
-                          r_g_b = crop_img[min(i,height)][min(j,width)]
+                          r_g_b = crop_img[min(i,height-1)][min(j,width-1)]
                           r_noise = np.random.normal(mean, guassian_variance)
                           g_noise = np.random.normal(mean, guassian_variance)
                           b_noise = np.random.normal(mean, guassian_variance)
-                          crop_img[min(i,height)][min(j,width)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
+                          crop_img[min(i,height-1)][min(j,width-1)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
                       else:
-                          crop_img[min(i,height)][min(j,width)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                          crop_img[min(i,height-1)][min(j,width-1)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
 
           
@@ -310,9 +310,11 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
     hv_label = 0
     mut = 0
     #iterate through a list of labels
+    n_jobs_parameter=30
     if __debug__:
-      label_list = label_list[:1000]
-    Parallel(n_jobs=30)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
+      label_list = label_list[:10]
+      n_jobs_parameter=5
+    Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
     # print("--------finished-------")
     # print("total: ", no_label+hv_label, "images")
     # print("images with labels: ", hv_label)
