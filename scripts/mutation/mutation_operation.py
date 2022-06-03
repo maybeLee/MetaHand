@@ -7,7 +7,7 @@ import argparse
 import random
 import pathlib
 import os
-from joblib import Parallel, delayed
+from multiprocessing import Pool
 
 class mutation_operation:
   
@@ -312,9 +312,18 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
     #iterate through a list of labels
     n_jobs_parameter=30
     if __debug__:
-      label_list = label_list[:10]
+      label_list = label_list[:12]
       n_jobs_parameter=5
-    Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
+    # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
+    pool = Pool(processes=3)
+    for id in label_list:
+      print("DEBUG: apply async\n")
+      result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance,))
+    pool.close()
+    pool.join()
+      # p = Process(target=perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance))
+      # p.start()
+      # p.join()
     # print("--------finished-------")
     # print("total: ", no_label+hv_label, "images")
     # print("images with labels: ", hv_label)
