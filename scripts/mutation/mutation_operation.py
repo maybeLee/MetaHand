@@ -212,13 +212,13 @@ class mutation_operation:
                       if guassian_variance > 0.0:
                           mean = 0.0
                           # sd = 0.0
-                          r_g_b = crop_img[min(i,height-1)][min(j,width-1)]
+                          r_g_b = crop_img[max(min(i,height-1),0)][max(min(j,width-1),0)]
                           r_noise = np.random.normal(mean, guassian_variance)
                           g_noise = np.random.normal(mean, guassian_variance)
                           b_noise = np.random.normal(mean, guassian_variance)
-                          crop_img[min(i,height-1)][min(j,width-1)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
+                          crop_img[max(min(i,height-1),0)][max(min(j,width-1),0)] = [int(r_g_b[0] + r_noise), int(r_g_b[1]+g_noise), int(r_g_b[2]+b_noise)]
                       else:
-                          crop_img[min(i,height-1)][min(j,width-1)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
+                          crop_img[max(min(i,height-1),0)][max(min(j,width-1),0)] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
 
 
           
@@ -316,11 +316,12 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
       label_list = label_list[:12]
       n_jobs_parameter=5
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
-    pool = Pool(processes=10)
+    pool = Pool(processes=5)
     start_time = time.time()
     for id in label_list:
       print("INFO: processing id " + str(id))
-      result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance,))
+      # result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance,))
+      perform_mutation(mo,id,random_erase,random_erase_mode,guassian_variance)
     print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
     pool.close()
     pool.join()
