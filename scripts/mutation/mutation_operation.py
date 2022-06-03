@@ -8,6 +8,7 @@ import random
 import pathlib
 import os
 from multiprocessing import Pool
+import time
 
 class mutation_operation:
   
@@ -316,9 +317,11 @@ def main(image_path,label_path,write_path,random_erase,guassian_variance,random_
       n_jobs_parameter=5
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_variance) for id in label_list)
     pool = Pool(processes=10)
+    start_time = time.time()
     for id in label_list:
       print("INFO: processing id " + str(id))
       result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance,))
+    print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
     pool.close()
     pool.join()
       # p = Process(target=perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_variance))

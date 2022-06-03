@@ -16,10 +16,10 @@ mkdir -p /ssddata/metahand/coco/mutate/log #for recording which process finishes
 # for guass_noise in 0.0 0.1 0.5 1.0 2.0 4.0 8.0 16.0
 for guass_noise in 0.0
 do
-for rand_erase in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+for rand_erase in 0.5
 do
     # echo "fixMutRatio_fixXY\n"
-    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_variance $guass_noise & 
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_variance $guass_noise 
     # echo "varyMutRatio_fixXY\n"
     # python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode varyMutRatio_fixXY --guassian_variance $guass_noise &
     # echo "fixMutRatio_varyXY\n"
