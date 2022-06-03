@@ -21,6 +21,7 @@ class PreTrainData(object):
         self.train_path = os.path.join(self.target_dir, "train.txt")
         self.valid_path = os.path.join(self.target_dir, "valid.txt")
         self.test_path = os.path.join(self.target_dir, "test.txt")
+        self.append = flags.append  # 0: do not append (default), 1: append without removing original data
         self.initiate_dirs()
 
     @deprecated
@@ -37,7 +38,7 @@ class PreTrainData(object):
         return target_file_path
 
     def initiate_dirs(self):
-        if os.path.exists(self.target_dir):
+        if os.path.exists(self.target_dir) and self.append == 0:
             shutil.rmtree(self.target_dir, ignore_errors=True)
         if not os.path.exists(self.target_dir):
             os.makedirs(self.target_dir)
@@ -51,7 +52,9 @@ class PreTrainData(object):
             content = file.read().split("\n")[:-1]
         for line in content:
             self.img_list.append(line)
-        if self.data_path != "./data/training_id.txt":
+        if self.data_path != "./data/training_id.txt" and self.append == 0:
+            # if append is 0, we assume the original training image has not been added to the working dir.
+            # Therefore we do it.
             with open("./data/training_id.txt", "r") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
@@ -86,7 +89,9 @@ class PreTrainData(object):
     def prepare_img(self):
         logger.info("Preparing Images")
         os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        if self.append == 0:
+            # if we append the target directory, we assume that original training data have been added
+            os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
     def prepare_train_valid_test(self):
         train_list, valid_list = self._split_train_valid_test(test_ratio=0.0)
@@ -95,26 +100,29 @@ class PreTrainData(object):
             content = file.read().split("\n")[:-1]
             for line in content:
                 test_list.append(line)
-        with open(self.train_path, "w") as file:
+        with open(self.train_path, "a") as file:
             for train_id in train_list:
-                # target_file_path = _prepare_img_label(train_id)
                 target_file_path = os.path.join(self.obj_dir, f"{train_id}.jpg")
                 file.write(target_file_path+"\n")
-        with open(self.valid_path, "w") as file:
+        with open(self.valid_path, "a") as file:
             for valid_id in valid_list:
-                # target_file_path = _prepare_img_label(valid_id)
                 target_file_path = os.path.join(self.obj_dir, f"{valid_id}.jpg")
                 file.write(target_file_path+"\n")
         with open(self.test_path, "w") as file:
             for test_id in test_list:
-                # target_file_path = _prepare_img_label(test_id)
                 target_file_path = os.path.join(self.obj_dir, f"{test_id}.jpg")
                 file.write(target_file_path+"\n")
+        with open(self.train_path, "r") as file:
+            content = file.read().split("\n")[:-1]
+        train_list = []
+        for line in content:
+            train_list.append(line)
         logger.info(f"Total Number of Training Set: {len(train_list)}")
         logger.info(f"Total Number of Validation Set: {len(valid_list)}")
         logger.info(f"Total Number of Test Set: {len(test_list)}")
 
     def prepare_obj(self):
+        # TODO: Need To Change This Logic Before Evaluating On COCO DataSet
         for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
             write_content = ""
             with open(file_path, "r") as file:
@@ -149,6 +157,7 @@ if __name__ == "__main__":
     parser.add_argument("--img_dir", type=str, help="The dir of image data")
     parser.add_argument("--label_dir", type=str, help="The dir of label data")
     parser.add_argument("--target_dir", type=str, help="The dir of train/test/valid data")
+    parser.add_argument("--append", type=int, default=0, help="Whether to add images to existing work dir")
     flags, _ = parser.parse_known_args(sys.argv[1:])
     preTrainData = PreTrainData(flags)
     preTrainData.load_data()
