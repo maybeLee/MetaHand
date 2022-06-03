@@ -186,7 +186,7 @@ class mutation_operation:
           for box in bbox:
               if __debug__:
                 print("the bbox being proceesed: " + str(box))
-              x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3]) 
+              x, y, w, h = int(box[0]), int(box[1]), max(int(box[2]),1), max(int(box[3]),1)
               original_area = w*h
               if __debug__:
                 print("DEBUG: w is : " + str(w))
