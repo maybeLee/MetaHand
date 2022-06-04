@@ -60,65 +60,33 @@ class mutation_operation:
       f.close()
       cnt+=1
 
-  def gen_labels_OB(self, id, labels, random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_sigma=0.0):
-    cnt = 0
+  def gen_labels_OB(self, id, labels, object_or_background, random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_sigma=0.0):
     for label in labels:
-      
+      if object_or_background == "background":
       # save labels for object
-      filename = id[:-4] + "-" + "O.txt"
-      filepath = os.path.join(self.write_path+'label', filename)#/ for ubuntu, \\ for window
-      f = open(filepath, "w")
-      temp = ""
-      for value in label:
-        temp = temp + str(value) + " "
-      f.write(temp)
-      f.close()
-
-      # save labels for other hands in background
-      filename = id[:-4] + "-" + str(cnt) + "B.txt"
-      filepath = os.path.join(self.write_path+'label', filename)
-      f = open(filepath, "w")
-      for i in range(len(labels)):
-        if i!=cnt:
-          temp = ""
-          for value in labels[i]:
-            temp = temp + str(value) + " "
-          f.write(temp+'\n')
-      f.close()
-      cnt+=1
-      
-      filename_list = [id[:-4] + "-" + "B.txt"]
-      if random_erase > 0.0 and guassian_sigma == 0.0:
-        filename_list.append(id[:-4] + "-" + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt")
-      elif guassian_sigma > 0.0:
-        filename_list.append(id[:-4] + "-" + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt")
-      if guassian_sigma == 0.0 and random_erase == 0.0:
-        raise RuntimeError("invalid operation: guassian_sigma and random_erase must be larger than zero at the same time.")
-      
-      for filename in filename_list:
-        filepath = os.path.join(self.write_path+'label', filename)
+        filename = id[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".txt"
+        filepath = os.path.join(self.write_path+'label', filename)#/ for ubuntu, \\ for window
         f = open(filepath, "w")
-        for i in range(len(labels)):
-          f.write('\n')
+        temp = ""
+        for value in label:
+          temp = temp + str(value) + " "
+        f.write(temp)
         f.close()
-        cnt+=1
-      
-  # def rm_object(self, filename, bbox):
-  #   img = cv2.imread(self.image_path+filename)
-  #   #cv2_imshow(img)
-
-  #   if len(bbox)!=0:
-  #     cnt = 0
-  #     for box in bbox:
-  #       x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3])
-  #       crop_img = img.copy()
-  #       for i in range(h):
-  #         for j in range(w):
-  #           crop_img[y+i][x+j] = [int(random.uniform(0,255)), int(random.uniform(0,255)), int(random.uniform(0,255))]
-  #       #cv2_imshow(crop_img)
-  #       cv2.imwrite(self.write_path + "bkg/" + filename[:-4] + "-"+ str(cnt) + "B" + ".jpg", crop_img)      #save image
-  #       #cv2.waitKey(0)
-  #       cnt+=1
+      else:
+        filename_list = []
+        if random_erase > 0.0 and guassian_sigma == 0.0:
+          filename_list.append(id[:-4] + "-" + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt")
+        elif guassian_sigma > 0.0:
+          filename_list.append(id[:-4] + "-" + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt")
+        if guassian_sigma == 0.0 and random_erase == 0.0:
+          raise RuntimeError("invalid operation: guassian_sigma and random_erase must be larger than zero at the same time.")
+        
+        for filename in filename_list:
+          filepath = os.path.join(self.write_path+'label', filename)
+          f = open(filepath, "w")
+          for i in range(len(labels)):
+            f.write('\n')
+          f.close()
         
   #Remove background of the image, only one object left
 
@@ -295,7 +263,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
           return
         
       bbox = None
-      mo.gen_labels_OB(id, labels, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_sigma=guassian_sigma) #use os.path.basename() to keep only base directory for id        
+      mo.gen_labels_OB(id, labels, object_or_background, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_sigma=guassian_sigma) #use os.path.basename() to keep only base directory for id        
       
       bbox = mo.unnormalize(labels,mo.dataset)
       
