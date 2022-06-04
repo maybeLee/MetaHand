@@ -285,7 +285,7 @@ class mutation_operation:
     f.write("finished") 
     f.close()
     
-def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma):
+def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background):
       print("INFO: processing id: " + str(id) + "\n")
       labels = mo.get_label(id)
       id = os.path.basename(id)
@@ -364,7 +364,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     for id in label_list:
       print("INFO: processing id " + str(id))
       if os.name == 'nt':
-          perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma)
+          perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
       else:
           result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,))
     print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
