@@ -150,7 +150,7 @@ class mutation_operation:
           for j in range(w):
             obj[y+i][x+j] = img[y+i][x+j]
 
-        cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + ".jpg", obj)      #save image
+        cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".jpg", obj)      #save image
         # cnt+=1
         
   #Remove hands other than the label object
