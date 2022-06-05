@@ -7,11 +7,14 @@ import shutil
 import argparse
 import sys
 logger = Logger()
+MAPPING_DICT = {"popsquare": "./data", "coco": "./data_coco"}
 
 
 class PreTrainData(object):
     def __init__(self, flags):
         self.data_path = flags.source_path
+        self.dataset = flags.dataset
+        self.data_root_dir = MAPPING_DICT[self.dataset].rstrip("/")
         self.img_list = []
         self.target_dir = flags.target_dir.rstrip("/")
         self.img_dir = flags.img_dir.rstrip("/")
@@ -52,10 +55,10 @@ class PreTrainData(object):
             content = file.read().split("\n")[:-1]
         for line in content:
             self.img_list.append(line)
-        if self.data_path != "./data/training_id.txt" and self.append == 0:
+        if self.data_path != f"{self.data_root_dir}/training_id.txt" and self.append == 0:
             # if append is 0, we assume the original training image has not been added to the working dir.
             # Therefore we do it.
-            with open("./data/training_id.txt", "r") as file:
+            with open(f"{self.data_root_dir}/training_id.txt", "r") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 self.img_list.append(line)
@@ -69,7 +72,7 @@ class PreTrainData(object):
 
     def prepare_label(self):
         logger.info("Preparing Labels")
-        os.system(f"find ./data/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        os.system(f"find {self.data_root_dir}/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
         if self.label_dir == "empty":
             img_list = os.listdir(self.img_dir)
             for img in img_list:
@@ -82,21 +85,21 @@ class PreTrainData(object):
                 mutate_id = img[:-4]
                 img_id = mutate_id.split("-")[0]
                 label_path = os.path.join(self.obj_dir, f"{mutate_id}.txt")
-                shutil.copy(f"./data/Labels/{img_id}.txt", f"{label_path}")
-        else:
+                shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
+        elif self.label_dir != f"{self.data_root_dir}/Labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
     def prepare_img(self):
         logger.info("Preparing Images")
         os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
-        if self.append == 0:
+        if self.append == 0 and self.img_dir != f"{self.data_root_dir}/ImageSet":
             # if we append the target directory, we assume that original training data have been added
-            os.system(f"find ./data/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+            os.system(f"find {self.data_root_dir}/ImageSet/ -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
     def prepare_train_valid_test(self):
         train_list, valid_list = self._split_train_valid_test(test_ratio=0.0)
         test_list = []
-        with open("./data/testing_id.txt", "r") as file:
+        with open(f"{self.data_root_dir}/testing_id.txt", "r") as file:
             content = file.read().split("\n")[:-1]
             for line in content:
                 test_list.append(line)
@@ -123,19 +126,25 @@ class PreTrainData(object):
 
     def prepare_obj(self):
         # TODO: Need To Change This Logic Before Evaluating On COCO DataSet
-        for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
-            write_content = ""
-            with open(file_path, "r") as file:
-                for line in file:
-                    write_content += "0" + line[1:]
-            with open(file_path, "w") as file:
-                file.write(write_content)
+        if self.dataset == "popsquare":
+            for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
+                write_content = ""
+                with open(file_path, "r") as file:
+                    for line in file:
+                        write_content += "0" + line[1:]
+                with open(file_path, "w") as file:
+                    file.write(write_content)
 
         # generate obj.data, obj.names
         obj_names_path = os.path.join(self.target_dir, "obj.names")
         obj_data_path = os.path.join(self.target_dir, "obj.data")
-        with open(obj_names_path, "w") as file:
-            file.write("hands")
+        if self.dataset == "popsquare":
+            with open(obj_names_path, "w") as file:
+                file.write("hands")
+        elif self.dataset == "coco":
+            shutil.copy("./cfg/coco.names", obj_names_path)
+        else:
+            raise ValueError("Undefined Dataset !!!")
         with open(obj_data_path, "w") as file:
             file.write("classes = 1\n")
             file.write(f"train = {self.train_path}\n")
@@ -158,6 +167,7 @@ if __name__ == "__main__":
     parser.add_argument("--label_dir", type=str, help="The dir of label data")
     parser.add_argument("--target_dir", type=str, help="The dir of train/test/valid data")
     parser.add_argument("--append", type=int, default=0, help="Whether to add images to existing work dir")
+    parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
     flags, _ = parser.parse_known_args(sys.argv[1:])
     preTrainData = PreTrainData(flags)
     preTrainData.load_data()
