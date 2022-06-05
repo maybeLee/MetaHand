@@ -32,8 +32,8 @@ class coco_train_mut_class:
                     file_name_to_category_bbox_dict[image_id] = []  
             
             write_to_file_line = str(each_image_label["category_id"]) + " "
-            for each_coordinate in bbox:
-                if each_coordinate == bbox[-1]:
+            for counter, each_coordinate in enumerate(bbox):
+                if counter == 3:
                     write_to_file_line = write_to_file_line + str(each_coordinate) + "\n"
                 else:
                     write_to_file_line = write_to_file_line + str(each_coordinate) + " "
