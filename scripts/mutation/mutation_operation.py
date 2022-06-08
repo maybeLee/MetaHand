@@ -25,7 +25,8 @@ class mutation_operation:
     f = open(filename, "r")
     for line in f.readlines():
       line = line[:-1]
-      arr = line.split(' ')
+      arr_list = line.split(' ')
+      arr = [str for str in arr_list if str]
       arr = list(map(float, arr))
       arr[0] = int(arr[0])
       labels.append(arr)
@@ -39,9 +40,9 @@ class mutation_operation:
     for label in labels:
       # if __debug__:
         # print("DEBUG: label original: " + str(label))
-      if dataset == "company":
+      if dataset == "company" or "2014" in dataset: #coco 2014 does not need unnormalise
           return_labels.append(self.center_to_topleft([label[1]*self.WIDTH, label[2]*self.HEIGHT, label[3]*self.WIDTH, label[4]*self.HEIGHT]))
-      elif dataset == "coco":
+      elif "coco" in dataset:
           return_labels.append([label[1], label[2], label[3], label[4]])
       else:
           raise ValueError("invalid dataset")
@@ -331,7 +332,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     start_time = time.time()
     for id in label_list:
       print("INFO: processing id " + str(id))
-      if os.name == 'nt':
+      if __debug__ or os.name == 'nt': #on window, only single thread can be run coz apply_async cannot be run on window
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
       else:
           result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background))
@@ -363,7 +364,7 @@ if __name__ == "__main__":
       guassian_sigma = 0.0
       random_erase_mode = "fixMutRatio_centerXY"
       dataset = "coco"
-      object_or_background = "background"
+      object_or_background = "object"
     else:
       #random_erase_mode
       parser = argparse.ArgumentParser()
