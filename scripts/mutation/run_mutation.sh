@@ -5,11 +5,11 @@
 # label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/
 # mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/
 
-img=/ssddata/metahand/coco/images/
-label=/ssddata/metahand/coco/labels/
-mutate=/ssddata/metahand/coco/mutate/
+img=/ssddata/metahand/coco2014_training/images/
+label=/ssddata/metahand/coco2014_training/labels/
+mutate=/ssddata/metahand/coco2014_training/mutate/
 o_or_b=background
-which_dataset="company"
+which_dataset="coco"
 
 if [[ $which_dataset == "company" ]]
 then
@@ -22,8 +22,8 @@ mkdir -p ${mutate}
 mkdir -p ${mutate}log #for recording which process finishes during multi-processing
 # rand_erase=0.0
 # guass_noise=0.0
-# for guass_noise in 0.0 0.1 0.5 1.0 2.0 4.0 8.0 16.0
-for guass_noise in 0.0 0.5 1.0 2.0 4.0 8.0 16.0 32.0 64.0 128.0
+# for guass_noise in 0.0 0.5 1.0 2.0 4.0 8.0 16.0 32.0 64.0 128.0
+for guass_noise in 0.0 
 do
 for rand_erase in 0.1 0.2 0.3 0.4 0.6 0.7 0.8 0.9 1.0
 do
