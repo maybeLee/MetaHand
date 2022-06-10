@@ -6,6 +6,7 @@ from scripts.utils.logger import Logger
 logger = Logger()
 from scripts.utils.utils import YoloUtils
 import numpy as np
+from scripts.train.prepare_train_data import MAPPING_DICT
 
 
 class MetaTester(object):
@@ -24,6 +25,7 @@ class MetaTester(object):
         self.output_dir = flags.output_dir
         self.weights_path = flags.weights_path
         self.only_train = flags.only_train
+        self.dataset = flags.dataset
         self.origin_images = glob.glob(f"{self.origin_img_dir}/*.jpg")
         self.mutate_images = glob.glob(f"{self.mutate_img_dir}/*.jpg")
         self.origin_pred = {}
@@ -44,7 +46,13 @@ class MetaTester(object):
                 content = file.read().split("\n")[:-1]
             for line in content:
                 arr = line.split(" ")
-                arr = list(map(float, arr))
+                new_arr = []
+                for i in arr:
+                    try:
+                        new_arr.append(float(i))
+                    except:
+                        pass
+                arr = new_arr
                 arr[0] = int(arr[0])
                 labels[file_name].append(arr)
         return labels
@@ -54,13 +62,17 @@ class MetaTester(object):
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
         mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
+        cfg_path="./cfg/cross-hands.cfg" if self.dataset == "popsquare" else "./cfg/yolov3.cfg"
         if not os.path.exists(origin_output_dir):
             # predict on original image
             logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Hand Detection")
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.origin_img_dir} "
                       f"-w={self.weights_path} "
-                      f"--save_dir={origin_output_dir}")
+                      f"--save_dir={origin_output_dir} "
+                      f"--cfg={cfg_path} "
+                      f"--dataset={self.dataset}"
+                      )
         else:
             logger.info(f"Detection on {origin_img_name} Exists, Loading the Detection")
         # origin_pred: {img_id: [label1, label2], ..., }
@@ -71,7 +83,10 @@ class MetaTester(object):
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.mutate_img_dir} "
                       f"-w={self.weights_path} "
-                      f"--save_dir={mutate_output_dir}")
+                      f"--save_dir={mutate_output_dir} "
+                      f"--cfg={cfg_path} "
+                      f"--dataset={self.dataset}"
+                      )
         else:
             logger.info(f"Detection on {mutate_output_dir} Exists, Loading the Detection")
         # mutate_pred: {file_name: [label1, label2]}
@@ -96,7 +111,7 @@ class MetaTester(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            with open("./data/testing_id.txt") as file:
+            with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
@@ -145,7 +160,8 @@ class MetaTester(object):
         with open(f"{mutate_base}_violations.txt", "w") as file:
             text = ""
             for violate_mutate_id in violate_mutate_id_list:
-                text += violate_mutate_id + "\n"
+                violate_mutate_path = os.path.join(self.mutate_img_dir, f"{violate_mutate_id}.jpg")
+                text += violate_mutate_path + "\n"
             file.write(text)
 
     def evaluate(self, ):
@@ -163,6 +179,7 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--weights_path", default="./data/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
+    parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
     flags, unknown = parser.parse_known_args(sys.argv[1:])
     metaTester = MetaTester(flags)
     metaTester.evaluate()

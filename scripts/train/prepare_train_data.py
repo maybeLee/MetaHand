@@ -15,7 +15,7 @@ class PreTrainData(object):
         self.data_path = flags.source_path
         self.dataset = flags.dataset
         self.data_root_dir = MAPPING_DICT[self.dataset].rstrip("/")
-        self.img_list = []
+        self.img_list = []  # img_list: [img_path_1, img_path_2]
         self.target_dir = flags.target_dir.rstrip("/")
         self.img_dir = flags.img_dir.rstrip("/")
         self.label_dir = flags.label_dir.rstrip("/")
@@ -77,7 +77,7 @@ class PreTrainData(object):
             img_list = os.listdir(self.img_dir)
             for img in img_list:
                 img_name = img[:-4]
-                label_path = os.path.join(self.obj_dir, f"{img_name}.txt")
+                label_path = os.path.join(self.img_dir, f"{img_name}.txt")
                 os.system(f"touch {label_path}")
         elif self.label_dir == "same":
             img_list = os.listdir(self.img_dir)
@@ -89,6 +89,7 @@ class PreTrainData(object):
         elif self.label_dir != f"{self.data_root_dir}/Labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
+    @deprecated
     def prepare_img(self):
         logger.info("Preparing Images")
         os.system(f"find {self.img_dir} -name '*.jpg' -exec cp " + "{}" + f" {self.obj_dir} \\;")
@@ -99,21 +100,19 @@ class PreTrainData(object):
     def prepare_train_valid_test(self):
         train_list, valid_list = self._split_train_valid_test(test_ratio=0.0)
         test_list = []
+        # train_list, test_list, valid_list: [path_1, path_2, ...]
         with open(f"{self.data_root_dir}/testing_id.txt", "r") as file:
             content = file.read().split("\n")[:-1]
             for line in content:
                 test_list.append(line)
         with open(self.train_path, "a") as file:
-            for train_id in train_list:
-                target_file_path = os.path.join(self.obj_dir, f"{train_id}.jpg")
+            for target_file_path in train_list:
                 file.write(target_file_path+"\n")
         with open(self.valid_path, "a") as file:
-            for valid_id in valid_list:
-                target_file_path = os.path.join(self.obj_dir, f"{valid_id}.jpg")
+            for target_file_path in valid_list:
                 file.write(target_file_path+"\n")
         with open(self.test_path, "w") as file:
-            for test_id in test_list:
-                target_file_path = os.path.join(self.obj_dir, f"{test_id}.jpg")
+            for target_file_path in test_list:
                 file.write(target_file_path+"\n")
         with open(self.train_path, "r") as file:
             content = file.read().split("\n")[:-1]
@@ -146,7 +145,11 @@ class PreTrainData(object):
         else:
             raise ValueError("Undefined Dataset !!!")
         with open(obj_data_path, "w") as file:
-            file.write("classes = 1\n")
+            if self.dataset == "coco":
+                file.write("classes = 80\n")
+                file.write(f"eval=coco\n")
+            elif self.dataset == "popsquare":
+                file.write("classes = 1\n")
             file.write(f"train = {self.train_path}\n")
             file.write(f"valid = {self.test_path}\n")  # use test data for validation during the training
             file.write(f"test = {self.test_path}\n")
@@ -154,7 +157,7 @@ class PreTrainData(object):
             file.write(f"backup = {self.backup_dir}\n")
 
     def prepare_darknet_data(self):
-        self.prepare_img()
+        # self.prepare_img()
         self.prepare_label()
         self.prepare_train_valid_test()
         self.prepare_obj()
