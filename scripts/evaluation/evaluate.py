@@ -16,10 +16,13 @@ class MetaTester(object):
         self.mutate_type = ""
         self.idntfr = ""
         if "object" in self.mutate_img_dir or "Object" in self.mutate_img_dir:
+            # object: only preserve the object
             self.mutate_type = "object"
         if "B" in self.mutate_img_dir:
+            # B: only preserver the background, mutation operator such as CenterEraseMutation
             self.mutate_type = "background"
         if "Gaussian" in self.mutate_img_dir:
+            # Add gaussian noise to the object or background, label will be preserved
             self.mutate_type = "gaussian"
         self.origin_label_dir = flags.origin_label_dir.rstrip("/")
         self.output_dir = flags.output_dir
@@ -62,7 +65,7 @@ class MetaTester(object):
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
         mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
-        cfg_path="./cfg/cross-hands.cfg" if self.dataset == "popsquare" else "./cfg/yolov3.cfg"
+        cfg_path = "./cfg/cross-hands.cfg" if self.dataset == "popsquare" else "./cfg/yolov3.cfg"
         if not os.path.exists(origin_output_dir):
             # predict on original image
             logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Hand Detection")
@@ -103,6 +106,10 @@ class MetaTester(object):
                 return status
             for pred in preds:
                 # Go through all prediction and check whether the hand is detected
+                # We only check the IoU if the predicted category is the same as the ground truth
+                pred_label = preds[0]
+                if pred_label != hand_label[0]:
+                    continue
                 threshold = YoloUtils.overlapping(hand_label, pred)
                 if threshold > self.threshold:
                     status = True
@@ -111,6 +118,7 @@ class MetaTester(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
+            # No need for this under coco scenario because we did not involve test images when mutating
             with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
@@ -138,7 +146,17 @@ class MetaTester(object):
                     res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
             else:
                 raise ValueError("Unsupported Mutation Type!")
-        logger.info("Finish Comparing Detection Result, Saving The Result")
+        logger.info("Finish Comparing Detection Result. Start Filtering The Duplicated Images")
+        for type in res_id_list:
+            # We filter out duplicated images
+            img_list = []
+            for img_path in res_id_list[type]:
+                if img_path not in img_list:
+                    img_list.append(img_path)
+                else:
+                    continue
+            res_id_list[type] = img_list
+        logger.info("Finish Filtering the Duplicated Images. Saving The Result")
         np.save(f"./results/res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
         logger.info(f"11: {len(res_id_list['11'])}, 10: {len(res_id_list['10'])}, "
                     f"01: {len(res_id_list['01'])}, 00: {len(res_id_list['00'])}")

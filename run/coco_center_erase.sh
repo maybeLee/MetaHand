@@ -8,7 +8,7 @@ weights_path=./${data_dir}/working_dir/origin_model/backup/yolov3_best.weights
 output_dir=./outputs/coco
 mkdir -p $log_dir
 mkdir -p $output_dir
-for th in 01
+for th in 08
 do
     MutateName=B_random_erase_fixMutRatio_centerXY_${th}
     echo "Preparing Data For ${MutateName}"
@@ -41,7 +41,7 @@ do
 done
 
 gpu_id=0,1,2
-for th in 01
+for th in 08
 do
     MutateName=B_random_erase_fixMutRatio_centerXY_${th}
     CFGPATH=./cfg/yolov3.cfg
