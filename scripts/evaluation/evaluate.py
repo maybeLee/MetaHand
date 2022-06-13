@@ -104,10 +104,11 @@ class MetaTester(object):
             status = False
             if len(preds) == 0:
                 return status
+            print(preds, hand_label)
             for pred in preds:
                 # Go through all prediction and check whether the hand is detected
                 # We only check the IoU if the predicted category is the same as the ground truth
-                pred_label = preds[0]
+                pred_label = pred[0]
                 if pred_label != hand_label[0]:
                     continue
                 threshold = YoloUtils.overlapping(hand_label, pred)

@@ -72,3 +72,4 @@ vcpkg/
 
 #mutation operators
 scripts\mutation\data
+bad.list
