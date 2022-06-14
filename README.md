@@ -8,7 +8,7 @@ To install darknet
 ```
 git clone https://github.com/pjreddie/darknet.git
 cd darknet
-docker build -f Dockerfile .
+docker build -t metahand -f Dockerfile .
 docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root {image_id} 
 
 ```
