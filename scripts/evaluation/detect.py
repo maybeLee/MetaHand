@@ -6,6 +6,9 @@ import cv2
 import numpy as np
 from scripts.evaluation.yolo import YOLO
 from scripts.utils.logger import Logger
+from scripts.train.prepare_train_data import MAPPING_DICT
+
+
 logger = Logger()
 
 
@@ -14,7 +17,8 @@ class Detector(object):
         self.yolo = None
         self.yolo_cfg = flags.cfg_path
         self.yolo_size = flags.size
-        self.dataset=flags.dataset
+        self.dataset = flags.dataset
+        self.data_root_dir = MAPPING_DICT[self.dataset].rstrip("/")
         self.yolo_confidence = flags.confidence
         self.source_path = flags.source_path
         self.img_dir = flags.img_dir.rstrip("/")
@@ -65,7 +69,7 @@ class Detector(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            with open("./data/testing_id.txt") as file:
+            with open(f"./{self.data_root_dir}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
