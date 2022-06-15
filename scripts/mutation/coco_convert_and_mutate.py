@@ -4,6 +4,8 @@ import shutil
 import argparse
 import os
 import logging
+import xml.etree.ElementTree as ET
+
 class coco_train_mut_class:
     
     def __init__(self,source_image_path,source_label_path,working_dir_path,object_category="dummy"):
@@ -120,12 +122,17 @@ class coco_train_mut_class:
         # for each_file_name in file_name_to_category_bbox_dict:
             
         
-    def read_label(self,label_json_path):
-        json_data = None
-        with open(label_json_path, "r") as read_file:
-            # json_dump = json.dumps(read_file)
-            json_data = json.loads(read_file.read())
-        return json_data
+    def read_label(self,label_path,type="json"):
+        label_data = None
+        if type == "json":
+            with open(label_path, "r") as read_file:
+                # json_dump = json.dumps(read_file)
+                label_data = json.loads(read_file.read())
+        elif type == "xml":
+            with open(label_path, "r") as read_file:
+                # json_dump = json.dumps(read_file)
+                label_data = json.loads(read_file.read())            
+        return label_data
         # labels = json_data["annotations"][0]["bbox"]
         # print("labels: " + str(labels))
         # return labels
