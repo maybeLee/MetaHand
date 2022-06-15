@@ -8,4 +8,4 @@
 python -O coco_convert_and_mutate.py --source_image_path /data/litszon/itf/VOCdevkit/VOC2012/JPEGImages/ \
 --source_label_path /data/litszon/itf/VOCdevkit/VOC2012/Annotations/ \
 --working_dir_path /ssddata/metahand/voc/ \
---json dummy
+--json dummy --dataset voc
