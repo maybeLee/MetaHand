@@ -157,6 +157,8 @@ class MetaTester(object):
                     continue
             res_id_list[type] = img_list
         logger.info("Finish Filtering the Duplicated Images. Saving The Result")
+        if not os.path.exists("./results"):
+            os.makedirs("./results")
         np.save(f"./results/res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
         logger.info(f"11: {len(res_id_list['11'])}, 10: {len(res_id_list['10'])}, "
                     f"01: {len(res_id_list['01'])}, 00: {len(res_id_list['00'])}")

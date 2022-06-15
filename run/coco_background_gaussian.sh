@@ -8,7 +8,7 @@ weights_path=./${data_dir}/working_dir/origin_model/backup/yolov3_best.weights
 output_dir=./outputs/coco
 mkdir -p $log_dir
 mkdir -p $output_dir
-for th in 128_0
+for th in 64_0
 do
     MutateName=BackgroundGaussian${th}
     echo "Preparing Data For ${MutateName}"
@@ -41,14 +41,15 @@ do
 done
 
 gpu_id=0,1,2
-for th in 128_0
+for th in 64_0
 do
     MutateName=BackgroundGaussian${th}
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th03
     CFGPATH=./cfg/yolov3.cfg
+    WORKDIR=$base_dir/data
     OBJPATH=${WORKDIR}/obj.data
     base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th03
-    WORKDIR=$base_dir/data
-    nohup python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}.log &
+    nohup python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id > ${log_dir}/${MutateName}.log &
 done
 
 echo $"Finish All Jobs"
