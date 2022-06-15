@@ -8,7 +8,7 @@
 img=/ssddata/metahand/coco2014_training/images/
 label=/ssddata/metahand/coco2014_training/labels/
 mutate=/ssddata/metahand/coco2014_training/mutate/
-o_or_b=background
+o_or_b=object
 which_dataset="coco2014"
 
 if [[ $which_dataset == "company" ]]
