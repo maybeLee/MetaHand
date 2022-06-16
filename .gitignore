@@ -73,3 +73,6 @@ vcpkg/
 #mutation operators
 scripts\mutation\data
 bad.list
+**anaconda**
+**Anaconda**
+**tmp**

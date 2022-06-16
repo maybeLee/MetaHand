@@ -16,6 +16,7 @@ sudo apt-get install -y libv4l-dev libxvidcore-dev libx264-dev
 sudo apt-get install -y libgtk-3-dev
 sudo apt-get install -y libatlas-base-dev gfortran
 cd opencv
+rm -rf build
 # Create build directory
 mkdir -p build && cd build
 # Configure
@@ -47,6 +48,6 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
 -D BUILD_EXAMPLES=ON ..
 
 # Build
-make -j28
+make -j30
 
-ln -s /root/tools/opencv/build/lib/python3/cv2.cpython-37m-x86_64-linux-gnu.so /opt/conda/lib/python3.7/site-packages/cv2.so
+ln -sfn /root/tools/opencv/build/lib/python3/cv2.cpython-37m-x86_64-linux-gnu.so /opt/conda/lib/python3.7/site-packages/cv2.so
