@@ -43,6 +43,14 @@ class Detector(object):
             for label in content:
                 label_list.append(label)
             self.yolo = YOLO(self.yolo_cfg, self.weights_path, label_list)
+        elif self.dataset == "voc":
+            name_path = "./cfg/voc.names"
+            with open(name_path, "r") as file:
+                content = file.read().split("\n")[:-1]
+            label_list = []
+            for label in content:
+                label_list.append(label)
+            self.yolo = YOLO(self.yolo_cfg, self.weights_path, label_list)
         self.yolo.size = int(self.yolo_size)
         self.yolo.confidence = float(self.yolo_confidence)
 

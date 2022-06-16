@@ -65,7 +65,14 @@ class MetaTester(object):
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
         mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
-        cfg_path = "./cfg/cross-hands.cfg" if self.dataset == "popsquare" else "./cfg/yolov3.cfg"
+        if self.dataset == "popsquare":
+            cfg_path = "./cfg/cross-hands.cfg"
+        elif self.dataset == "voc":
+            cfg_path = "./cfg/yolov3-voc.cfg"
+        elif self.dataset == "coco":
+            cfg_path = "./cfg/yolov3.cfg"
+        else:
+            raise ValueError("Undefined Dataset Found!!")
         if not os.path.exists(origin_output_dir):
             # predict on original image
             logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Hand Detection")

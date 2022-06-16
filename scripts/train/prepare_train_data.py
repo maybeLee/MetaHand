@@ -7,7 +7,7 @@ import shutil
 import argparse
 import sys
 logger = Logger()
-MAPPING_DICT = {"popsquare": "./data", "coco": "./data_coco"}
+MAPPING_DICT = {"popsquare": "./data", "coco": "./data_coco", "voc": "./data_voc"}
 
 
 class PreTrainData(object):
@@ -72,7 +72,7 @@ class PreTrainData(object):
 
     def prepare_label(self):
         logger.info("Preparing Labels")
-        os.system(f"find {self.data_root_dir}/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        # os.system(f"find {self.data_root_dir}/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
         if self.label_dir == "empty":
             img_list = os.listdir(self.img_dir)
             for img in img_list:
@@ -86,7 +86,7 @@ class PreTrainData(object):
                 img_id = mutate_id.split("-")[0]
                 label_path = os.path.join(self.img_dir, f"{mutate_id}.txt")
                 shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
-        elif self.label_dir != f"{self.data_root_dir}/Labels":
+        elif self.label_dir != f"{self.data_root_dir}/Labels" and self.label_dir != f"{self.data_root_dir}/labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
     @deprecated
@@ -142,12 +142,16 @@ class PreTrainData(object):
                 file.write("hands")
         elif self.dataset == "coco":
             shutil.copy("./cfg/coco.names", obj_names_path)
+        elif self.dataset == "voc":
+            shutil.copy("./cfg/voc.names", obj_names_path)
         else:
             raise ValueError("Undefined Dataset !!!")
         with open(obj_data_path, "w") as file:
             if self.dataset == "coco":
                 file.write("classes = 80\n")
                 file.write(f"eval=coco\n")
+            if self.dataset == "voc":
+                file.write("classes = 20\n")
             elif self.dataset == "popsquare":
                 file.write("classes = 1\n")
             file.write(f"train = {self.train_path}\n")
