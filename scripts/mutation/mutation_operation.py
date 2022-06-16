@@ -16,7 +16,7 @@ class mutation_operation:
     self.image_path = image_path
     self.label_path = label_path
     self.write_path = write_path
-    self.WIDTH = WIDTH
+    self.WIDTH = WIDTH #only used for normalisation
     self.HEIGHT = HEIGHT
     self.dataset = dataset
   
@@ -43,7 +43,9 @@ class mutation_operation:
       if dataset == "company" or "2014" in dataset: #coco 2014 does not need unnormalise
           return_labels.append(self.center_to_topleft([label[1]*self.WIDTH, label[2]*self.HEIGHT, label[3]*self.WIDTH, label[4]*self.HEIGHT]))
       elif "coco" in dataset:
-          return_labels.append([label[1], label[2], label[3], label[4]])
+          if __debug__:
+            print("**********enter coco")
+            return_labels.append([label[1], label[2], label[3], label[4]])
       else:
           raise ValueError("invalid dataset")
     return return_labels
@@ -160,6 +162,9 @@ class mutation_operation:
       # print("DEBUG: the file path is " + str(self.image_path+filename))
       # print("height of an img: " + str(len(img)))
       height, width, channels = img.shape
+      if __debug__:
+        print("height: " + str(height))
+        print("width: " + str(width))
       if len(bbox)!=0:
           cnt = 0
           crop_img = img.copy()
@@ -182,8 +187,11 @@ class mutation_operation:
                   height_randomize_factor = random.uniform(0.1, 1.0)
                   x = int(x+w/2)
                   y = int(y+h/2)    
-                  h = int(h*height_randomize_factor)
-                  w = int(w*random_erase/height_randomize_factor)        
+                  h = min(int(h*height_randomize_factor),h)
+                  w = min(int(w*random_erase/height_randomize_factor),w) 
+                  # if __debug__:
+                  #   print("original weight: " + str(width))
+                  #   print("mutated weight: " + str(w))       
                 else:
                   if "fixXY" not in random_erase_mode:
                     raise ValueError("invalid operation, random erase mode must be varyXY, centerXY and fixXY")
@@ -357,10 +365,10 @@ if __name__ == "__main__":
     guassian_sigma = None
     random_erase_mode = None
     if __debug__ and os.name == 'nt': #os.name == 'nt' is for checking whether the os is window
-      image_path = "working_dir/images/"
-      label_path = "working_dir/labels/"
-      mutate_path = "working_dir/mutate/"
-      random_erase = 0.9
+      image_path = "working_dir/voc/images/"
+      label_path = "working_dir/voc/labels/"
+      mutate_path = "working_dir/voc/mutate/"
+      random_erase = 1.0
       guassian_sigma = 0.0
       random_erase_mode = "fixMutRatio_centerXY"
       dataset = "coco"

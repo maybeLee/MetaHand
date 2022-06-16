@@ -58,9 +58,17 @@ class coco_train_mut_class:
                 category_id = classes.index(category)
                 # for each_object in json_data.findall('object'):
                 #     print("got list: " + str(each_object.find('name').text))
-                for bndbox_corr in each_object.find('bndbox'):
-                    bbox.append(bndbox_corr.text)
+                # print("each_object.find('bndbox'): " + str(each_object.find('bndbox')))
+                # for bndbox_corr in each_object.find('bndbox'):
+                    # bbox.append(bndbox_corr.text)
+                x_max = each_object.find('bndbox').find('xmax').text
+                x_min = each_object.find('bndbox').find('xmin').text
+                y_max = each_object.find('bndbox').find('ymax').text
+                y_min = each_object.find('bndbox').find('ymin').text
+                h = int(y_max) - int(y_min) 
+                w = int(x_max) - int(x_min)
                     # print("bndbox corrdination: " + str(bndbox_corr.text))
+                bbox = [x_min,y_min,w,h]
                 self.add_corr_to_file(image_id_to_category_bbox_dict,image_id,category_id,bbox)
         else:
             raise ValueError("invalid parameter, expected json or xml but got " + type)

@@ -11,7 +11,7 @@ label=/ssddata/metahand/voc/labels/
 mutate=/ssddata/metahand/voc/mutate/
 
 o_or_b=object
-which_dataset="coco2014" #coco means the coordinations are in the actual one, coco2014 means the coordinations are 
+which_dataset="coco" #coco means the coordinations are in the actual one (voc also needs coco), coco2014 means the coordinations are 
 
 if [[ $which_dataset == "company" ]]
 then
