@@ -84,7 +84,7 @@ class PreTrainData(object):
             for img in img_list:
                 mutate_id = img[:-4]
                 img_id = mutate_id.split("-")[0]
-                label_path = os.path.join(self.obj_dir, f"{mutate_id}.txt")
+                label_path = os.path.join(self.img_dir, f"{mutate_id}.txt")
                 shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
         elif self.label_dir != f"{self.data_root_dir}/Labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
