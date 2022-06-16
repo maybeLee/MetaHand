@@ -9,6 +9,7 @@ import pathlib
 import os
 from multiprocessing import Pool
 import time
+import math 
 
 class mutation_operation:
   
@@ -184,11 +185,13 @@ class mutation_operation:
                   h = int(h*random.uniform(random_erase, 1.0))
                   w = int(w*random.uniform(random_erase, 1.0))
                 elif "centerXY" in random_erase_mode:
-                  height_randomize_factor = random.uniform(0.1, 1.0)
+                  height_randomize_factor = random_erase
+                  if __debug__:
+                      height_randomize_factor = random_erase
                   x = int(x+w/2)
                   y = int(y+h/2)    
-                  h = min(int(h*height_randomize_factor),h)
-                  w = min(int(w*random_erase/height_randomize_factor),w) 
+                  h = min(int(h*math.sqrt(random_erase)),h)
+                  w = min(int(w*math.sqrt(random_erase)),w) 
                   # if __debug__:
                   #   print("original weight: " + str(width))
                   #   print("mutated weight: " + str(w))       

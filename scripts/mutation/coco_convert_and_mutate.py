@@ -65,8 +65,8 @@ class coco_train_mut_class:
                 x_min = each_object.find('bndbox').find('xmin').text
                 y_max = each_object.find('bndbox').find('ymax').text
                 y_min = each_object.find('bndbox').find('ymin').text
-                h = int(y_max) - int(y_min) 
-                w = int(x_max) - int(x_min)
+                h = float(y_max) - float(y_min) 
+                w = float(x_max) - float(x_min)
                     # print("bndbox corrdination: " + str(bndbox_corr.text))
                 bbox = [x_min,y_min,w,h]
                 self.add_corr_to_file(image_id_to_category_bbox_dict,image_id,category_id,bbox)
