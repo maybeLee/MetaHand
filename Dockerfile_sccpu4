@@ -1,6 +1,6 @@
 # FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-devel
 FROM nvidia/cuda:11.2.0-cudnn8-devel-ubuntu18.04
-RUN apt-get update && apt-get install -y sudo pkg-config vim ffmpeg libsm6 libxext6 wget
+RUN apt-get update && apt-get install -y sudo pkg-config vim ffmpeg libsm6 libxext6 wget zip
 
 
 WORKDIR /root
