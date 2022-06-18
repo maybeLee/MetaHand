@@ -1,4 +1,9 @@
 # This is the script to split training and testing dataset, the result will be saved in training_id.txt and testing_id.txt
+# Note that this file should not be run again!!!
+
+raise ValueError("This File SHOULD NOT BE RUN AFTER THE DATASET IS SPLITTED")
+exit()
+
 import os
 from sklearn.model_selection import train_test_split
 

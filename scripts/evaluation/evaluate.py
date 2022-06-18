@@ -129,16 +129,23 @@ class MetaTester(object):
             with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
-                img_id_list.append(line)
+                if self.dataset == "voc":
+                    # if the dataset is voc, the testing_id stores the path of file
+                    # example: /root/data_voc/images/val2014/2008_008439.jpg
+                    img_id = line.split("2014/")[-1].split(".jpg")[0]
+                else:
+                    # if the dataset is popsquare, the testing_id only stores the id of file
+                    img_id = line
+                img_id_list.append(img_id)
         for i, mutate_id in enumerate(self.mutate_pred):
             if (i + 1) % 500 == 0:
                 logger.info(f'Progress: {str(i + 1)}')
             img_id = mutate_id.split("-")[0]
-            img_labels = labels[img_id]
             if len(img_id_list) != 0 and img_id in img_id_list:
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
                 continue
+            img_labels = labels[img_id]
             origin_preds = self.origin_pred[img_id]
             mutate_preds = self.mutate_pred[mutate_id]
             if self.mutate_type == "object":
