@@ -1,5 +1,5 @@
 cd ../../
-MutateType=CenterEraseMutation
+MutateType=BackgroundGaussianMutation
 DATASET=voc
 GPU=0,1,2
 data_dir=data_voc
@@ -8,10 +8,10 @@ weights_path=./${data_dir}/working_dir/origin_model/backup/yolov3-voc_best.weigh
 output_dir=./outputs/voc
 mkdir -p $log_dir
 mkdir -p $output_dir
-# finished run: th=08 01 03 05 07 09
-for th in 02 04 06
+
+for th in 32_0 128_0
 do
-    MutateName=B_random_erase_fixMutRatio_centerXY_${th}
+    MutateName=BackgroundGaussian${th}
     echo "Preparing Data For ${MutateName}"
 
     python -u -m scripts.evaluation.evaluate \
@@ -29,7 +29,7 @@ do
 
     TRAIN_ID=${base_dir}/${MutateName}_violations.txt
     IMGDIR=./${data_dir}/${MutateType}/$MutateName
-    LABELDIR=empty
+    LABELDIR=same
     WORKDIR=$base_dir/data
 
     python -u -m scripts.train.prepare_train_data \
@@ -42,9 +42,9 @@ do
 done
 
 gpu_id=0,1,2
-for th in 02 04 06
+for th in 32_0 128_0
 do
-    MutateName=B_random_erase_fixMutRatio_centerXY_${th}
+    MutateName=BackgroundGaussian${th}
     base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th03
     CFGPATH=./cfg/yolov3-voc.cfg
     WORKDIR=$base_dir/data
