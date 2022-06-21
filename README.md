@@ -10,6 +10,8 @@ git clone https://github.com/pjreddie/darknet.git
 cd darknet
 docker build -t metahand -f Dockerfile .
 docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root metahand 
+# Note that if you are using sccpu6, please add the flag: --security-opt=label=disable on docker run so local dir can be properly mounted
 
 ```
+
 
