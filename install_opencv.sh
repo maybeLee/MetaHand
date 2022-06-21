@@ -1,5 +1,8 @@
 rm -rf tools/opencv*
 cd tools
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install wget unzip
 wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip
 wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.x.zip
 unzip opencv.zip
