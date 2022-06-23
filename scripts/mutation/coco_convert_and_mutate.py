@@ -6,6 +6,7 @@ import os
 import logging
 import xml.etree.ElementTree as ET
 import glob
+import scipy.io
 
 class coco_train_mut_class:
     
@@ -126,6 +127,20 @@ class coco_train_mut_class:
             # if len(image_id_to_category_bbox_dict[image_id]) == 0:
             #     raise ValueError("no")
         return image_id_to_category_bbox_dict
+    
+    def convert_matlab_label(self):
+        all_boxes = scipy.io.loadmat('test_case\mat\Buffy_1.mat')
+        max_x = None
+        min_x = None
+        max_y = None
+        min_y = None
+        for each_box in all_boxes:
+            for all_coordinate in each_box:
+                for each_coordinate in all_coordinate:
+                    if max_x == None or min_x == None:
+                        max_x = each_coordinate[0]
+                    
+        print(mat)
 
     def create_empty_file(self):
         # path_
@@ -196,7 +211,16 @@ class coco_train_mut_class:
             "airplane":"5"
         }
         return category_to_id_dict[category]
-        
+
+def test_mat_converter():
+    source_image_path = "source_data/data/"
+    source_label_path = "source_data/label/label_example.json"
+    working_dir_path = "working_dir/"
+    object_category = "airplane"
+    # json_path = source_label_path + ""
+    cc_o = coco_train_mut_class(source_image_path,source_label_path,working_dir_path,object_category)
+    cc_o.convert_matlab_label()
+
 def test_coco():
     source_image_path = "source_data/data/"
     source_label_path = "source_data/label/label_example.json"
@@ -265,6 +289,7 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     if __debug__:
-        test_voc()
+        # test_voc()
+        test_mat_converter()
     else:
         main()

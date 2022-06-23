@@ -46,7 +46,7 @@ class mutation_operation:
       elif "coco" in dataset:
           if __debug__:
             print("**********enter coco")
-            return_labels.append([label[1], label[2], label[3], label[4]])
+          return_labels.append([label[1], label[2], label[3], label[4]])
       else:
           raise ValueError("invalid dataset")
     return return_labels
@@ -243,6 +243,7 @@ class mutation_operation:
             cv2.imwrite(self.write_path + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
           elif random_erase > 0.0:
             # print("INFO: creating")
+            print("creating directory: " + str(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","")))
             pathlib.Path(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
             cv2.imwrite(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
@@ -337,10 +338,12 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     n_jobs_parameter=15
     # if __debug__:
     #   label_list = label_list[:12]
-    #   n_jobs_parameter=5
+    #   n_jobs_pa:wqrameter=5
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_sigma) for id in label_list)
     pool = Pool(processes=n_jobs_parameter)
     start_time = time.time()
+#    if __debug__:
+#      label_list = label_list[:10]
     for id in label_list:
       print("INFO: processing id " + str(id))
       if __debug__ or os.name == 'nt': #on window, only single thread can be run coz apply_async cannot be run on window
