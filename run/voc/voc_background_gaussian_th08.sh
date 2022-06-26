@@ -8,9 +8,9 @@ weights_path=./${data_dir}/working_dir/origin_model/backup/yolov3-voc_best.weigh
 output_dir=./outputs/voc
 mkdir -p $log_dir
 mkdir -p $output_dir
-# finished: 16, 32, 64, 128
+# finished: 16_0, 32_0, 64_0, 128_0
 
-for th in 2_0 4_0 8_0
+for th in 32_0 64_0 128_0
 do
     MutateName=BackgroundGaussian${th}
     echo "Preparing Data For ${MutateName}"
@@ -22,9 +22,9 @@ do
     -w=${weights_path} \
     -od=${output_dir} \
     --dataset=${DATASET} \
-    --threshold=0.05 > ${log_dir}/${MutateName}_th005.log
+    --threshold=0.8 > ${log_dir}/${MutateName}_th08.log
 
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th005
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th08
     mkdir -p $base_dir
     mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt
 
@@ -38,20 +38,20 @@ do
     --img_dir=${IMGDIR} \
     --label_dir=${LABELDIR} \
     --target_dir=${WORKDIR} \
-    --dataset=${DATASET} >> ${log_dir}/${MutateName}_th005.log
+    --dataset=${DATASET} >> ${log_dir}/${MutateName}_th08.log
 
 done
 
 gpu_id=0,1,2
-for th in 2_0 4_0 8_0
+for th in 32_0 64_0 128_0
 do
     MutateName=BackgroundGaussian${th}
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th005
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th08
     CFGPATH=./cfg/yolov3-voc.cfg
     WORKDIR=$base_dir/data
     OBJPATH=${WORKDIR}/obj.data
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th005
-    python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_th005.log
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th08
+    python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_th08.log
 done
 
 echo $"Finish All Jobs"

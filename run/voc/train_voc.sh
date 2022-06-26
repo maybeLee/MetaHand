@@ -2,7 +2,7 @@ cd ../../
 TRAIN_ID=./data_voc/training_id.txt
 IMGDIR=./data_voc/images
 LABELDIR=./data_voc/labels
-WORKDIR=./data_voc/working_dir/origin_model
+WORKDIR=./data_voc/working_dir/origin_model_1
 GPU=0,1,2
 CFGPATH=./cfg/yolov3-voc.cfg
 OBJPATH=${WORKDIR}/obj.data
