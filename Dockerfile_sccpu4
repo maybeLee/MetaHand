@@ -1,6 +1,7 @@
 # FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-devel 
-FROM nvidia/cuda:11.2.0-cudnn8-devel-ubuntu18.04 
-RUN apt-get update && apt-get install -y sudo pkg-config vim ffmpeg libsm6 libxext6 wget zip git python3-pip
+# FROM nvidia/cuda:11.2.0-cudnn8-devel-ubuntu18.04 #dont pull this because it does not have a builtin conda, so cannot successfully run install_opencv.sh
+FROM pytorch/pytorch:1.8.0-cuda11.1-cudnn8-devel
+RUN apt-get update && apt-get install -y sudo pkg-config vim ffmpeg libsm6 libxext6 wget zip git 
 RUN pip3 install --upgrade pip; pip3 install sklearn opencv-python
 
 
