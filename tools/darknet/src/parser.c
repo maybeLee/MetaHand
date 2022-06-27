@@ -1768,6 +1768,7 @@ network parse_network_cfg_custom(char *filename, int batch, int time_steps)
     fprintf(stderr, "Total BFLOPS %5.3f \n", bflops);
     fprintf(stderr, "avg_outputs = %d \n", avg_outputs);
 #ifdef GPU
+    
     get_cuda_stream();
     //get_cuda_memcpy_stream();
     if (gpu_index >= 0)
@@ -1797,17 +1798,18 @@ network parse_network_cfg_custom(char *filename, int batch, int time_steps)
             net.workspace = (float*)xcalloc(1, workspace_size);
         }
     }
+    fprintf(stderr, "found all gpus");
 #else
         if (workspace_size) {
             net.workspace = (float*)xcalloc(1, workspace_size);
         }
 #endif
-
     LAYER_TYPE lt = net.layers[net.n - 1].type;
     if ((net.w % 32 != 0 || net.h % 32 != 0) && (lt == YOLO || lt == REGION || lt == DETECTION)) {
         printf("\n Warning: width=%d and height=%d in cfg-file must be divisible by 32 for default networks Yolo v1/v2/v3!!! \n\n",
             net.w, net.h);
     }
+    fprintf(stderr, "found all gpus");
     return net;
 }
 
