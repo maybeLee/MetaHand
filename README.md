@@ -1,3 +1,6 @@
+# Note
+Please checkout to the voc branch
+
 # MetaHand
 MetaHand is a tool for evaluating and enhancing hand-detection DL models
 
