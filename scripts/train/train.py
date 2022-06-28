@@ -21,16 +21,20 @@ class Trainer(object):
             logger.info("Continue Training")
             os.system(
                 f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map")
+        elif self.retrain == -1:
+            os.system(
+                f"./tools/darknet/darknet detector test {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map")            
         else:
             raise ValueError(f"Unknown Training Option! retrain: {self.retrain}, pretrained_path: {self.pretrained_path}")
 
+    
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--obj_path", type=str, help="The path of objects")
     parser.add_argument("--cfg_path", type=str, help="The path of configuration")
-    parser.add_argument("--retrain", type=int, default=0, help="Whether to retrain the model")
+    parser.add_argument("--retrain", type=int, default=0, help="Whether to retrain the model. -1 means testing mode")
     parser.add_argument("--pretrained_path", type=str, default=None, help="Path of the pretrained model")
     parser.add_argument("--gpu", type=str, default="1", help="Specify the gpu id")  # note that in the docker environment, 0 gpu id means the 1 actual gpu id
     flags, _ = parser.parse_known_args(sys.argv[1:])

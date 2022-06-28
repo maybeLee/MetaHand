@@ -6,19 +6,14 @@ import cv2
 import numpy as np
 from scripts.evaluation.yolo import YOLO
 from scripts.utils.logger import Logger
-from scripts.train.prepare_train_data import MAPPING_DICT
-
-
 logger = Logger()
 
 
 class Detector(object):
     def __init__(self, flags):
         self.yolo = None
-        self.yolo_cfg = flags.cfg_path
+        self.yolo_cfg = "./cfg/cross-hands.cfg"
         self.yolo_size = flags.size
-        self.dataset = flags.dataset
-        self.data_root_dir = MAPPING_DICT[self.dataset].rstrip("/")
         self.yolo_confidence = flags.confidence
         self.source_path = flags.source_path
         self.img_dir = flags.img_dir.rstrip("/")
@@ -33,24 +28,7 @@ class Detector(object):
             os.makedirs(self.save_dir)
 
     def load_weights(self, ):
-        if self.dataset == "popsquare":
-            self.yolo = YOLO(self.yolo_cfg, self.weights_path, ["hand"])
-        elif self.dataset == "coco":
-            name_path = "./cfg/coco.names"
-            with open(name_path, "r") as file:
-                content = file.read().split("\n")[:-1]
-            label_list = []
-            for label in content:
-                label_list.append(label)
-            self.yolo = YOLO(self.yolo_cfg, self.weights_path, label_list)
-        elif self.dataset == "voc":
-            name_path = "./cfg/voc.names"
-            with open(name_path, "r") as file:
-                content = file.read().split("\n")[:-1]
-            label_list = []
-            for label in content:
-                label_list.append(label)
-            self.yolo = YOLO(self.yolo_cfg, self.weights_path, label_list)
+        self.yolo = YOLO(self.yolo_cfg, self.weights_path, ["hand"])
         self.yolo.size = int(self.yolo_size)
         self.yolo.confidence = float(self.yolo_confidence)
 
@@ -77,7 +55,7 @@ class Detector(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            with open(f"./{self.data_root_dir}/testing_id.txt") as file:
+            with open("./data/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
@@ -101,8 +79,9 @@ class Detector(object):
             with open(res_path, "a") as file:
                 for res in results:
                     id, name, confidence, x, y, w, h = res
+
                     file.write("%s %s %s %s %s %s\n" % (
-                    id, str(x / width), str(y / height), str(w / width), str(h / height), str(confidence)))
+                    '0', str(x / width), str(y / height), str(w / width), str(h / height), str(confidence)))
 
                     cx = x + (w / 2)
                     cy = y + (h / 2)
@@ -139,9 +118,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--device', default=0, help='Device to use')
     parser.add_argument('-s', '--size', default=416, help='Size for yolo')
     parser.add_argument('-c', '--confidence', default=0.25, help='Confidence for yolo')
-    parser.add_argument("--cfg_path", type=str, default="./cfg/cross-hands.cfg", help="The path of configuration")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
-    parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
     flags, unknown = parser.parse_known_args()
     detector = Detector(flags)
     detector.load_weights()

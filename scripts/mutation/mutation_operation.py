@@ -101,12 +101,12 @@ class mutation_operation:
         print("DEBUG: img width length " + str(len(obj[0])))
     for i in range(0,len(obj)):
       for j in range(0,len(obj[i])):
-        if __debug__:
+        # if __debug__:
           # print("DEBUG: i and j in processing: " + str(i) + "," + str(j))
         # print("obj[i][j]: " + str(obj[i][j]))
         # for k in obj[i][j]:
         #   print("obj[i][j][k] is: " + str())
-          obj[i][j] = [obj[i][j][0] + np.random.normal(mean, guassian_sigma),obj[i][j][1] + np.random.normal(mean, guassian_sigma),obj[i][j][2] + np.random.normal(mean, guassian_sigma)]
+        obj[i][j] = [obj[i][j][0] + np.random.normal(mean, guassian_sigma),obj[i][j][1] + np.random.normal(mean, guassian_sigma),obj[i][j][2] + np.random.normal(mean, guassian_sigma)]
     if len(bbox) != 0:
       # cnt = 0
       if __debug__:
@@ -278,7 +278,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
           print("INFO: mutation operator: guassian noise to background")
           mo.add_guassian_noise_to_bg(id[:-4]+".jpg", bbox, guassian_sigma)
       elif object_or_background == "object":
-          print("INFO: mutation operator: random erase object")
+          print("INFO: mutation operlsator: random erase object")
           mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,random_erase_mode=random_erase_mode,guassian_sigma=guassian_sigma)
       else:
         raise ValueError("invalid parameter value: expected background or object but got " + str(object_or_background))
@@ -360,7 +360,7 @@ if __name__ == "__main__":
       label_path = "working_dir/labels/"
       mutate_path = "working_dir/mutate/"
       random_erase = 0.9
-      guassian_sigma = 0.0
+      guassian_sigma = 100.0
       random_erase_mode = "fixMutRatio_centerXY"
       dataset = "coco"
       object_or_background = "background"
