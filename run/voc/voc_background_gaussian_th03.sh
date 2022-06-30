@@ -8,11 +8,11 @@ weights_path=./${data_dir}/working_dir/origin_model/backup/yolov3-voc_best.weigh
 output_dir=./outputs/voc
 mkdir -p $log_dir
 mkdir -p $output_dir
-# finished: 16_0, 32_0, 64_0, 128_0
-
-for th in 32_0 64_0 128_0
+th=0.3
+# finished: std 16_0 32_0
+for std in 64_0 128_0 256_0
 do
-    MutateName=BackgroundGaussian${th}
+    MutateName=BackgroundGaussian${std}
     echo "Preparing Data For ${MutateName}"
 
     python -u -m scripts.evaluation.evaluate \
@@ -22,9 +22,9 @@ do
     -w=${weights_path} \
     -od=${output_dir} \
     --dataset=${DATASET} \
-    --threshold=0.5 > ${log_dir}/${MutateName}_th05.log
+    --threshold=${th} > ${log_dir}/${MutateName}_${th}.log
 
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th05
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_${th}
     mkdir -p $base_dir
     mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt
 
@@ -38,20 +38,21 @@ do
     --img_dir=${IMGDIR} \
     --label_dir=${LABELDIR} \
     --target_dir=${WORKDIR} \
-    --dataset=${DATASET} >> ${log_dir}/${MutateName}_th05.log
+    --dataset=${DATASET} >> ${log_dir}/${MutateName}_${th}.log
 
 done
 
 gpu_id=0,1,2
-for th in 32_0 64_0 128_0
+for std in 64_0 128_0 256_0
 do
-    MutateName=BackgroundGaussian${th}
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th05
+    MutateName=BackgroundGaussian${std}
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_${th}
     CFGPATH=./cfg/yolov3-voc.cfg
     WORKDIR=$base_dir/data
     OBJPATH=${WORKDIR}/obj.data
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_th05
-    python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_th05.log
+    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_${th}
+    python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_${th}.log
 done
 
 echo $"Finish All Jobs"
+
