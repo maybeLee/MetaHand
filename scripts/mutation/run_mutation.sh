@@ -20,6 +20,7 @@ then
 img=/ssddata/metahand/data_egohands/images/train/
 label=/ssddata/metahand/data_egohands/images/train/
 mutate=/ssddata/metahand/data_egohands/mutate/
+chmod 777 -R $mutate
 fi
 
 # mkdir -p ${mutate}
