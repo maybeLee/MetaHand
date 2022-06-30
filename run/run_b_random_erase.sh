@@ -19,7 +19,7 @@ do
     nohup python -u -m scripts.train.train --obj_path=${base_dir}/data/obj.data --cfg_path=./cfg/cross-hands.cfg --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}.log &
     gpu_id=$(($gpu_id+1))
 done
-MutateName=B_random_erase_fixMutRatio_varyXY_02
+MutateName=B_random_erase_fixMutRati1o_varyXY_02
 base_dir=./data/working_dir/${MutateType}/${MutateName}_th03
 python -u -m scripts.train.train --obj_path=${base_dir}/data/obj.data --cfg_path=./cfg/cross-hands.cfg --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}.log
 
