@@ -9,7 +9,7 @@ import pathlib
 import os
 from multiprocessing import Pool
 import time
-
+import math
 class mutation_operation:
   
   def __init__(self,image_path,label_path,write_path,WIDTH,HEIGHT,dataset):
@@ -180,11 +180,11 @@ class mutation_operation:
                   h = int(h*random.uniform(random_erase, 1.0))
                   w = int(w*random.uniform(random_erase, 1.0))
                 elif "centerXY" in random_erase_mode:
-                  height_randomize_factor = random.uniform(0.1, 1.0)
+                  # height_randomize_factor = random.uniform(0.1, 1.0)
                   x = int(x+w/2)
                   y = int(y+h/2)    
-                  h = int(h*height_randomize_factor)
-                  w = int(w*random_erase/height_randomize_factor)        
+                  h = min(int(h*math.sqrt(random_erase)),h)
+                  w = min(int(w*math.sqrt(random_erase)),w)   
                 else:
                   if "fixXY" not in random_erase_mode:
                     raise ValueError("invalid operation, random erase mode must be varyXY, centerXY and fixXY")
