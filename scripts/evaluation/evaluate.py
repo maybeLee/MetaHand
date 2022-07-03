@@ -71,6 +71,8 @@ class MetaTester(object):
             cfg_path = "./cfg/yolov3-voc.cfg"
         elif self.dataset == "coco":
             cfg_path = "./cfg/yolov3.cfg"
+        elif self.dataset == "egohands":
+            cfg_path = "./cfg/egohands.cfg"
         else:
             raise ValueError("Undefined Dataset Found!!")
         if not os.path.exists(origin_output_dir):
@@ -125,7 +127,7 @@ class MetaTester(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            # No need for this under coco scenario because we did not involve test images when mutating
+            # No need for this under coco or egohands scenario because we did not involve test images when mutating
             with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:

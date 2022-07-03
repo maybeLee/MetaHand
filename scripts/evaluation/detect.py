@@ -33,7 +33,7 @@ class Detector(object):
             os.makedirs(self.save_dir)
 
     def load_weights(self, ):
-        if self.dataset == "popsquare":
+        if self.dataset == "popsquare" or self.dataset == "egohands":
             self.yolo = YOLO(self.yolo_cfg, self.weights_path, ["hand"])
         elif self.dataset == "coco":
             name_path = "./cfg/coco.names"

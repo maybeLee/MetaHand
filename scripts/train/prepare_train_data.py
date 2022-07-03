@@ -7,7 +7,7 @@ import shutil
 import argparse
 import sys
 logger = Logger()
-MAPPING_DICT = {"popsquare": "./data", "coco": "./data_coco", "voc": "./data_voc"}
+MAPPING_DICT = {"popsquare": "./data", "coco": "./data_coco", "voc": "./data_voc", "egohands": "./data_egohands"}
 
 
 class PreTrainData(object):
@@ -125,7 +125,7 @@ class PreTrainData(object):
 
     def prepare_obj(self):
         # TODO: Need To Change This Logic Before Evaluating On COCO DataSet
-        if self.dataset == "popsquare":
+        if self.dataset == "popsquare" or self.dataset == "egohands":
             for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
                 write_content = ""
                 with open(file_path, "r") as file:
@@ -137,7 +137,7 @@ class PreTrainData(object):
         # generate obj.data, obj.names
         obj_names_path = os.path.join(self.target_dir, "obj.names")
         obj_data_path = os.path.join(self.target_dir, "obj.data")
-        if self.dataset == "popsquare":
+        if self.dataset == "popsquare" or self.dataset == "egohands":
             with open(obj_names_path, "w") as file:
                 file.write("hands")
         elif self.dataset == "coco":
@@ -152,7 +152,7 @@ class PreTrainData(object):
                 file.write(f"eval=coco\n")
             if self.dataset == "voc":
                 file.write("classes = 20\n")
-            elif self.dataset == "popsquare":
+            elif self.dataset == "popsquare" or self.dataset == "egohands":
                 file.write("classes = 1\n")
             file.write(f"train = {self.train_path}\n")
             file.write(f"valid = {self.test_path}\n")  # use test data for validation during the training
