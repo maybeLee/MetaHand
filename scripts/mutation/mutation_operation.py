@@ -10,6 +10,10 @@ import os
 from multiprocessing import Pool
 import time
 import math
+import random
+
+random.seed(10)
+
 class mutation_operation:
   
   def __init__(self,image_path,label_path,write_path,WIDTH,HEIGHT,dataset):
@@ -378,7 +382,7 @@ if __name__ == "__main__":
       parser.add_argument('--guassian_sigma', help="the guassian noise's variance",required=True)
       parser.add_argument('--object_or_background', help="mutate object or background",required=True)
       parser.add_argument('--random_erase_mode', help="random erase mode: fixMutRatio, varyMutRatio, fixXY, varyXY, centerXY. fixMutRatio means every hand has exactly the same mutaton ratio e.g., 0.7, varyMutRatio means every hand has slightly different mutation ratio, but on average a particular value. Use underscore to connect the parameters, e.g., fixMutRatio_fixXY",required=True)
-      parser.add_argument('--dataset', help="coco or company",required=True)
+      # parser.add_argument('--dataset', help="coco or company",required=false)
       flags, unknown = parser.parse_known_args()
       image_path = flags.image_path
       label_path = flags.label_path
@@ -387,7 +391,7 @@ if __name__ == "__main__":
       guassian_sigma = flags.guassian_sigma
       object_or_background = flags.object_or_background
       random_erase_mode = flags.random_erase_mode
-      dataset = flags.dataset
+      dataset = "company"
       
     
     # image_path = "/data1/wcleungag/ImageSet/"

@@ -34,7 +34,7 @@ do
 for rand_erase in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 do
     # echo "fixMutRatio_fixXY\n"
-    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_sigma $guass_noise --dataset $which_dataset --object_or_background $o_or_b 
+    python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_sigma $guass_noise --object_or_background $o_or_b 
     # echo "varyMutRatio_fixXY\n"
     # python -O mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode varyMutRatio_fixXY --guassian_variance $guass_noise &
     # echo "fixMutRatio_varyXY\n"
