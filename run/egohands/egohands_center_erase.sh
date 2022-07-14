@@ -8,7 +8,7 @@ weights_path=./${data_dir}/working_dir/origin_model/backup/egohands_best.weights
 output_dir=./outputs/egohands
 mkdir -p $log_dir
 mkdir -p $output_dir
-th_list="01 03 05 07 09"
+th_list="01 02 03 04 05 06 07 08 09"
 for th in $th_list
 do
     MutateName=B_random_erase_fixMutRatio_centerXY_${th}
