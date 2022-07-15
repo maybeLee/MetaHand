@@ -109,9 +109,9 @@ class Detector(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--source_path', default="./data/testing_id.txt", help='Path to image id file')
-    parser.add_argument("--img_dir", default="./data/ImageSet", type=str, help="The dir of image data")
-    parser.add_argument('-w', '--weights_path', default="./data/working_dir/origin_model/backup/cross-hands_best.weights", help="Path to model weights")
+    parser.add_argument('-i', '--source_path', default="./data_company/testing_id.txt", help='Path to image id file')
+    parser.add_argument("--img_dir", default="./data_company/ImageSet", type=str, help="The dir of image data")
+    parser.add_argument('-w', '--weights_path', default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", help="Path to model weights")
     parser.add_argument('--save_dir', default="./outputs", help="The dir of yolo output")
     parser.add_argument('-n', '--network', default="normal", choices=["normal", "tiny", "prn", "v4-tiny"],
                         help='Network Type')
