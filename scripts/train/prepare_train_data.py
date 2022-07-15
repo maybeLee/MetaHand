@@ -7,7 +7,7 @@ import shutil
 import argparse
 import sys
 logger = Logger()
-MAPPING_DICT = {"popsquare": "./data", "coco": "./data_coco"}
+MAPPING_DICT = {"popsquare": "./data_company", "coco": "./data_coco"}
 
 
 class PreTrainData(object):
