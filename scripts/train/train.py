@@ -17,7 +17,7 @@ class Trainer(object):
         logger.info(f"{self.retrain}, {self.pretrained_path}, {self.gpu}")
         if self.retrain == 1:
             os.system(f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -gpus {self.gpu} -dont_show -map -clear")
-        if self.retrain == -1:
+        elif self.retrain == -1:
             os.system(f"./tools/darknet/darknet detector test {self.obj_path} {self.cfg_path} -gpus {self.gpu} -dont_show -map -clear")
         elif self.retrain == 0 and self.pretrained_path is not None:
             logger.info("Continue Training")
