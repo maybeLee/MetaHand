@@ -9,6 +9,10 @@ import pathlib
 import os
 from multiprocessing import Pool
 import time
+import math
+import random
+
+random.seed(10)
 
 class mutation_operation:
   
@@ -95,18 +99,22 @@ class mutation_operation:
     img = cv2.imread(self.image_path+filename)
     mean = 0.0
     obj = img.copy()
+    max_i = len(obj)
+    max_j = len(obj[0])
     # bg = np.random.randint(0,high=256,size=(480, 640, 3),dtype=np.uint8)
     if __debug__:
         print("DEBUG: img height length " + str(len(obj)))
         print("DEBUG: img width length " + str(len(obj[0])))
+    assert self.HEIGHT == len(obj), "given height (self.HEIGHT) does not match detected height"        
+    assert self.WIDTH == len(obj[0]), "given width (self.WIDTH) does not match detected width"
     for i in range(0,len(obj)):
       for j in range(0,len(obj[i])):
-        if __debug__:
+        # if __debug__:
           # print("DEBUG: i and j in processing: " + str(i) + "," + str(j))
         # print("obj[i][j]: " + str(obj[i][j]))
         # for k in obj[i][j]:
         #   print("obj[i][j][k] is: " + str())
-          obj[i][j] = [obj[i][j][0] + np.random.normal(mean, guassian_sigma),obj[i][j][1] + np.random.normal(mean, guassian_sigma),obj[i][j][2] + np.random.normal(mean, guassian_sigma)]
+        obj[i][j] = [obj[i][j][0] + np.random.normal(mean, guassian_sigma),obj[i][j][1] + np.random.normal(mean, guassian_sigma),obj[i][j][2] + np.random.normal(mean, guassian_sigma)]
     if len(bbox) != 0:
       # cnt = 0
       if __debug__:
@@ -116,9 +124,18 @@ class mutation_operation:
         
         for i in range(h):
           for j in range(w):
-            obj[y+i][x+j] = img[y+i][x+j]
-
-        cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".jpg", obj)      #save image
+            target_i = min(y+i,max_i-1)
+            target_j = min(x+j,max_j-1)
+            obj[target_i][target_j] = img[target_i][target_j]
+      print("saving mutated image")
+      writeStatus = cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".jpg", obj)      #save image
+      if writeStatus is False:
+        print("cv2 write failed")
+      else:
+        print("cv2 write successful")
+        # raise ValueError("cv2 write failed")
+    else:
+      raise ValueError("Should not encounter empty bbox")
         # cnt+=1
         
   #Remove hands other than the label object
@@ -159,6 +176,8 @@ class mutation_operation:
       # print("DEBUG: the file path is " + str(self.image_path+filename))
       # print("height of an img: " + str(len(img)))
       height, width, channels = img.shape
+      assert self.WIDTH == width, "given width (self.WIDTH) does not match detected width"
+      assert self.HEIGHT == height, "given height (self.HEIGHT) does not match detected height"
       if len(bbox)!=0:
           cnt = 0
           crop_img = img.copy()
@@ -178,11 +197,11 @@ class mutation_operation:
                   h = int(h*random.uniform(random_erase, 1.0))
                   w = int(w*random.uniform(random_erase, 1.0))
                 elif "centerXY" in random_erase_mode:
-                  height_randomize_factor = random.uniform(0.1, 1.0)
+                  # height_randomize_factor = random.uniform(0.1, 1.0)
                   x = int(x+w/2)
                   y = int(y+h/2)    
-                  h = int(h*height_randomize_factor)
-                  w = int(w*random_erase/height_randomize_factor)        
+                  h = min(int(h*math.sqrt(random_erase)),h)
+                  w = min(int(w*math.sqrt(random_erase)),w)   
                 else:
                   if "fixXY" not in random_erase_mode:
                     raise ValueError("invalid operation, random erase mode must be varyXY, centerXY and fixXY")
@@ -235,23 +254,23 @@ class mutation_operation:
             cv2.imwrite(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
           #cv2.waitKey(0)
           
-  def gen_log_name(self,random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_sigma=0.0):
-    log_name = ""
-    if random_erase > 0.0 and guassian_sigma == 0.0:
-      log_name = "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt"
-    elif guassian_sigma > 0.0:
-      log_name = "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt"
-    return log_name
+  # def gen_log_name(self,random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_sigma=0.0):
+  #   log_name = ""
+  #   if random_erase > 0.0 and guassian_sigma == 0.0:
+  #     log_name = "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt"
+  #   elif guassian_sigma > 0.0:
+  #     log_name = "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".txt"
+  #   return log_name
   
-  def remove_log(self,log_name):
-    if os.path.exists(self.write_path + "log/" + log_name):
-      # print("file exists")
-      os.remove(self.write_path + "log/" + log_name)
+  # def remove_log(self,log_name):
+  #   if os.path.exists(self.write_path + "log/" + log_name):
+  #     # print("file exists")
+  #     os.remove(self.write_path + "log/" + log_name)
   
-  def log_finish(self,log_name):
-    f = open(self.write_path + "log/" + log_name, "w") 
-    f.write("finished") 
-    f.close()
+  # def log_finish(self,log_name):
+  #   f = open(self.write_path + "log/" + log_name, "w") 
+  #   f.write("finished") 
+  #   f.close()
     
 def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background):
       print("INFO: processing id: " + str(id) + "\n")
@@ -259,7 +278,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       id = os.path.basename(id)
       if len(labels)==0:#print message to show that the label does not exist
           print(id+" -- no label")
-          no_label+=1
+          # no_label+=1
           return
         
       bbox = None
@@ -278,7 +297,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
           print("INFO: mutation operator: guassian noise to background")
           mo.add_guassian_noise_to_bg(id[:-4]+".jpg", bbox, guassian_sigma)
       elif object_or_background == "object":
-          print("INFO: mutation operator: random erase object")
+          print("INFO: mutation operlsator: random erase object")
           mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,random_erase_mode=random_erase_mode,guassian_sigma=guassian_sigma)
       else:
         raise ValueError("invalid parameter value: expected background or object but got " + str(object_or_background))
@@ -288,11 +307,19 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       return 
   
 
-def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_erase_mode,dataset,object_or_background):
+def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_erase_mode,dataset_normalization_type,object_or_background,dataset):
     # image width and height
-    WIDTH = 640
-    HEIGHT = 480
-    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset)
+    WIDTH = None
+    HEIGHT = None
+    if dataset == "ego":
+      WIDTH = 1280
+      HEIGHT = 720
+    elif dataset == "company":
+      WIDTH = 640
+      HEIGHT = 480
+    else:
+      raise ValueError(f"Expected dataset as ego or company, but got {dataset}")
+    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset_normalization_type)
     #create folder for mutated images
     # os.chdir(write_path)
     if not os.path.exists(write_path + 'objects'):
@@ -316,12 +343,13 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     # label_list = [os.path.basename(i) for i in all_paths] #drop parent directory path
     # print("label path is : " + str(label_path + "*.txt"))
     # print("number of labels obtained: " + str(len(label_list)))
-    log_name = mo.gen_log_name(random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_sigma=guassian_sigma)
-    mo.remove_log(log_name)
+    # log_name = mo.gen_log_name(random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_sigma=guassian_sigma)
+    # mo.remove_log(log_name)
     no_label = 0
     hv_label = 0
     mut = 0
     #iterate through a list of labels
+    print("Initiating multi-processes")
     n_jobs_parameter=15
     # if __debug__:
     #   label_list = label_list[:12]
@@ -329,13 +357,16 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_sigma) for id in label_list)
     pool = Pool(processes=n_jobs_parameter)
     start_time = time.time()
+    print("label_list: " + str(len(label_list)))
     for id in label_list:
       print("INFO: processing id " + str(id))
       if os.name == 'nt':
+          print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
       else:
+          # perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
           result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background))
-    print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
+    # print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
     pool.close()
     pool.join()
       # p = Process(target=perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma))
@@ -346,7 +377,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     # print("images with labels: ", hv_label)
     # print("images without labels: ", no_label)
     # print(mut, " sets of obj and bg generated")
-    mo.log_finish(log_name)
+    # mo.log_finish(log_name)
 
 if __name__ == "__main__":
     image_path = None
@@ -356,14 +387,14 @@ if __name__ == "__main__":
     guassian_sigma = None
     random_erase_mode = None
     if __debug__ and os.name == 'nt': #os.name == 'nt' is for checking whether the os is window
-      image_path = "working_dir/images/"
-      label_path = "working_dir/labels/"
+      image_path = "ego_hand/train/"
+      label_path = "ego_hand/train/"
       mutate_path = "working_dir/mutate/"
       random_erase = 0.9
       guassian_sigma = 0.0
       random_erase_mode = "fixMutRatio_centerXY"
-      dataset = "coco"
-      object_or_background = "background"
+      dataset = "company"
+      object_or_background = "object"
     else:
       #random_erase_mode
       parser = argparse.ArgumentParser()
@@ -374,19 +405,20 @@ if __name__ == "__main__":
       parser.add_argument('--guassian_sigma', help="the guassian noise's variance",required=True)
       parser.add_argument('--object_or_background', help="mutate object or background",required=True)
       parser.add_argument('--random_erase_mode', help="random erase mode: fixMutRatio, varyMutRatio, fixXY, varyXY, centerXY. fixMutRatio means every hand has exactly the same mutaton ratio e.g., 0.7, varyMutRatio means every hand has slightly different mutation ratio, but on average a particular value. Use underscore to connect the parameters, e.g., fixMutRatio_fixXY",required=True)
-      parser.add_argument('--dataset', help="coco or company",required=True)
+      parser.add_argument('--dataset', help="company or ego",required=True)
       flags, unknown = parser.parse_known_args()
       image_path = flags.image_path
       label_path = flags.label_path
       mutate_path = flags.mutate_path
       random_erase = flags.random_erase
       guassian_sigma = flags.guassian_sigma
+      dataset = flags.dataset
       object_or_background = flags.object_or_background
       random_erase_mode = flags.random_erase_mode
-      dataset = flags.dataset
+      dataset_normalization_type = "company"
       
     
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_sigma),random_erase_mode,dataset,object_or_background)
+    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_sigma),random_erase_mode,dataset_normalization_type,object_or_background,dataset)
