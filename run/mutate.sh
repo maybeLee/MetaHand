@@ -3,6 +3,7 @@
 which_dataset=$1
 if [[ ${which_dataset} == "company" ]]
 then
+<<<<<<< HEAD
 img=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/ImageSet/
 label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/
 mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/
@@ -11,9 +12,19 @@ then
 img=/ssddata/metahand/data_egohands/images/train/
 label=/ssddata/metahand/data_egohands/images/train/
 mutate=/ssddata/metahand/data_egohands/mutate/
+=======
+    img=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/ImageSet/  #Company dataset原始图像的路径
+    label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/  #Company dataset标签的路径
+    mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/ #Company dataset变异图像的路径
+elif [[ ${which_dataset} == "ego" ]]
+then
+    img=/ssddata/metahand/data_egohands/images/train/   #Public dataset原始图像的路径
+    label=/ssddata/metahand/data_egohands/images/train/ #Public dataset标签的路径
+    mutate=/ssddata/metahand/data_egohands/mutate/      #Public dataset变异图像的路径
+>>>>>>> 40f9af3a2df4e48a62409e4ef9c26c7420c4f145
 else
-echo "Invalid programme input, expected 'company' or 'ego' but got ${which_dataset}"
-exit 1
+    echo "Invalid programme input, expected 'company' or 'ego' but got ${which_dataset}"
+    exit 1
 fi
 
 mkdir -p $mutate
