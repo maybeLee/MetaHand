@@ -1,5 +1,5 @@
 cd ../../
-MutateType=BackgroundGaussianMutation
+MutateType=ObjectGaussianMutation
 log_dir=logs/company/${MutateType}
 output_dir=outputs/company
 mkdir -p $log_dir
@@ -10,7 +10,6 @@ ratio_list="01 02 03 04 05 06 07 08 09"
 for ratio in $ratio_list
 do
     MutateName=B_guassian_160_fixMutRatio_centerXY_${ratio}
-    # MutateName=BackgroundGaussian${std}
     echo "Preparing Data For ${MutateName}"
     
     python -u -m scripts.evaluation.evaluate -mi=./data_company/${MutateType}/$MutateName -od=${output_dir} --threshold=0.3 > ${log_dir}/${MutateName}.log
@@ -26,7 +25,6 @@ gpu_id=0,1,2
 for ratio in $ratio_list
 do
     MutateName=B_guassian_160_fixMutRatio_centerXY_${ratio}
-    # MutateName=BackgroundGaussian${std}
     base_dir=./data_company/working_dir/${MutateType}/${MutateName}_th03
     python -u -m scripts.train.train --obj_path=${base_dir}/data/obj.data --cfg_path=./cfg/cross-hands.cfg --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}.log
 done
