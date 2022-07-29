@@ -55,7 +55,7 @@ class Detector(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            with open("./data/testing_id.txt") as file:
+            with open("./data_company/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
@@ -109,9 +109,9 @@ class Detector(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--source_path', default="./data/testing_id.txt", help='Path to image id file')
-    parser.add_argument("--img_dir", default="./data/ImageSet", type=str, help="The dir of image data")
-    parser.add_argument('-w', '--weights_path', default="./data/working_dir/origin_model/backup/cross-hands_best.weights", help="Path to model weights")
+    parser.add_argument('-i', '--source_path', default="./data_company/testing_id.txt", help='Path to image id file')
+    parser.add_argument("--img_dir", default="./data_company/ImageSet", type=str, help="The dir of image data")
+    parser.add_argument('-w', '--weights_path', default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", help="Path to model weights")
     parser.add_argument('--save_dir', default="./outputs", help="The dir of yolo output")
     parser.add_argument('-n', '--network', default="normal", choices=["normal", "tiny", "prn", "v4-tiny"],
                         help='Network Type')

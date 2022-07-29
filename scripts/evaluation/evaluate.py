@@ -96,7 +96,7 @@ class MetaTester(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            with open("./data/testing_id.txt") as file:
+            with open("./data_company/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
@@ -156,11 +156,11 @@ class MetaTester(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-oi", "--origin_img_dir", type=str, default="./data/ImageSet", help="The dir of original images")
-    parser.add_argument("-mi", "--mutate_img_dir", type=str, default="./data/MutatedSet/objects", help="The dir of mutated images")
-    parser.add_argument("-ol", "--origin_label_dir", type=str, default="./data/Labels/", help="The dir of original labels")
+    parser.add_argument("-oi", "--origin_img_dir", type=str, default="./data_company/ImageSet", help="The dir of original images")
+    parser.add_argument("-mi", "--mutate_img_dir", type=str, default="./data_company/MutatedSet/objects", help="The dir of mutated images")
+    parser.add_argument("-ol", "--origin_label_dir", type=str, default="./data_company/Labels/", help="The dir of original labels")
     parser.add_argument("-od", "--output_dir", default="./outputs", help="The dir of yolo output")
-    parser.add_argument("-w", "--weights_path", default="./data/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
+    parser.add_argument("-w", "--weights_path", default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
     flags, unknown = parser.parse_known_args(sys.argv[1:])
