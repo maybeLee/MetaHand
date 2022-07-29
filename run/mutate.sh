@@ -3,7 +3,6 @@
 which_dataset=$1
 if [[ ${which_dataset} == "company" ]]
 then
-<<<<<<< HEAD
 img=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/ImageSet/
 label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/
 mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/
@@ -12,16 +11,6 @@ then
 img=/ssddata/metahand/data_egohands/images/train/
 label=/ssddata/metahand/data_egohands/images/train/
 mutate=/ssddata/metahand/data_egohands/mutate/
-=======
-    img=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/ImageSet/  #Company dataset原始图像的路径
-    label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/  #Company dataset标签的路径
-    mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/ #Company dataset变异图像的路径
-elif [[ ${which_dataset} == "ego" ]]
-then
-    img=/ssddata/metahand/data_egohands/images/train/   #Public dataset原始图像的路径
-    label=/ssddata/metahand/data_egohands/images/train/ #Public dataset标签的路径
-    mutate=/ssddata/metahand/data_egohands/mutate/      #Public dataset变异图像的路径
->>>>>>> 40f9af3a2df4e48a62409e4ef9c26c7420c4f145
 else
     echo "Invalid programme input, expected 'company' or 'ego' but got ${which_dataset}"
     exit 1
@@ -34,7 +23,7 @@ chmod 777 -R $mutate
 # rand_erase=0.0
 # guass_noise=0.0
 # for guass_noise in 0.0 0.5 1.0 2.0 4.0 8.0 16.0 32.0 64.0 128.0
-for guass_noise in 128.0 16.0 32.0 64.0 
+for guass_noise in 0.0 16.0 32.0 64.0 128.0
 do
 for rand_erase in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
 do
