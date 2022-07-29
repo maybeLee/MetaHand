@@ -3,14 +3,14 @@
 which_dataset=$1
 if [[ ${which_dataset} == "company" ]]
 then
-    img=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/ImageSet/  #Company dataset原始图像的路径
-    label=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/labels/  #Company dataset标签的路径
-    mutate=/data/litszon/itf/ITF/2165-143-89-238-111.ap.ngrok.io/mutate/ #Company dataset变异图像的路径
+    img=/root/data_company/ImageSet/  #Company dataset原始图像的路径
+    label=/root/data_company/Labels/  #Company dataset标签的路径
+    mutate=/root/data_company/ObjactGaussianMutation/ #Company dataset变异图像的路径
 elif [[ ${which_dataset} == "ego" ]]
 then
-    img=/ssddata/metahand/data_egohands/images/train/   #Public dataset原始图像的路径
-    label=/ssddata/metahand/data_egohands/images/train/ #Public dataset标签的路径
-    mutate=/ssddata/metahand/data_egohands/mutate/      #Public dataset变异图像的路径
+    img=/root/data_egohands/ImageSet/   #Public dataset原始图像的路径
+    label=/root/data_egohands/Labels/ #Public dataset标签的路径
+    mutate=/root/data_egohands/ObjactGaussianMutation/      #Public dataset变异图像的路径
 else
     echo "Invalid programme input, expected 'company' or 'ego' but got ${which_dataset}"
     exit 1
