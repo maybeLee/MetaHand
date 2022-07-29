@@ -99,10 +99,14 @@ class mutation_operation:
     img = cv2.imread(self.image_path+filename)
     mean = 0.0
     obj = img.copy()
+    max_i = len(obj)
+    max_j = len(obj[0])
     # bg = np.random.randint(0,high=256,size=(480, 640, 3),dtype=np.uint8)
     if __debug__:
         print("DEBUG: img height length " + str(len(obj)))
         print("DEBUG: img width length " + str(len(obj[0])))
+    assert self.HEIGHT == len(obj), "given height (self.HEIGHT) does not match detected height"        
+    assert self.WIDTH == len(obj[0]), "given width (self.WIDTH) does not match detected width"
     for i in range(0,len(obj)):
       for j in range(0,len(obj[i])):
         # if __debug__:
@@ -120,9 +124,18 @@ class mutation_operation:
         
         for i in range(h):
           for j in range(w):
-            obj[y+i][x+j] = img[y+i][x+j]
-
-        cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".jpg", obj)      #save image
+            target_i = min(y+i,max_i-1)
+            target_j = min(x+j,max_j-1)
+            obj[target_i][target_j] = img[target_i][target_j]
+      print("saving mutated image")
+      writeStatus = cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".jpg", obj)      #save image
+      if writeStatus is False:
+        print("cv2 write failed")
+      else:
+        print("cv2 write successful")
+        # raise ValueError("cv2 write failed")
+    else:
+      raise ValueError("Should not encounter empty bbox")
         # cnt+=1
         
   #Remove hands other than the label object
@@ -265,7 +278,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       id = os.path.basename(id)
       if len(labels)==0:#print message to show that the label does not exist
           print(id+" -- no label")
-          no_label+=1
+          # no_label+=1
           return
         
       bbox = None
@@ -294,11 +307,19 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       return 
   
 
-def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_erase_mode,dataset,object_or_background):
+def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_erase_mode,dataset_normalization_type,object_or_background,dataset):
     # image width and height
-    WIDTH = 1280
-    HEIGHT = 720
-    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset)
+    WIDTH = None
+    HEIGHT = None
+    if dataset == "ego":
+      WIDTH = 1280
+      HEIGHT = 720
+    elif dataset == "company":
+      WIDTH = 640
+      HEIGHT = 480
+    else:
+      raise ValueError(f"Expected dataset as ego or company, but got {dataset}")
+    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset_normalization_type)
     #create folder for mutated images
     # os.chdir(write_path)
     if not os.path.exists(write_path + 'objects'):
@@ -336,12 +357,14 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_sigma) for id in label_list)
     pool = Pool(processes=n_jobs_parameter)
     start_time = time.time()
+    print("label_list: " + str(len(label_list)))
     for id in label_list:
       print("INFO: processing id " + str(id))
       if os.name == 'nt':
           print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
       else:
+          # perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
           result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background))
     # print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
     pool.close()
@@ -382,19 +405,20 @@ if __name__ == "__main__":
       parser.add_argument('--guassian_sigma', help="the guassian noise's variance",required=True)
       parser.add_argument('--object_or_background', help="mutate object or background",required=True)
       parser.add_argument('--random_erase_mode', help="random erase mode: fixMutRatio, varyMutRatio, fixXY, varyXY, centerXY. fixMutRatio means every hand has exactly the same mutaton ratio e.g., 0.7, varyMutRatio means every hand has slightly different mutation ratio, but on average a particular value. Use underscore to connect the parameters, e.g., fixMutRatio_fixXY",required=True)
-      # parser.add_argument('--dataset', help="coco or company",required=false)
+      parser.add_argument('--dataset', help="company or ego",required=True)
       flags, unknown = parser.parse_known_args()
       image_path = flags.image_path
       label_path = flags.label_path
       mutate_path = flags.mutate_path
       random_erase = flags.random_erase
       guassian_sigma = flags.guassian_sigma
+      dataset = flags.dataset
       object_or_background = flags.object_or_background
       random_erase_mode = flags.random_erase_mode
-      dataset = "company"
+      dataset_normalization_type = "company"
       
     
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_sigma),random_erase_mode,dataset,object_or_background)
+    main(image_path,label_path,mutate_path,float(random_erase),float(guassian_sigma),random_erase_mode,dataset_normalization_type,object_or_background,dataset)
