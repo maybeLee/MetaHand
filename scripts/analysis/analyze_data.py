@@ -38,6 +38,7 @@ class DatasetAnalyzer(object):
     def analyze(self):
         self.load_labels()
         print(f"The total img of is: {self.total_imgs()}, "
+              f"The total number of hands is: {self.total_objects()}, "
               f"The average hands is: {self.avg_objects()},"
               f"The total number of empty img is: {self.empty_imgs()}")
 
