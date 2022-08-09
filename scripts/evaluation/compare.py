@@ -132,7 +132,7 @@ class MetaComparator(object):
             img_id = target_id.split("-")[0]
             origin_image_path = os.path.join(self.origin_output_dir, img_name, f"{img_id}.txt")
             target_origin_image_path = os.path.join(target_dir, f"{img_id}_origin.txt")
-            repair_image_path = os.path.join(target_dir, f"{img_id}.txt")
+            repair_image_path = os.path.join(self.output_dir, img_name, f"{img_id}.txt")
             target_repair_image_path = os.path.join(target_dir, f"{img_id}_repair.txt")
             shutil.copy(origin_image_path, target_origin_image_path)
             shutil.copy(repair_image_path, target_repair_image_path)
