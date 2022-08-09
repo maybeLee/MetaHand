@@ -70,5 +70,13 @@ uselib
 uselib_track
 vcpkg/
 
-#mutation operators
+# 3rd-libraries
+tools/opencv*
+
+# mutation operators
 scripts\mutation\data
+
+# temporary_data
+outputs**
+results**
+logs**
