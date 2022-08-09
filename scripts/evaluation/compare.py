@@ -161,7 +161,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--images_dir", type=str, default="./data_company/ImageSet", help="The dir of images")
     parser.add_argument("-od", "--output_dir", default="./outputs/company/repair/B_guassian_160_fixMutRatio_centerXY_01", help="The dir of yolo output")
     parser.add_argument("-ood", "--origin_output_dir", default="./outputs/company")
-    parser.add_argument("-t", "--threshold", type=float, default=0.5, help="Confidence threshold to detect hands")
+    parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
     parser.add_argument('--only_train', type=int, default=0, help="Whether we only consider the training image")
     flags, unknown = parser.parse_known_args(sys.argv[1:])
     metaComparator = MetaComparator(flags)
