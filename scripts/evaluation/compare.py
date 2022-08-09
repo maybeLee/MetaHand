@@ -114,16 +114,27 @@ class MetaComparator(object):
         return res_id_list
 
     def save_violate(self, res_id_list):
-        mutate_base = os.path.basename(self.images_dir)
         target_list = ["01"]
         target_id_list = []
-        for target in target_list:
-            target_id_list += res_id_list[target]
+        for target_id in target_list:
+            target_id_list += res_id_list[target_id]
         with open(f"target.txt", "w") as file:
             text = ""
             for target_id in target_id_list:
                 text += target_id + "\n"
             file.write(text)
+        import shutil
+        for target_id in target_id_list:
+            img_name = os.path.basename(self.images_dir)
+            img_id = target_id.split("-")[0]
+            origin_image_path = os.path.join(self.origin_output_dir, img_name, f"{img_id}.txt")
+            target_origin_image_path = os.path.join(self.origin_output_dir, "target", f"{img_id}_origin.txt")
+            repair_image_path = os.path.join(self.output_dir, img_name, f"{img_id}.txt")
+            target_repair_image_path = os.path.join(self.output_dir, "target", f"{img_id}_repair.txt")
+            os.makedirs(os.path.join(self.origin_output_dir, "target"))
+            os.makedirs(os.path.join(self.output_dir, "target"))
+            shutil.copy(origin_image_path, target_origin_image_path)
+            shutil.copy(repair_image_path, target_repair_image_path)
 
     def evaluate(self, ):
         self.get_prediction()
