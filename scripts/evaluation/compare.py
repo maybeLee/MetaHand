@@ -131,7 +131,7 @@ class MetaComparator(object):
             img_name = os.path.basename(self.images_dir)
             img_id = target_id.split("-")[0]
             target_img_dir = os.path.join(target_dir, img_id)
-            if os.path.exists(target_img_dir):
+            if not os.path.exists(target_img_dir):
                 os.makedirs(target_img_dir)
             origin_image_dir = os.path.join(self.origin_output_dir, img_name)
             repair_image_dir = os.path.join(self.output_dir, img_name)
