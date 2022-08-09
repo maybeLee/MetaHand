@@ -124,15 +124,16 @@ class MetaComparator(object):
                 text += target_id + "\n"
             file.write(text)
         import shutil
+        target_dir = os.path.join(self.output_dir, "target")
+        os.system(f"rm -rf {target_dir}")
+        os.makedirs(target_dir)
         for target_id in target_id_list:
             img_name = os.path.basename(self.images_dir)
             img_id = target_id.split("-")[0]
             origin_image_path = os.path.join(self.origin_output_dir, img_name, f"{img_id}.txt")
-            target_origin_image_path = os.path.join(self.origin_output_dir, "target", f"{img_id}_origin.txt")
-            repair_image_path = os.path.join(self.output_dir, img_name, f"{img_id}.txt")
-            target_repair_image_path = os.path.join(self.output_dir, "target", f"{img_id}_repair.txt")
-            os.makedirs(os.path.join(self.origin_output_dir, "target"))
-            os.makedirs(os.path.join(self.output_dir, "target"))
+            target_origin_image_path = os.path.join(target_dir, f"{img_id}_origin.txt")
+            repair_image_path = os.path.join(target_dir, f"{img_id}.txt")
+            target_repair_image_path = os.path.join(target_dir, f"{img_id}_repair.txt")
             shutil.copy(origin_image_path, target_origin_image_path)
             shutil.copy(repair_image_path, target_repair_image_path)
 
