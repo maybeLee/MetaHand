@@ -130,12 +130,17 @@ class MetaComparator(object):
         for target_id in target_id_list:
             img_name = os.path.basename(self.images_dir)
             img_id = target_id.split("-")[0]
-            origin_image_path = os.path.join(self.origin_output_dir, img_name, f"{img_id}.txt")
-            target_origin_image_path = os.path.join(target_dir, f"{img_id}_origin.txt")
-            repair_image_path = os.path.join(self.output_dir, img_name, f"{img_id}.txt")
-            target_repair_image_path = os.path.join(target_dir, f"{img_id}_repair.txt")
-            shutil.copy(origin_image_path, target_origin_image_path)
-            shutil.copy(repair_image_path, target_repair_image_path)
+            target_img_dir = os.path.join(target_dir, img_id)
+            if os.path.exists(target_img_dir):
+                os.makedirs(target_img_dir)
+            origin_image_dir = os.path.join(self.origin_output_dir, img_name)
+            repair_image_dir = os.path.join(self.output_dir, img_name)
+            origin_list = glob.glob(f"{origin_image_dir}/{img_id}*")
+            repair_list = glob.glob(f"{repair_image_dir}/{img_id}*")
+            for file_path in origin_list:
+                shutil.copy(file_path, target_img_dir)
+            for file_path in repair_list:
+                shutil.copy(file_path, target_img_dir)
 
     def evaluate(self, ):
         self.get_prediction()
