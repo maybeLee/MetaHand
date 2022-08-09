@@ -142,9 +142,10 @@ class MetaComparator(object):
             for file_path in origin_list:
                 shutil.copy(file_path, target_img_dir)
             for file_path in repair_list:
-                file_path.replace(".txt", "-repair.txt")
-                file_path.replace(".jpg", "-repair.jpg")
-                shutil.copy(file_path, target_img_dir)
+                file_name = os.path.basename(file_path)
+                new_file_name = file_name.replace(".txt", "-repair.txt")
+                new_file_name = new_file_name.replace(".jpg", "-repair.jpg")
+                shutil.copy(file_path, os.path.join(target_img_dir, new_file_name))
 
     def evaluate(self, ):
         self.get_prediction()
