@@ -60,7 +60,7 @@ Thumbs.db
 .vscode/
 
 # Managed by CMake
-# src/version.h
+src/version.h
 
 # Build artifacts
 lib/
@@ -70,11 +70,13 @@ uselib
 uselib_track
 vcpkg/
 
-#mutation operators
+# 3rd-libraries
+tools/opencv*
+
+# mutation operators
 scripts\mutation\data
-bad.list
-**anaconda**
-**Anaconda**
-**tmp**
-**results**
-**outputs**
+
+# temporary_data
+outputs**
+results**
+logs**
