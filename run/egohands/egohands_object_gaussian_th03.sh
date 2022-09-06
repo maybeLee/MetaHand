@@ -4,7 +4,7 @@ DATASET=egohands
 GPU=0,1,2
 data_dir=data_egohands
 log_dir=logs/egohands/${MutateType}
-weights_path=./${data_dir}/working_dir/origin_model/backup/egohands_best.weights
+weights_path=./${data_dir}/working_dir/testing/origin_model/backup/egohands_best.weights
 output_dir=./outputs/egohands
 mkdir -p $log_dir
 mkdir -p $output_dir
@@ -26,7 +26,7 @@ do
     --dataset=${DATASET} \
     --threshold=${th} > ${log_dir}/${MutateName}_${th}.log
 
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_${th}
+    base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
     mkdir -p $base_dir
     mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt
 
@@ -48,11 +48,11 @@ gpu_id=0,1,2
 for ratio in $ratio_list
 do
     MutateName=B_guassian_160_fixMutRatio_centerXY_${ratio}
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_${th}
+    base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
     CFGPATH=./cfg/egohands.cfg
     WORKDIR=$base_dir/data
     OBJPATH=${WORKDIR}/obj.data
-    base_dir=./${data_dir}/working_dir/${MutateType}/${MutateName}_${th}
+    base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
     python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_${th}.log
 done
 
