@@ -1,6 +1,6 @@
 cd ../../
 MutateType=ObjectGaussianMutation
-log_dir=logs/company/${MutateType}
+log_dir=logs/company/testing/${MutateType}
 output_dir=outputs/company
 mkdir -p $log_dir
 mkdir -p $output_dir
