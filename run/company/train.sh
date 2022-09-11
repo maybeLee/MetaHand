@@ -2,7 +2,7 @@ cd ../../
 TRAIN_ID=./data_company/training_id.txt
 IMGDIR=./data_company/ImageSet
 LABELDIR=./data_company/Labels
-WORKDIR=./data_company/working_dir/origin_model
+WORKDIR=./data_company/working_dir/testing/origin_model
 GPU=0,1,2
 CFGPATH=./cfg/cross-hands.cfg
 OBJPATH=${WORKDIR}/obj.data
