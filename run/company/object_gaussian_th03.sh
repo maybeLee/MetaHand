@@ -1,4 +1,4 @@
-cd ../../
+# cd ../../
 MutateType=ObjectGaussianMutation
 log_dir=logs/company/testing/${MutateType}
 output_dir=outputs/company
