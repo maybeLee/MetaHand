@@ -20,7 +20,7 @@ do
     --img_dir=./data_company/${MutateType}/$MutateName --label_dir=same --target_dir=$base_dir/data >> ${log_dir}/${MutateName}.log
 done
 
-gpu_id=0,1,2
+gpu_id=2
 # for std in $std_list
 for ratio in $ratio_list
 do
