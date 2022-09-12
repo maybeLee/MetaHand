@@ -42,7 +42,7 @@ do
 
 done
 
-gpu_id=0,1,2
+gpu_id=2
 for std in $std_list
 do
     MutateName=BackgroundGaussian${std}
