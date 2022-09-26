@@ -3,8 +3,8 @@
 which_dataset=$1
 if [[ ${which_dataset} == "company" ]]
 then
-    img=/root/data_company/images/train/  #Company dataset原始图像的路径
-    label=/root/data_company/labels/  #Company dataset标签的路径
+    img=/root/data_company/ImageSet/  #Company dataset原始图像的路径
+    label=/root/data_company/Labels/  #Company dataset标签的路径
     mutate=/root/data_company/ObjactGaussianMutation/ #Company dataset变异图像的路径
 elif [[ ${which_dataset} == "ego" ]]
 then
