@@ -90,13 +90,10 @@ class MetaTester(object):
                 if threshold < 0.1:
                     return "background"
                 pred_label = pred[0]
-                if pred_label != label[0]:
-                    return "other"
+                if 0.1 <= threshold < 0.5:
+                    return "localization"
                 else:
-                    if 0.1 <= threshold < 0.5:
-                        return "localization"
-                    else:
-                        return "correct"
+                    return "correct"
 
         img_id_list = []
         if self.only_train == 1:
