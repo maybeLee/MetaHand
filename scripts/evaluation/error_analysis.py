@@ -53,7 +53,7 @@ class MetaTester(object):
         origin_img_name = os.path.basename(self.origin_img_dir)
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
-        mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
+        mutate_output_dir = os.path.join(self.output_dir, "repair", mutate_img_name, "ImageSet")
         if not os.path.exists(origin_output_dir):
             # predict on original image
             logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Hand Detection")
