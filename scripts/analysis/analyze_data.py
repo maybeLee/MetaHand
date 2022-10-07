@@ -1,3 +1,4 @@
+from cgitb import handler
 import os
 
 
@@ -28,6 +29,18 @@ class DatasetAnalyzer(object):
     def avg_objects(self):
         return self.total_objects()/self.total_imgs()
 
+    def total_sizes(self):
+        total_size = 0
+        for img, hand_list in self.label_dict.items():
+            for hand in hand_list:
+                w = float(hand.split(" ")[-2])
+                h = float(hand.split(" ")[-1])
+                total_size += w*h
+        return total_size
+        
+    def avg_objects_size(self):
+        return self.total_sizes()/self.total_imgs()
+    
     def empty_imgs(self):
         empty_num = 0
         for img in self.label_dict:
@@ -40,6 +53,7 @@ class DatasetAnalyzer(object):
         print(f"The total img of is: {self.total_imgs()}, "
               f"The total number of hands is: {self.total_objects()}, "
               f"The average hands is: {self.avg_objects()},"
+              f"The average hands' size is: {self.avg_objects_size()},"
               f"The total number of empty img is: {self.empty_imgs()}")
 
 
