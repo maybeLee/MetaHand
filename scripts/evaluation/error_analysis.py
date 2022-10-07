@@ -111,22 +111,22 @@ class MetaTester(object):
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
                 continue
-            origin_preds = self.origin_pred[img_id]
             mutate_preds = self.mutate_pred[mutate_id]
-            if self.mutate_type == "object":
-                hand_id = int(mutate_id.split("-")[1].rstrip("O"))
-                origin_detection = _is_detected(img_labels[hand_id], origin_preds)
-                mutate_detection = _is_detected(img_labels[hand_id], mutate_preds)
-                res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
-            elif self.mutate_type == "background" or self.mutate_type == "gaussian":
-                for j in range(len(mutate_preds)):
-                    error_type = _analyze_error(img_labels, mutate_preds[j])
-                    mutate_res_list[error_type] += 1
-                for j in range(len(origin_preds)):
-                    error_type = _analyze_error(img_labels, origin_preds[j])
-                    origin_res_list[error_type] += 1
-            else:
-                raise ValueError("Unsupported Mutation Type!")
+            for j in range(len(mutate_preds)):
+                error_type = _analyze_error(img_labels, mutate_preds[j])
+                mutate_res_list[error_type] += 1
+        for i, img_id in enumerate(self.origin_pred):
+            if (i + 1) % 500 == 0:
+                logger.info(f'Progress: {str(i + 1)}')
+            img_labels = labels[img_id]
+            if len(img_id_list) != 0 and img_id in img_id_list:
+                # We only evaluate the image that belong to the training_id.txt
+                logger.info(f"Find Test Images, Exclude!")
+                continue
+            origin_preds = self.origin_pred[img_id]
+            for j in range(len(origin_preds)):
+                error_type = _analyze_error(img_labels, origin_preds[j])
+                origin_res_list[error_type] += 1
         return origin_res_list, mutate_res_list
 
     def evaluate(self, ):
