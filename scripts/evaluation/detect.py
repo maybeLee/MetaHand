@@ -35,8 +35,11 @@ class Detector(object):
     def load_data(self, ):
         logger.info("Loading Images...")
         if self.source_path == "all":
-            # we add all images in img_dir
-            self.images = glob.glob(f"{self.img_dir}/*.jpg")
+            if self.img_dir.endswith(".jpg"):
+                self.images = [self.img_dir]
+            else:
+                # we add all images in img_dir
+                self.images = glob.glob(f"{self.img_dir}/*.jpg")
         else:
             with open(self.source_path, "r") as file:
                 image_list = file.read().split("\n")[:-1]
@@ -103,7 +106,10 @@ class Detector(object):
                 # cv2.imshow('image', mat)
                 # cv2_imshow(mat)
                 # here cv2.waitKey(0)
-        logger.info(f"AVG Confidence: {round(conf_sum / detection_count, 2)} Count: {detection_count}")
+        if detection_count == 0:
+            logger.info(f"AVG Confidence: 0 Count: {detection_count}")
+        else:
+            logger.info(f"AVG Confidence: {round(conf_sum / detection_count, 2)} Count: {detection_count}")
         # cv2.destroyAllWindows()
 
 
