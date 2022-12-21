@@ -312,11 +312,11 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     if dataset == "ego":
       WIDTH = 1280
       HEIGHT = 720
-    elif dataset == "company":
+    elif dataset == "company" or dataset == "coco":
       WIDTH = 640
       HEIGHT = 480
     else:
-      raise ValueError(f"Expected dataset as ego or company, but got {dataset}")
+      raise ValueError(f"Expected dataset as ego, company or coco, but got {dataset}")
     mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset_normalization_type)
     #create folder for mutated images
     # os.chdir(write_path)
