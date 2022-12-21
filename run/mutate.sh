@@ -11,6 +11,11 @@ then
     img=/root/data_egohands/images/train/   #Public dataset原始图像的路径
     label=/root/data_egohands/labels/ #Public dataset标签的路径
     mutate=/root/data_egohands/ObjactGaussianMutation/      #Public dataset变异图像的路径
+elif [[ ${which_dataset} == "coco" ]]
+then
+    img=/root/data_coco/images/train/   #Public dataset原始图像的路径
+    label=/root/data_coco/labels/ #Public dataset标签的路径
+    mutate=/root/data_coco/ObjactGaussianMutation/      #Public dataset变异图像的路径
 else
     echo "Invalid programme input, expected 'company' or 'ego' but got ${which_dataset}"
     exit 1

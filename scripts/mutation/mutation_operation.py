@@ -285,8 +285,6 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       mo.gen_labels_OB(id, labels, object_or_background, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_sigma=guassian_sigma) #use os.path.basename() to keep only base directory for id        
       
       bbox = mo.unnormalize(labels,mo.dataset)
-      
-      
       # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
       
       # #remove the hand object
