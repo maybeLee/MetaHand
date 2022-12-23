@@ -7,7 +7,7 @@ import shutil
 import argparse
 import sys
 logger = Logger()
-MAPPING_DICT = {"popsquare": "./data_company", "coco": "./data_coco"}
+MAPPING_DICT = {"popsquare": "./data_company", "coco": "./data_coco", "voc": "./data_voc", "egohands": "./data_egohands"}
 
 
 class PreTrainData(object):
@@ -15,7 +15,7 @@ class PreTrainData(object):
         self.data_path = flags.source_path
         self.dataset = flags.dataset
         self.data_root_dir = MAPPING_DICT[self.dataset].rstrip("/")
-        self.img_list = []
+        self.img_list = []  # img_list: [img_path_1, img_path_2]
         self.target_dir = flags.target_dir.rstrip("/")
         self.img_dir = flags.img_dir.rstrip("/")
         self.label_dir = flags.label_dir.rstrip("/")
@@ -61,7 +61,11 @@ class PreTrainData(object):
             with open(f"{self.data_root_dir}/training_id.txt", "r") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
-                self.img_list.append(line)
+                if not line.endswith(".jpg"):
+                    # if line is not ended with `.jpg`, the testing_id stores the image_name instead of file_path
+                    self.img_list.append(os.path.join(self.obj_dir, f"{line}.jpg"))
+                else:
+                    self.img_list.append(line)
 
     def _split_train_valid_test(self, test_ratio=0.2):
         if test_ratio == 0:
@@ -72,9 +76,13 @@ class PreTrainData(object):
 
     def prepare_label(self):
         logger.info("Preparing Labels")
-        os.system(f"find {self.data_root_dir}/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
+        if self.dataset == "popsquare":
+            # For popsquare, the label and images are stored separately, which cannot be found by darknet.
+            # Therefore, we copy the labels of popsquare to `obj_dir`
+            os.system(f"find {self.data_root_dir}/Labels/ -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
         if self.label_dir == "empty":
-            img_list = os.listdir(self.img_dir)
+            # if label_dir is empty, the label of all images are zero
+            img_list = os.listdir(self.img_dir)  # in popsquare, each element in img_dir is an id, in egohands, each element is a path
             for img in img_list:
                 img_name = img[:-4]
                 label_path = os.path.join(self.obj_dir, f"{img_name}.txt")
@@ -84,9 +92,9 @@ class PreTrainData(object):
             for img in img_list:
                 mutate_id = img[:-4]
                 img_id = mutate_id.split("-")[0]
-                label_path = os.path.join(self.obj_dir, f"{mutate_id}.txt")
+                label_path = os.path.join(self.img_dir, f"{mutate_id}.txt")
                 shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
-        elif self.label_dir != f"{self.data_root_dir}/Labels":
+        elif self.label_dir != f"{self.data_root_dir}/Labels" and self.label_dir != f"{self.data_root_dir}/labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
     def prepare_img(self):
@@ -102,18 +110,20 @@ class PreTrainData(object):
         with open(f"{self.data_root_dir}/testing_id.txt", "r") as file:
             content = file.read().split("\n")[:-1]
             for line in content:
-                test_list.append(line)
+                if not line.endswith(".jpg"):
+                    # if line is not ended with `.jpg`, the testing_id stores the image_name instead of file_path
+                    test_list.append(os.path.join(self.obj_dir, f"{line}.jpg"))
+                else:
+                    test_list.append(line)
+        # train_list, test_list, valid_list: [path_1, path_2, ...]
         with open(self.train_path, "a") as file:
-            for train_id in train_list:
-                target_file_path = os.path.join(self.obj_dir, f"{train_id}.jpg")
+            for target_file_path in train_list:
                 file.write(target_file_path+"\n")
         with open(self.valid_path, "a") as file:
-            for valid_id in valid_list:
-                target_file_path = os.path.join(self.obj_dir, f"{valid_id}.jpg")
+            for target_file_path in valid_list:
                 file.write(target_file_path+"\n")
         with open(self.test_path, "w") as file:
-            for test_id in test_list:
-                target_file_path = os.path.join(self.obj_dir, f"{test_id}.jpg")
+            for target_file_path in test_list:
                 file.write(target_file_path+"\n")
         with open(self.train_path, "r") as file:
             content = file.read().split("\n")[:-1]
@@ -126,7 +136,7 @@ class PreTrainData(object):
 
     def prepare_obj(self):
         # TODO: Need To Change This Logic Before Evaluating On COCO DataSet
-        if self.dataset == "popsquare":
+        if self.dataset == "popsquare" or self.dataset == "egohands":
             for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
                 write_content = ""
                 with open(file_path, "r") as file:
@@ -138,15 +148,23 @@ class PreTrainData(object):
         # generate obj.data, obj.names
         obj_names_path = os.path.join(self.target_dir, "obj.names")
         obj_data_path = os.path.join(self.target_dir, "obj.data")
-        if self.dataset == "popsquare":
+        if self.dataset == "popsquare" or self.dataset == "egohands":
             with open(obj_names_path, "w") as file:
                 file.write("hands")
         elif self.dataset == "coco":
             shutil.copy("./cfg/coco.names", obj_names_path)
+        elif self.dataset == "voc":
+            shutil.copy("./cfg/voc.names", obj_names_path)
         else:
             raise ValueError("Undefined Dataset !!!")
         with open(obj_data_path, "w") as file:
-            file.write("classes = 1\n")
+            if self.dataset == "coco":
+                file.write("classes = 80\n")
+                file.write(f"eval=coco\n")
+            if self.dataset == "voc":
+                file.write("classes = 20\n")
+            elif self.dataset == "popsquare" or self.dataset == "egohands":
+                file.write("classes = 1\n")
             file.write(f"train = {self.train_path}\n")
             file.write(f"valid = {self.test_path}\n")  # use test data for validation during the training
             file.write(f"test = {self.test_path}\n")
@@ -154,7 +172,9 @@ class PreTrainData(object):
             file.write(f"backup = {self.backup_dir}\n")
 
     def prepare_darknet_data(self):
-        self.prepare_img()
+        if self.dataset == "popsquare":
+            # We copy the image to object directory for the company's dataset.
+            self.prepare_img()
         self.prepare_label()
         self.prepare_train_valid_test()
         self.prepare_obj()

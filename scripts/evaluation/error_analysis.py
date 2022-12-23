@@ -6,24 +6,29 @@ from scripts.utils.logger import Logger
 logger = Logger()
 from scripts.utils.utils import YoloUtils
 import numpy as np
+from scripts.train.prepare_train_data import MAPPING_DICT
 
 
-class MetaTester(object):
+class ErrorAnalyzer(object):
     def __init__(self, flags):
         self.origin_img_dir = flags.origin_img_dir.rstrip("/")
         self.mutate_img_dir = flags.mutate_img_dir.rstrip("/")
         self.mutate_type = ""
         self.idntfr = ""
         if "object" in self.mutate_img_dir or "Object" in self.mutate_img_dir:
+            # object: only preserve the object
             self.mutate_type = "object"
         if "B" in self.mutate_img_dir:
+            # B: only preserver the background, mutation operator such as CenterEraseMutation
             self.mutate_type = "background"
         if "Gaussian" in self.mutate_img_dir:
+            # Add gaussian noise to the object or background, label will be preserved
             self.mutate_type = "gaussian"
         self.origin_label_dir = flags.origin_label_dir.rstrip("/")
         self.output_dir = flags.output_dir
         self.weights_path = flags.weights_path
         self.only_train = flags.only_train
+        self.dataset = flags.dataset
         self.origin_images = glob.glob(f"{self.origin_img_dir}/*.jpg")
         self.mutate_images = glob.glob(f"{self.mutate_img_dir}/*.jpg")
         self.origin_pred = {}
@@ -44,23 +49,45 @@ class MetaTester(object):
                 content = file.read().split("\n")[:-1]
             for line in content:
                 arr = line.split(" ")
-                arr = list(map(float, arr))
+                new_arr = []
+                for i in arr:
+                    try:
+                        new_arr.append(float(i))
+                    except:
+                        pass
+                arr = new_arr
                 arr[0] = int(arr[0])
                 labels[file_name].append(arr)
         return labels
 
     def get_prediction(self):
+        """
+        Get the prediction of target model on the mutated images and original images.
+        self.origin_pred: {img_id: [pred1, pred2], ...}
+        self.mutate_pred: {img_id: [pred1, pred2], ...}
+        """
         origin_img_name = os.path.basename(self.origin_img_dir)
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
-        mutate_output_dir = os.path.join(self.output_dir, "repair", mutate_img_name, "ImageSet")
+        mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
+        if self.dataset == "popsquare":
+            cfg_path = "./cfg/cross-hands.cfg"
+        elif self.dataset == "egohands":
+            cfg_path = "./cfg/egohands.cfg"
+        elif self.dataset == "coco":
+            cfg_path = "./cfg/yolov3.cfg"
+        else:
+            raise ValueError("Undefined Dataset Found!!")
         if not os.path.exists(origin_output_dir):
             # predict on original image
             logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Hand Detection")
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.origin_img_dir} "
                       f"-w={self.weights_path} "
-                      f"--save_dir={origin_output_dir}")
+                      f"--save_dir={origin_output_dir} "
+                      f"--cfg={cfg_path} "
+                      f"--dataset={self.dataset}"
+                      )
         else:
             logger.info(f"Detection on {origin_img_name} Exists, Loading the Detection")
         # origin_pred: {img_id: [label1, label2], ..., }
@@ -71,7 +98,10 @@ class MetaTester(object):
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.mutate_img_dir} "
                       f"-w={self.weights_path} "
-                      f"--save_dir={mutate_output_dir}")
+                      f"--save_dir={mutate_output_dir} "
+                      f"--cfg={cfg_path} "
+                      f"--dataset={self.dataset}"
+                      )
         else:
             logger.info(f"Detection on {mutate_output_dir} Exists, Loading the Detection")
         # mutate_pred: {file_name: [label1, label2]}
@@ -90,18 +120,25 @@ class MetaTester(object):
                 if threshold < 0.1:
                     return "background"
                 pred_label = pred[0]
-                if 0.1 <= threshold < 0.5:
-                    return "localization"
+                if pred_label != label[0]:
+                    return "other"
                 else:
-                    return "correct"
+                    if 0.1 <= threshold < 0.5:
+                        return "localization"
+                    else:
+                        return "correct"
 
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            with open("./data_company/testing_id.txt") as file:
+            # No need for this under coco or egohands scenario because we did not involve test images when mutating
+            with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
+                # if the dataset is popsquare, the testing_id only stores the id of file
                 img_id_list.append(line)
+
+        # Analyze Error Of Model On Mutants
         for i, mutate_id in enumerate(self.mutate_pred):
             if (i + 1) % 500 == 0:
                 logger.info(f'Progress: {str(i + 1)}')
@@ -115,6 +152,8 @@ class MetaTester(object):
             for j in range(len(mutate_preds)):
                 error_type = _analyze_error(img_labels, mutate_preds[j])
                 mutate_res_list[error_type] += 1
+
+        # Analyze Error Of Model On Original Images
         for i, img_id in enumerate(self.origin_pred):
             if (i + 1) % 500 == 0:
                 logger.info(f'Progress: {str(i + 1)}')
@@ -145,6 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--weights_path", default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
+    parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
     flags, unknown = parser.parse_known_args(sys.argv[1:])
-    metaTester = MetaTester(flags)
-    metaTester.evaluate()
+    errorAnalyzer = ErrorAnalyzer(flags)
+    errorAnalyzer.evaluate()

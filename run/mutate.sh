@@ -17,7 +17,7 @@ then
     label=/root/data_coco/labels/ #Public dataset标签的路径
     mutate=/root/data_coco/ObjactGaussianMutation/      #Public dataset变异图像的路径
 else
-    echo "Invalid programme input, expected 'company' or 'ego' but got ${which_dataset}"
+    echo "Invalid programme input, expected 'company', 'coco', or 'ego' but got ${which_dataset}"
     exit 1
 fi
 

@@ -23,8 +23,8 @@ def get_files(target_dir, end_pattern):
             file_lists.append(os.path.join(root, file))
     return file_lists
 
-class YoloUtils:
 
+class YoloUtils:
     @staticmethod
     def center_to_topleft(label):
         return [label[0] - label[2] / 2, label[1] - label[3] / 2, label[2], label[3]]
