@@ -54,7 +54,11 @@ class PreTrainData(object):
         with open(self.data_path, "r") as file:
             content = file.read().split("\n")[:-1]
         for line in content:
-            self.img_list.append(line)
+            if not line.endswith(".jpg"):
+                # if line is not ended with `.jpg`, the testing_id stores the image_name instead of file_path
+                self.img_list.append(os.path.join(self.obj_dir, f"{line}.jpg"))
+            else:
+                self.img_list.append(line)
         if self.data_path != f"{self.data_root_dir}/training_id.txt" and self.append == 0:
             # if append is 0, we assume the original training image has not been added to the working dir.
             # Therefore we do it.
