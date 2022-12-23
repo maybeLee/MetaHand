@@ -11,8 +11,17 @@ To install darknet
 ```
 git clone https://github.com/pjreddie/darknet.git
 cd darknet
-docker build -f Dockerfile .
-docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root {image_id} 
+docker build -t metahand -f Dockerfile .
+docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root metahand 
+# Note that if you are using sccpu6, please add the flag: --security-opt=label=disable on docker run so local dir can be properly mounted
 
 ```
 
+# How to run
+
+### To train a voc model
+rm -rf /MetaHand/outputs/voc/B_random_erase_fixMutRatio_centerXY_02; ./voc_center_erase.sh
+
+# Note
+
+Remember to clone MetaHand under /root/

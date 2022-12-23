@@ -1,0 +1,11 @@
+## EgoHands数据集
+训练初始模型的指令：
+podman exec suspicious_davinci bash ./run/egohands/train_egohands.sh
+变异图像的指令：
+./run/mutate.sh
+基于变异图像，增强模型的指令：
+podman exec suspicious_davinci bash ./run/egohands/egohands_background_gaussian_th03.sh
+衡量增强模型的指令：
+podman exec suspicious_davinci bash ./run/egohands/test.sh
+衡量增强模型的输出结果将被打印出来：
+
