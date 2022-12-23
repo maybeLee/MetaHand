@@ -28,9 +28,11 @@ chmod 777 -R $mutate
 # rand_erase=0.0
 # guass_noise=0.0
 # for guass_noise in 0.0 0.5 1.0 2.0 4.0 8.0 16.0 32.0 64.0 128.0
-for guass_noise in 128.0 16.0 32.0 64.0 
+# for guass_noise in 128.0 16.0 32.0 64.0 
+for guass_noise in 128.0 
 do
-for rand_erase in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+for rand_erase in 0.6 0.7 0.8
+# for rand_erase in 0.9 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
 do
     apply_guassian=$(awk 'BEGIN{ print "'$guass_noise'"=="'0.0'" }')
     if [ "$apply_guassian" -eq 1 ];then

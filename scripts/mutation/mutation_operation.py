@@ -16,12 +16,12 @@ random.seed(10)
 
 class mutation_operation:
   
-  def __init__(self,image_path,label_path,write_path,WIDTH,HEIGHT,dataset):
+  def __init__(self,image_path,label_path,write_path,dataset):
     self.image_path = image_path
     self.label_path = label_path
     self.write_path = write_path
-    self.WIDTH = WIDTH
-    self.HEIGHT = HEIGHT
+    # self.WIDTH = WIDTH
+    # self.HEIGHT = HEIGHT
     self.dataset = dataset
   
   def get_label(self,filename):
@@ -29,7 +29,7 @@ class mutation_operation:
     f = open(filename, "r")
     for line in f.readlines():
       line = line[:-1]
-      arr = line.split(' ')
+      arr = [x for x in line.split(' ') if x]
       arr = list(map(float, arr))
       arr[0] = int(arr[0])
       labels.append(arr)
@@ -38,15 +38,20 @@ class mutation_operation:
   def center_to_topleft(self,label):
     return [label[0]-label[2]/2, label[1]-label[3]/2, label[2], label[3]]
 
-  def unnormalize(self,labels,dataset):
+  def unnormalize(self,labels,dataset,img):
+    obj = img.copy()
+    HEIGHT = len(obj)
+    WIDTH = len(obj[0])
+
     return_labels = []
     for label in labels:
       # if __debug__:
         # print("DEBUG: label original: " + str(label))
-      if dataset == "company":
-          return_labels.append(self.center_to_topleft([label[1]*self.WIDTH, label[2]*self.HEIGHT, label[3]*self.WIDTH, label[4]*self.HEIGHT]))
-      elif dataset == "coco":
-          return_labels.append([label[1], label[2], label[3], label[4]])
+      print(f"dataset is: {dataset}")
+      if dataset == "company" or dataset=="ego" or dataset=="coco":
+          return_labels.append(self.center_to_topleft([label[1]*WIDTH, label[2]*HEIGHT, label[3]*WIDTH, label[4]*HEIGHT]))
+      # elif dataset == "coco":
+      #     return_labels.append([label[1], label[2], label[3], label[4]])
       else:
           raise ValueError("invalid dataset")
     return return_labels
@@ -105,8 +110,8 @@ class mutation_operation:
     if __debug__:
         print("DEBUG: img height length " + str(len(obj)))
         print("DEBUG: img width length " + str(len(obj[0])))
-    assert self.HEIGHT == len(obj), "given height (self.HEIGHT) does not match detected height"        
-    assert self.WIDTH == len(obj[0]), "given width (self.WIDTH) does not match detected width"
+    #assert self.HEIGHT == len(obj), "given height (self.HEIGHT) does not match detected height"        
+    #assert self.WIDTH == len(obj[0]), "given width (self.WIDTH) does not match detected width"
     for i in range(0,len(obj)):
       for j in range(0,len(obj[i])):
         # if __debug__:
@@ -176,8 +181,8 @@ class mutation_operation:
       # print("DEBUG: the file path is " + str(self.image_path+filename))
       # print("height of an img: " + str(len(img)))
       height, width, channels = img.shape
-      assert self.WIDTH == width, "given width (self.WIDTH) does not match detected width"
-      assert self.HEIGHT == height, "given height (self.HEIGHT) does not match detected height"
+      #assert self.WIDTH == width, "given width (self.WIDTH) does not match detected width"
+      #assert self.HEIGHT == height, "given height (self.HEIGHT) does not match detected height"
       if len(bbox)!=0:
           cnt = 0
           crop_img = img.copy()
@@ -284,7 +289,8 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       bbox = None
       mo.gen_labels_OB(id, labels, object_or_background, random_erase=random_erase, random_erase_mode=random_erase_mode, guassian_sigma=guassian_sigma) #use os.path.basename() to keep only base directory for id        
       
-      bbox = mo.unnormalize(labels,mo.dataset)
+      img = cv2.imread(mo.image_path+id[:-4]+".jpg")
+      bbox = mo.unnormalize(labels,mo.dataset,img)
       # mo.rm_bg(id[:-4]+".jpg", bbox) #make background becomes black
       
       # #remove the hand object
@@ -307,17 +313,17 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
 
 def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_erase_mode,dataset_normalization_type,object_or_background,dataset):
     # image width and height
-    WIDTH = None
-    HEIGHT = None
-    if dataset == "ego":
-      WIDTH = 1280
-      HEIGHT = 720
-    elif dataset == "company" or dataset == "coco":
-      WIDTH = 640
-      HEIGHT = 480
-    else:
-      raise ValueError(f"Expected dataset as ego, company or coco, but got {dataset}")
-    mo = mutation_operation(image_path,label_path,write_path,WIDTH,HEIGHT,dataset_normalization_type)
+    # WIDTH = None
+    # HEIGHT = None
+    # if dataset == "ego":
+    #   WIDTH = 1280
+    #   HEIGHT = 720
+    # elif dataset == "company" or dataset == "coco":
+    #   WIDTH = None
+    #   HEIGHT = None
+    # else:
+    #   raise ValueError(f"Expected dataset as ego, company or coco, but got {dataset}")
+    mo = mutation_operation(image_path,label_path,write_path,dataset)
     #create folder for mutated images
     # os.chdir(write_path)
     if not os.path.exists(write_path + 'objects'):
@@ -348,7 +354,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     mut = 0
     #iterate through a list of labels
     print("Initiating multi-processes")
-    n_jobs_parameter=15
+    n_jobs_parameter=8
     # if __debug__:
     #   label_list = label_list[:12]
     #   n_jobs_parameter=5
@@ -362,7 +368,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
           print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
       else:
-          # perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
+          #perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
           result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background))
     # print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
     pool.close()
