@@ -81,3 +81,7 @@ outputs**
 results**
 logs**
 **.ipynb**
+.ssh*
+.python*
+.cache*
+.nv*
