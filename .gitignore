@@ -85,3 +85,7 @@ logs**
 .python*
 .cache*
 .nv*
+
+# large data (compressed folders)
+**.zip
+**.tgz
