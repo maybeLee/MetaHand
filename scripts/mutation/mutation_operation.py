@@ -133,7 +133,7 @@ class mutation_operation:
             target_j = min(x+j,max_j-1)
             obj[target_i][target_j] = img[target_i][target_j]
       print("saving mutated image")
-      writeStatus = cv2.imwrite(self.write_path + "objects/" + filename[:-4] + "-" + "O" + "_" + str(guassian_sigma) + ".jpg", obj)      #save image
+      writeStatus = cv2.imwrite(self.write_path + "BackgroundGaussianMutation/background_gaussian_" + str(guassian_sigma).replace(".","_") + "/" + filename[:-4] + ".jpg", obj)      #save image
       if writeStatus is False:
         print("cv2 write failed")
       else:
@@ -251,8 +251,10 @@ class mutation_operation:
           #   cv2.imwrite(self.write_path + "B/" + filename[:-4] + "-"+ "B" + ".jpg", crop_img)      #save image
           if guassian_sigma > 0.0:
             # print("INFO: creating")
-            pathlib.Path(self.write_path + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(self.write_path + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
+            # pathlib.Path(self.write_path + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
+            # cv2.imwrite(self.write_path + "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + "-"+ "B_guassian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + ".jpg", crop_img) #save image
+            pathlib.Path(self.write_path + "ObjectGaussianMutation/object_gaussaian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(self.write_path + "ObjectGaussianMutation/object_gaussaian_" + str(guassian_sigma).replace(".","") + "_" + random_erase_mode + "_" + str(random_erase).replace(".","") + "/" + filename[:-4] + ".jpg", crop_img) #save image
           elif random_erase > 0.0:
             # print("INFO: creating")
             pathlib.Path(self.write_path + "B_random_erase_" + random_erase_mode + "_" + str(random_erase).replace(".","")).mkdir(parents=True, exist_ok=True)
