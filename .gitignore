@@ -89,3 +89,4 @@ logs**
 # large data (compressed folders)
 **.zip
 **.tgz
+**.idea

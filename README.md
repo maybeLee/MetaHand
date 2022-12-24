@@ -19,8 +19,11 @@ docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root 
 
 # How to run
 
-### To train a voc model
-rm -rf /MetaHand/outputs/voc/B_random_erase_fixMutRatio_centerXY_02; ./voc_center_erase.sh
+### To run some script
+All running scripts are stored in the `./run` directory. You can directly run the script outside of the container by:
+```
+podman exec MetaHand bash -c 'cd /root && ./run/coco/train_coco.sh'
+```
 
 # Note
 
