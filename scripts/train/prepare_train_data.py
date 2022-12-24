@@ -98,7 +98,7 @@ class PreTrainData(object):
                 img_id = mutate_id.split("-")[0]
                 label_path = os.path.join(self.img_dir, f"{mutate_id}.txt")
                 shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
-        elif self.label_dir != f"{self.data_root_dir}/Labels" and self.label_dir != f"{self.data_root_dir}/labels":
+        elif self.label_dir != f"{self.data_root_dir}/Labels" and self.label_dir != f"{self.data_root_dir}/labels" and self.label_dir != f"{self.data_root_dir}/coco/labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 
     def prepare_img(self):
@@ -139,8 +139,7 @@ class PreTrainData(object):
         logger.info(f"Total Number of Test Set: {len(test_list)}")
 
     def prepare_obj(self):
-        # TODO: Need To Change This Logic Before Evaluating On COCO DataSet
-        if self.dataset == "popsquare" or self.dataset == "egohands":
+        if self.dataset == "popsquare":
             for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
                 write_content = ""
                 with open(file_path, "r") as file:
