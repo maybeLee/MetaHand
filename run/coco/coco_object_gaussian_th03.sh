@@ -1,4 +1,4 @@
-cd ../../
+# cd ../../
 MutateType=ObjectGaussianMutation
 DATASET=coco
 GPU=0,1,2
@@ -10,11 +10,11 @@ mkdir -p $log_dir
 mkdir -p $output_dir
 th=0.3
 # std_list="1_0 2_0 4_0 8_0 16_0 32_0 64_0 128_0"
-ratio_list="01 02 03 04 05 06 07 08 09"
+ratio_list="01"
 # for std in $std_list
 for ratio in $ratio_list
 do
-    MutateName=object_gaussian_1280_fixMutRatio_centerXY_${datio}
+    MutateName=object_gaussian_1280_fixMutRatio_centerXY_${ratio}
     MR=2
     LABELDIR=same
     echo "Preparing Data For ${MutateName}"
