@@ -97,7 +97,12 @@ class PreTrainData(object):
                 mutate_id = img[:-4]
                 img_id = mutate_id.split("-")[0]
                 label_path = os.path.join(self.img_dir, f"{mutate_id}.txt")
-                shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
+                if os.path.exists(f"{self.data_root_dir}/Labels/"):
+                    shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
+                elif os.path.exists(f"{self.data_root_dir}/labels/"):
+                    shutil.copy(f"{self.data_root_dir}/labels/{img_id}.txt", f"{label_path}")
+                else:
+                    raise ValueError("Cannot Find Corresponding Labels")
         elif self.label_dir != f"{self.data_root_dir}/Labels" and self.label_dir != f"{self.data_root_dir}/labels" and self.label_dir != f"{self.data_root_dir}/coco/labels":
             os.system(f"find {self.label_dir} -name '*.txt' -exec cp " + "{}" + f" {self.obj_dir} \\;")
 

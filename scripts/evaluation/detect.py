@@ -72,8 +72,7 @@ class Detector(object):
         pass
 
     def detect(self,):
-        # TODO: Currently this method is slow, not sure if it is caused by YOLO inference or frequent I/O.
-        #  Need to Check.
+        # Feature Request, check if we can make this parallel using multiprocessing.
         conf_sum = 0
         detection_count = 0
         total_num = len(self.images)
