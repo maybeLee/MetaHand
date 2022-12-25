@@ -167,17 +167,6 @@ class MetaTester(object):
                 origin_detection = self._is_detected(img_labels[j], origin_preds)
                 mutate_detection = self._is_detected(img_labels[j], mutate_preds)
                 res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
-        logger.info("Finish Comparing Detection Result. Start Filtering The Duplicated Images")
-        for type in res_id_list:
-            # We filter out duplicated images
-            img_list = []
-            for file_name in res_id_list[type]:
-                if file_name not in img_list:
-                    img_list.append(file_name)
-                else:
-                    continue
-            res_id_list[type] = img_list
-        logger.info("Finish Filtering the Duplicated Images. Saving The Result")
         if not os.path.exists("./results"):
             os.makedirs("./results")
         np.save(f"./results/res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
@@ -200,6 +189,16 @@ class MetaTester(object):
         violate_mutate_id_list = []
         for vio in violate_list:
             violate_mutate_id_list += res_id_list[vio]
+        logger.info("Finish Comparing Detection Result. Start Filtering The Duplicated Images")
+        # We filter out duplicated images
+        img_list = []
+        for file_name in violate_mutate_id_list:
+            if file_name not in img_list:
+                img_list.append(file_name)
+            else:
+                continue
+        violate_mutate_id_list = img_list
+        logger.info("Finish Filtering the Duplicated Images. Saving The Result")
         with open(f"{mutate_base}_violations.txt", "w") as file:
             text = ""
             for violate_mutate_id in violate_mutate_id_list:
