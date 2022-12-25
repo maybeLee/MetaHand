@@ -13,6 +13,7 @@ std_list="0_5 1_0 2_0 4_0 8_0 16_0 32_0 64_0 128_0"
 for std in $std_list
 do
     MutateName=BackgroundGaussian${std}
+    MR=2
     echo "Preparing Data For ${MutateName}"
 
     python -u -m scripts.evaluation.evaluate \
@@ -22,6 +23,7 @@ do
     -w=${weights_path} \
     -od=${output_dir} \
     --dataset=${DATASET} \
+    --mr=${MR} \
     --threshold=${th} > ${log_dir}/${MutateName}_${th}.log
 
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}

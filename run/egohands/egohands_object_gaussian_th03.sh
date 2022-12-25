@@ -15,6 +15,7 @@ ratio_list="01 02 03 04 05 06 07 08 09"
 for ratio in $ratio_list
 do
     MutateName=B_guassian_160_fixMutRatio_centerXY_${ratio}
+    MR=2
     echo "Preparing Data For ${MutateName}"
 
     python -u -m scripts.evaluation.evaluate \
@@ -24,6 +25,7 @@ do
     -w=${weights_path} \
     -od=${output_dir} \
     --dataset=${DATASET} \
+    --mr=${MR} \
     --threshold=${th} > ${log_dir}/${MutateName}_${th}.log
 
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}

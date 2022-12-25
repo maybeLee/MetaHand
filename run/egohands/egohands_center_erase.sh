@@ -12,6 +12,7 @@ th_list="01 02 03 04 05 06 07 08 09"
 for th in $th_list
 do
     MutateName=B_random_erase_fixMutRatio_centerXY_${th}
+    MR=2
     echo "Preparing Data For ${MutateName}"
 
     python -u -m scripts.evaluation.evaluate \
@@ -21,6 +22,7 @@ do
     -w=${weights_path} \
     -od=${output_dir} \
     --dataset=${DATASET} \
+    --mr=${MR} \
     --threshold=0.3 > ${log_dir}/${MutateName}.log
 
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_th03

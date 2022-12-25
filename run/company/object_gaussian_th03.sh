@@ -12,7 +12,7 @@ do
     MutateName=B_guassian_160_fixMutRatio_centerXY_${ratio}
     echo "Preparing Data For ${MutateName}"
     
-    python -u -m scripts.evaluation.evaluate -mi=./data_company/${MutateType}/$MutateName -od=${output_dir} --threshold=0.3 > ${log_dir}/${MutateName}.log
+    python -u -m scripts.evaluation.evaluate --mr=2 -mi=./data_company/${MutateType}/$MutateName -od=${output_dir} --threshold=0.3 > ${log_dir}/${MutateName}.log
     base_dir=./data_company/working_dir/testing/${MutateType}/${MutateName}_th03
     mkdir -p $base_dir
     mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt

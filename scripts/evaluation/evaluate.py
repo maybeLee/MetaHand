@@ -10,15 +10,28 @@ from scripts.train.prepare_train_data import MAPPING_DICT
 
 
 class MetaTester(object):
+    """MetaTester for evaluating a trained model on mutated images
+    """
+
     def __init__(self, flags):
+        """
+        Initiating the `MetaTester` class.
+        :param flags: flags containing all necessary variables.
+        flags.origin_img_dir: the directory of original images
+        flags.mutate_img_dir: the directory of mutated images
+        flags.origin_label_dir: the directory of original images' labels
+        flags.weights_path: the path stores the weights of the trained model
+        flags.only_train: for popsquare only, flags for considering training images
+        flags.output_dir: the directory storing model's prediction result on each image
+        flags.mr: 1: MR-1 (corrupting object-relevant features), 2: MR-2 (corrupting object-irrelevant features)
+        flags.dataset: the type of dataset (e.g., coco, popsquare, egohands)
+        flags.threshold: threshold used to determine the mis-detection
+        """
+
         self.origin_img_dir = flags.origin_img_dir.rstrip("/")
         self.mutate_img_dir = flags.mutate_img_dir.rstrip("/")
-        self.mutate_type = ""
+        self.mr = flags.mr
         self.idntfr = ""
-        if "Gaussian" in self.mutate_img_dir:
-            # The mutation type is ObjectGaussianMutation or BackgroundGaussianMutation.
-            # Add gaussian noise to the object or background, label will be preserved
-            self.mutate_type = "gaussian"
         self.origin_label_dir = flags.origin_label_dir.rstrip("/")
         self.output_dir = flags.output_dir
         self.weights_path = flags.weights_path
@@ -33,8 +46,8 @@ class MetaTester(object):
     @staticmethod
     def _get_label(label_dir):
         """
-        param label_dir: the dir of label files
-        return labels: {file_name1: [label1, label2], file_name2: [label1, label2]}
+        :param label_dir: The dir of label files
+        :return: {file_name1: [label1, label2], file_name2: [label1, label2]}
         Note that the file_name does not keep the extension
         """
         labels = {}
@@ -57,6 +70,10 @@ class MetaTester(object):
         return labels
 
     def get_prediction(self):
+        """
+        Get the prediction of trained model on both original images and mutated images
+        :return: None
+        """
         origin_img_name = os.path.basename(self.origin_img_dir)
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
@@ -83,7 +100,7 @@ class MetaTester(object):
                       )
         else:
             logger.info(f"Detection on {origin_img_name} Exists, Loading the Detection")
-        # origin_pred: {img_id: [label1, label2], ..., }
+        # origin_pred: {file_name: [label1, label2], ..., }
         self.origin_pred = self._get_label(origin_output_dir)
         if not os.path.exists(mutate_output_dir):
             # predict on mutate image
@@ -100,26 +117,31 @@ class MetaTester(object):
         # mutate_pred: {file_name: [label1, label2]}
         self.mutate_pred = self._get_label(mutate_output_dir)
 
+    def _is_detected(self, label, preds):
+        """
+        Check if the preds correctly detect the hand
+        :param label: [class_id, x, y, width, height]
+        :param preds: [[class_id, x, y, width, height], [...], ...]
+        :return: bool, True: preds can detect the label, False: preds cannot detect the label
+        """
+        status = False
+        if len(preds) == 0:
+            return status
+        for pred in preds:
+            # Go through all prediction and check whether the hand is detected
+            # We only check the IoU if the predicted category is the same as the ground truth
+            pred_label = pred[0]
+            if pred_label != label[0]:
+                continue
+            threshold = YoloUtils.overlapping(label, pred)
+            if threshold > self.threshold:
+                status = True
+        return status
+
     def compare_prediction(self, ):
         res_id_list = {"11": [], "10": [], "01": [], "00": []}
         # labels: {img_id1: [label1, label2], img_id2: [label1, label2]}
         labels = self._get_label(self.origin_label_dir)
-
-        def _is_detected(hand_label, preds):
-            status = False
-            if len(preds) == 0:
-                return status
-            for pred in preds:
-                # Go through all prediction and check whether the hand is detected
-                # We only check the IoU if the predicted category is the same as the ground truth
-                pred_label = pred[0]
-                if pred_label != hand_label[0]:
-                    continue
-                threshold = YoloUtils.overlapping(hand_label, pred)
-                if threshold > self.threshold:
-                    status = True
-            return status
-
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
@@ -141,22 +163,10 @@ class MetaTester(object):
             img_labels = labels[img_id]
             origin_preds = self.origin_pred[img_id]
             mutate_preds = self.mutate_pred[mutate_id]
-            if self.mutate_type == "object":
-                # MR-1: An image mutated by corrupting the features of target object(s) should lead to a different object
-                # detection result.
-                hand_id = int(mutate_id.split("-")[1].rstrip("O"))
-                origin_detection = _is_detected(img_labels[hand_id], origin_preds)
-                mutate_detection = _is_detected(img_labels[hand_id], mutate_preds)
+            for j in range(len(img_labels)):
+                origin_detection = self._is_detected(img_labels[j], origin_preds)
+                mutate_detection = self._is_detected(img_labels[j], mutate_preds)
                 res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
-            elif self.mutate_type == "background" or self.mutate_type == "gaussian":
-                # MR-2: An image mutated by not corrupting the features of target object(s) should lead to the same object
-                # detection result
-                for j in range(len(img_labels)):
-                    origin_detection = _is_detected(img_labels[j], origin_preds)
-                    mutate_detection = _is_detected(img_labels[j], mutate_preds)
-                    res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
-            else:
-                raise ValueError("Unsupported Mutation Type!")
         logger.info("Finish Comparing Detection Result. Start Filtering The Duplicated Images")
         for type in res_id_list:
             # We filter out duplicated images
@@ -177,11 +187,13 @@ class MetaTester(object):
 
     def save_violate(self, res_id_list):
         mutate_base = os.path.basename(self.mutate_img_dir)
-        if self.mutate_type == "object":
-            violate_list = ["10", "01"]
-        elif self.mutate_type == "background":
-            violate_list = ["01", "11"]
-        elif self.mutate_type == "gaussian":
+        if self.mr == 1:
+            # MR-1: An image mutated by corrupting the features of target object(s) should lead to a different object
+            # detection result.
+            violate_list = ["11", "00"]
+        elif self.mr == 2:
+            # MR-2: An image mutated by not corrupting the features of target object(s) should lead to the same object
+            # detection result
             violate_list = ["01", "10"]
         else:
             raise ValueError("Unsupported Mutation Type!")
@@ -215,6 +227,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
     parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
+    parser.add_argument("--mr", type=int, default=2, help="MR used. 1: MR-1, 2: MR-2")
     flags, unknown = parser.parse_known_args(sys.argv[1:])
     metaTester = MetaTester(flags)
     metaTester.evaluate()
