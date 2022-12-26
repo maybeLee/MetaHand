@@ -16,13 +16,13 @@ def model_predict(args):
     This function will load the `model` to predict images whose paths are stored in `images`.
     The detection result for each image is stored in save_dir.
     :param args: with the following arguments
-    param model_data: related data to load model: dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence.
+    param related data to load model: dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence.
     param images: paths of images to be predicted.
     param save_dir: directory to save the prediction result
     :return: total confidence and total number of detection
     """
-    model_data, images, save_dir = args
-    model = Detector.load_weights(*model_data)
+    dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence, images, save_dir = args
+    model = Detector.load_weights(dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence)
     conf_sum = 0
     detection_count = 0
     for i, image in enumerate(images):
@@ -156,7 +156,7 @@ class Detector(object):
             images = filtered_image_list[i:i+chunk_size]
             args.append(
                 (
-                    (self.dataset, self.yolo_cfg, self.weights_path, self.yolo_size, self.yolo_confidence),
+                    self.dataset, self.yolo_cfg, self.weights_path, self.yolo_size, self.yolo_confidence,
                     self.yolo, images, self.save_dir
                 )
             )
