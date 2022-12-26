@@ -16,12 +16,13 @@ def model_predict(args):
     This function will load the `model` to predict images whose paths are stored in `images`.
     The detection result for each image is stored in save_dir.
     :param args: with the following arguments
-    param model: model to be loaded.
+    param model_data: related data to load model: dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence.
     param images: paths of images to be predicted.
     param save_dir: directory to save the prediction result
     :return: total confidence and total number of detection
     """
-    model, images, save_dir = args
+    model_data, images, save_dir = args
+    model = Detector.load_weights(*model_data)
     conf_sum = 0
     detection_count = 0
     for i, image in enumerate(images):
@@ -73,27 +74,31 @@ class Detector(object):
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
 
-    def load_weights(self, ):
-        if self.dataset == "popsquare" or self.dataset == "egohands":
-            self.yolo = YOLO(self.yolo_cfg, self.weights_path, ["hand"])
-        elif self.dataset == "coco":
+    @staticmethod
+    def load_weights(dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence):
+        if dataset == "popsquare" or dataset == "egohands":
+            yolo = YOLO(yolo_cfg, weights_path, ["hand"])
+        elif dataset == "coco":
             name_path = "./cfg/coco.names"
             with open(name_path, "r") as file:
                 content = file.read().split("\n")[:-1]
             label_list = []
             for label in content:
                 label_list.append(label)
-            self.yolo = YOLO(self.yolo_cfg, self.weights_path, label_list)
-        elif self.dataset == "voc":
+            yolo = YOLO(yolo_cfg, weights_path, label_list)
+        elif dataset == "voc":
             name_path = "./cfg/voc.names"
             with open(name_path, "r") as file:
                 content = file.read().split("\n")[:-1]
             label_list = []
             for label in content:
                 label_list.append(label)
-            self.yolo = YOLO(self.yolo_cfg, self.weights_path, label_list)
-        self.yolo.size = int(self.yolo_size)
-        self.yolo.confidence = float(self.yolo_confidence)
+            yolo = YOLO(yolo_cfg, weights_path, label_list)
+        else:
+            raise ValueError(f"Unknown Dataset Type: {dataset}")
+        yolo.size = int(yolo_size)
+        yolo.confidence = float(yolo_confidence)
+        return yolo
 
     def load_data(self, ):
         """
@@ -149,7 +154,12 @@ class Detector(object):
         chunk_size = int(len(filtered_image_list)/self.jobs) + 1  # we set the chunk size larger so all images can be finished with `self.jobs` processes
         for i in range(start, end, chunk_size):
             images = filtered_image_list[i:i+chunk_size]
-            args.append((self.yolo, images, self.save_dir))
+            args.append(
+                (
+                    (self.dataset, self.yolo_cfg, self.weights_path, self.yolo_size, self.yolo_confidence),
+                    self.yolo, images, self.save_dir
+                )
+            )
         with Pool(self.jobs) as p:
             parallel_result = p.map(model_predict, args)
         for result in parallel_result:
@@ -179,6 +189,5 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
     flags, unknown = parser.parse_known_args()
     detector = Detector(flags)
-    detector.load_weights()
     detector.load_data()
     detector.detect()
