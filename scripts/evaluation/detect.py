@@ -1,15 +1,55 @@
 import argparse
 import glob
 import os
-import time
 import cv2
-import numpy as np
 from scripts.evaluation.yolo import YOLO
 from scripts.utils.logger import Logger
 from scripts.train.prepare_train_data import MAPPING_DICT
+from multiprocessing import Pool
 
 
 logger = Logger()
+
+
+def model_predict(args):
+    """
+    This function will load the `model` to predict images whose paths are stored in `images`.
+    The detection result for each image is stored in save_dir.
+    :param args: with the following arguments
+    param model: model to be loaded.
+    param images: paths of images to be predicted.
+    param save_dir: directory to save the prediction result
+    :return: total confidence and total number of detection
+    """
+    model, images, save_dir = args
+    conf_sum = 0
+    detection_count = 0
+    for i, image in enumerate(images):
+        logger.info(f"Progress: {i}/{len(images)}")
+        mat = cv2.imread(image)
+        width, height, inference_time, results = model.inference(mat)
+        res_path = os.path.join(save_dir, f"{os.path.basename(image)[:-4]}.txt")
+        label_path = os.path.join(save_dir, f"{os.path.basename(image)[:-4]}_label.jpg")
+        with open(res_path, "a") as file:
+            for res in results:
+                id, name, confidence, x, y, w, h = res
+                file.write("%s %s %s %s %s %s\n" % (
+                    id, str(x / width), str(y / height), str(w / width), str(h / height), str(confidence)))
+
+                cx = x + (w / 2)
+                cy = y + (h / 2)
+
+                conf_sum += confidence
+                detection_count += 1
+
+                # draw a bounding box rectangle and label on the image
+                color = (255, 0, 255)
+                cv2.rectangle(mat, (x, y), (x + w, y + h), color, 1)
+                text = "%s (%s)" % (name, round(confidence, 2))
+                cv2.putText(mat, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.25, color, 1)
+            cv2.imwrite(label_path, mat)
+    return conf_sum, detection_count
 
 
 class Detector(object):
@@ -21,6 +61,7 @@ class Detector(object):
         self.data_root_dir = MAPPING_DICT[self.dataset].rstrip("/")
         self.yolo_confidence = flags.confidence
         self.source_path = flags.source_path
+        self.jobs = flags.jobs
         self.img_dir = flags.img_dir.rstrip("/")
         self.save_dir = flags.save_dir.rstrip("/")
         self.weights_path = flags.weights_path
@@ -55,6 +96,13 @@ class Detector(object):
         self.yolo.confidence = float(self.yolo_confidence)
 
     def load_data(self, ):
+        """
+        Load images stored in `self.img_dir` to detect, the image paths will be stored in list, e.g., [path1, path2, ...]
+        This function has several modes, which is determined by `self.source_path`:
+            if self.source_path is "all": load all images stored in `self.img_dir`
+            if self.source_path is a txt file, load all images listed in the txt file from the `self.img_dir`
+        :return: None
+        """
         logger.info("Loading Images...")
         if self.source_path == "all":
             if self.img_dir.endswith(".jpg"):
@@ -75,62 +123,43 @@ class Detector(object):
         # Feature Request, check if we can make this parallel using multiprocessing.
         conf_sum = 0
         detection_count = 0
-        total_num = len(self.images)
         img_id_list = []
+
+        # Filter testing images
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
             with open(f"./{self.data_root_dir}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:
                 img_id_list.append(line)
-        for i, image in enumerate(self.images):
-            logger.info(f"Iteration: {i}/{total_num}")
-            img_id = os.path.basename(image).split("-")[0]
+        filtered_image_list = []
+        for image in self.images:
             if len(img_id_list) != 0:
                 # We only evaluate the image that belong to the training_id.txt
                 img_id = os.path.basename(image).split("-")[0]
                 if img_id in img_id_list:
                     logger.info(f"Find Test Images, Exclude!")
                     continue
-            mat = cv2.imread(image)
-            width, height, inference_time, results = self.yolo.inference(mat)
-            # print("%s in %s seconds: %s classes found!" % (os.path.basename(file), round(inference_time, 2), len(results)))
-            output = []
-            # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-            # cv2.resizeWindow('image', 848, 640)
-            res_path = os.path.join(self.save_dir, f"{os.path.basename(image)[:-4]}.txt")
-            label_path = os.path.join(self.save_dir, f"{os.path.basename(image)[:-4]}_label.jpg")
-            with open(res_path, "a") as file:
-                for res in results:
-                    id, name, confidence, x, y, w, h = res
-                    file.write("%s %s %s %s %s %s\n" % (
-                    id, str(x / width), str(y / height), str(w / width), str(h / height), str(confidence)))
-
-                    cx = x + (w / 2)
-                    cy = y + (h / 2)
-
-                    conf_sum += confidence
-                    detection_count += 1
-
-                    # draw a bounding box rectangle and label on the image
-                    color = (255, 0, 255)
-                    cv2.rectangle(mat, (x, y), (x + w, y + h), color, 1)
-                    text = "%s (%s)" % (name, round(confidence, 2))
-                    cv2.putText(mat, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.25, color, 1)
-
-                    # print("%s with %s confidence" % (name, round(confidence, 2)))
-
-                cv2.imwrite(label_path, mat)
-                # show the output image
-                # cv2.imshow('image', mat)
-                # cv2_imshow(mat)
-                # here cv2.waitKey(0)
+            filtered_image_list.append(image)
+        logger.info(f"Start Parallel Prediction With {self.jobs} Jobs.")
+        # Start parallel prediction
+        args = []
+        start = 0
+        end = len(filtered_image_list)
+        chunk_size = int(len(filtered_image_list)/self.jobs) + 1  # we set the chunk size larger so all images can be finished with `self.jobs` processes
+        for i in range(start, end, chunk_size):
+            images = filtered_image_list[i:i+chunk_size]
+            args.append((self.yolo, images, self.save_dir))
+        with Pool(self.jobs) as p:
+            parallel_result = p.map(model_predict, args)
+        for result in parallel_result:
+            assert len(result) == 2  # result contains two things: total confidence and total number of detection
+            conf_sum += result[0]
+            detection_count += result[1]
         if detection_count == 0:
             logger.info(f"AVG Confidence: 0 Count: {detection_count}")
         else:
             logger.info(f"AVG Confidence: {round(conf_sum / detection_count, 2)} Count: {detection_count}")
-        # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
@@ -141,6 +170,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', default="./outputs", help="The dir of yolo output")
     parser.add_argument('-n', '--network', default="normal", choices=["normal", "tiny", "prn", "v4-tiny"],
                         help='Network Type')
+    parser.add_argument('-j', '--jobs', default=1, help='Number of parallel jobs')
     parser.add_argument('-d', '--device', default=0, help='Device to use')
     parser.add_argument('-s', '--size', default=416, help='Size for yolo')
     parser.add_argument('-c', '--confidence', default=0.25, help='Confidence for yolo')

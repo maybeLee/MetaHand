@@ -27,6 +27,7 @@ do
     -od=${output_dir} \
     --dataset=${DATASET} \
     --mr=${MR} \
+    --jobs=4 \
     --threshold=${th} > ${log_dir}/${MutateName}_${th}.log
 
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}

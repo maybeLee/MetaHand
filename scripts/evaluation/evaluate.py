@@ -26,6 +26,7 @@ class MetaTester(object):
         flags.mr: 1: MR-1 (corrupting object-relevant features), 2: MR-2 (corrupting object-irrelevant features)
         flags.dataset: the type of dataset (e.g., coco, popsquare, egohands)
         flags.threshold: threshold used to determine the mis-detection
+        flags.jogs: number of parallel jobs
         """
 
         self.origin_img_dir = flags.origin_img_dir.rstrip("/")
@@ -42,6 +43,7 @@ class MetaTester(object):
         self.origin_pred = {}
         self.mutate_pred = {}
         self.threshold = flags.threshold
+        self.jobs = flags.jobs
 
     @staticmethod
     def _get_label(label_dir):
@@ -94,6 +96,7 @@ class MetaTester(object):
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.origin_img_dir} "
                       f"-w={self.weights_path} "
+                      f"-j={self.jobs} "
                       f"--save_dir={origin_output_dir} "
                       f"--cfg={cfg_path} "
                       f"--dataset={self.dataset}"
@@ -108,6 +111,7 @@ class MetaTester(object):
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.mutate_img_dir} "
                       f"-w={self.weights_path} "
+                      f"-j={self.jobs} "
                       f"--save_dir={mutate_output_dir} "
                       f"--cfg={cfg_path} "
                       f"--dataset={self.dataset}"
@@ -222,6 +226,7 @@ if __name__ == "__main__":
     parser.add_argument("-mi", "--mutate_img_dir", type=str, default="./data_company/MutatedSet/objects", help="The dir of mutated images")
     parser.add_argument("-ol", "--origin_label_dir", type=str, default="./data_company/Labels/", help="The dir of original labels")
     parser.add_argument("-od", "--output_dir", default="./outputs", help="The dir of yolo output")
+    parser.add_argument('-j', '--jobs', default=1, help='Number of parallel jobs')
     parser.add_argument("-w", "--weights_path", default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
