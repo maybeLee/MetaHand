@@ -55,7 +55,6 @@ def model_predict(args):
 
 class Detector(object):
     def __init__(self, flags):
-        self.yolo = None
         self.yolo_cfg = flags.cfg_path
         self.yolo_size = flags.size
         self.dataset = flags.dataset
@@ -157,7 +156,7 @@ class Detector(object):
             args.append(
                 (
                     self.dataset, self.yolo_cfg, self.weights_path, self.yolo_size, self.yolo_confidence,
-                    self.yolo, images, self.save_dir
+                    images, self.save_dir
                 )
             )
         with Pool(self.jobs) as p:
