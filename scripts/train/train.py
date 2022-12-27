@@ -16,13 +16,13 @@ class Trainer(object):
     def train(self, ):
         logger.info(f"{self.retrain}, {self.pretrained_path}, {self.gpu}")
         if self.retrain == 1:
-            os.system(f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -gpus {self.gpu} -dont_show -map -clear")
+            os.system(f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} -gpus {self.gpu} -map -clear")
         elif self.retrain == -1:
-            os.system(f"./tools/darknet/darknet detector test {self.obj_path} {self.cfg_path} -gpus {self.gpu} -dont_show -map -clear")
+            os.system(f"./tools/darknet/darknet detector test {self.obj_path} {self.cfg_path} -gpus {self.gpu} -map -clear")
         elif self.retrain == 0 and self.pretrained_path is not None:
             logger.info("Continue Training")
             os.system(
-                f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -dont_show -map")
+                f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -map")
         else:
             raise ValueError(f"Unknown Training Option! retrain: {self.retrain}, pretrained_path: {self.pretrained_path}")
 
