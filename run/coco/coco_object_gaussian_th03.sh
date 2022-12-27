@@ -10,11 +10,11 @@ mkdir -p $log_dir
 mkdir -p $output_dir
 th=0.3
 # std_list="1_0 2_0 4_0 8_0 16_0 32_0 64_0 128_0"
-ratio_list="01"
+ratio_list="02"
 # for std in $std_list
 for ratio in $ratio_list
 do
-    MutateName=object_gaussian_1280_fixMutRatio_centerXY_${ratio}
+    MutateName=object_gaussian_160_fixMutRatio_centerXY_${ratio}
     MR=2
     LABELDIR=same
     echo "Preparing Data For ${MutateName}"
@@ -50,7 +50,7 @@ done
 gpu_id=0,1,2
 for ratio in $ratio_list
 do
-    MutateName=object_gaussian_1280_fixMutRatio_centerXY_${ratio}
+    MutateName=object_gaussian_160_fixMutRatio_centerXY_${ratio}
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
     CFGPATH=./cfg/yolov3.cfg
     WORKDIR=$base_dir/data
