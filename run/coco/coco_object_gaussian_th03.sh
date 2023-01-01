@@ -13,7 +13,7 @@ th=0.3
 ratio_list="02"
 # for std in $std_list
 num_epoch=100
-CFGPATH=./cfg/yolov3.cfg
+original_cfg_path=./cfg/yolov3.cfg
 for ratio in $ratio_list
 do
     MutateName=object_gaussian_160_fixMutRatio_centerXY_${ratio}
@@ -45,7 +45,7 @@ do
     --img_dir=${IMGDIR} \
     --label_dir=${LABELDIR} \
     --target_dir=${WORKDIR} \
-    --dataset=${DATASET} --num_epoch=$num_epoch --cfg_path=$CFGPATH >> ${log_dir}/${MutateName}_${th}.log
+    --dataset=${DATASET} --num_epoch=$num_epoch --cfg_path=$original_cfg_path >> ${log_dir}/${MutateName}_${th}.log
 
 done
 
@@ -55,6 +55,7 @@ do
     MutateName=object_gaussian_160_fixMutRatio_centerXY_${ratio}
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
     WORKDIR=$base_dir/data
+    CFGPATH=${WORKDIR}/yolov3.cfg
     OBJPATH=${WORKDIR}/obj.data
     base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
     python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_${th}.log
