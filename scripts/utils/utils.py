@@ -43,7 +43,7 @@ def replace_lines(file_path, new_file_path, num_iteration, pattern="max_batches 
         with open(file_path) as old_file:
             for line in old_file:
                 if pattern in line:
-                    new_line = f"{pattern}{num_iteration}"
+                    new_line = f"{pattern}{num_iteration}\n"
                 else:
                     new_line = line
                 new_file.write(new_line)
