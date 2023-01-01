@@ -1,4 +1,7 @@
 import os
+from tempfile import mkstemp
+from shutil import move, copymode
+from os import fdopen, remove
 
 
 def deprecated(func):
@@ -22,6 +25,32 @@ def get_files(target_dir, end_pattern):
                 continue
             file_lists.append(os.path.join(root, file))
     return file_lists
+
+
+def replace_lines(file_path, new_file_path, num_iteration, pattern="max_batches = "):
+    """
+    Modify [file_path] by modifying the MAX_BATCHES. Note that this function cannot be used for general functionalities.
+    :param file_path: path of file to be modified
+    :param new_file_path: new path of file
+    :param num_iteration: the number of iterations
+    :param pattern: max_batches =
+    :return:
+    """
+
+    # Create temp file
+    fh, abs_path = mkstemp()
+    with fdopen(fh, 'w') as new_file:
+        with open(file_path) as old_file:
+            for line in old_file:
+                if pattern in line:
+                    new_line = f"{pattern}{num_iteration}"
+                else:
+                    new_line = line
+                new_file.write(new_line)
+    # Copy the file permissions from the old file to the new file
+    copymode(file_path, abs_path)
+    # Move new file
+    move(abs_path, new_file_path)
 
 
 class YoloUtils:

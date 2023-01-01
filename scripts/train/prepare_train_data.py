@@ -1,13 +1,14 @@
 import os
 from sklearn.model_selection import train_test_split
 from scripts.utils.logger import Logger
-from scripts.utils.utils import get_files, deprecated
+from scripts.utils.utils import get_files, deprecated, replace_lines
 import glob
 import shutil
 import argparse
 import sys
 logger = Logger()
 MAPPING_DICT = {"popsquare": "./data_company", "coco": "./data_coco", "voc": "./data_voc", "egohands": "./data_egohands"}
+BATCH_SIZE = 64
 
 
 class PreTrainData(object):
@@ -25,6 +26,8 @@ class PreTrainData(object):
         self.valid_path = os.path.join(self.target_dir, "valid.txt")
         self.test_path = os.path.join(self.target_dir, "test.txt")
         self.append = flags.append  # 0: do not append (default), 1: append without removing original data
+        self.cfg_path = flags.cfg_path
+        self.num_epoch = flags.num_epoch
         self.initiate_dirs()
 
     @deprecated
@@ -143,6 +146,16 @@ class PreTrainData(object):
         logger.info(f"Total Number of Validation Set: {len(valid_list)}")
         logger.info(f"Total Number of Test Set: {len(test_list)}")
 
+    def update_cfg(self):
+        """
+        Update the number of iterations in cfg since the total number of training dataset may update. We update this to make sure the epoch is 100
+        :return:
+        """
+        num_train = len(self.img_list)
+        num_iteration = int(num_train*self.num_epoch/BATCH_SIZE)
+        logger.info(f"Total Number of Training Set: {len(self.img_list)}, Epoch: {self.num_epoch}, Number of Iteration: {num_iteration}")
+        replace_lines(self.cfg_path, os.path.join(self.target_dir, "yolov3.cfg"), num_iteration)
+
     def prepare_obj(self):
         if self.dataset == "popsquare":
             for file_path in glob.glob(f"{self.obj_dir}/*.txt"):
@@ -185,6 +198,7 @@ class PreTrainData(object):
             self.prepare_img()
         self.prepare_label()
         self.prepare_train_valid_test()
+        self.update_cfg()
         self.prepare_obj()
 
 
@@ -196,6 +210,8 @@ if __name__ == "__main__":
     parser.add_argument("--target_dir", type=str, help="The dir of train/test/valid data")
     parser.add_argument("--append", type=int, default=0, help="Whether to add images to existing work dir")
     parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
+    parser.add_argument("--num_epoch", type=int, default=100, help="Epoch to train the model")
+    parser.add_argument("--cfg_path", type=str, help="The path of configuration")
     flags, _ = parser.parse_known_args(sys.argv[1:])
     preTrainData = PreTrainData(flags)
     preTrainData.load_data()
