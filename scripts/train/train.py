@@ -22,7 +22,7 @@ class Trainer(object):
         elif self.retrain == 0 and self.pretrained_path is not None:
             logger.info("Continue Training")
             os.system(
-                f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -map")
+                f"./tools/darknet/darknet detector train {self.obj_path} {self.cfg_path} {self.pretrained_path} -gpus {self.gpu} -map")
         else:
             raise ValueError(f"Unknown Training Option! retrain: {self.retrain}, pretrained_path: {self.pretrained_path}")
 
