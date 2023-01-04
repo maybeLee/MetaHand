@@ -1,7 +1,7 @@
 # This is a utility script to continue training some models for analysis
 MutateType=ObjectGaussianMutation
 th=0.3
-ratio=0.2
+ratio=02
 data_dir=data_coco
 MutateName=object_gaussian_160_fixMutRatio_centerXY_${ratio}
 base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
