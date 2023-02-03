@@ -14,9 +14,9 @@ import os
 
 
 SOURCE_VAL_IMG_DIR = "/root/data_imagenet/ILSVRC/Data/DET/val"
-DEST_TRAIN_IMG_DIR = "/root/data_imagenet/images"
-DEST_VAL_IMG_DIR = "/root/data_imagenet/val/images"
-DEST_VAL_LABEL_DIR = "/root/data_imagenet/val/labels"
+DEST_TRAIN_IMG_DIR = "/root/data_imagenet/imagenet/images/train2013"
+DEST_VAL_IMG_DIR = "/root/data_imagenet/imagenet/images/val2013"
+DEST_VAL_LABEL_DIR = "/root/data_imagenet/imagenet/labels/val2013"
 TRAIN_ID_PATH = "/root/data_imagenet/training_id.txt"
 TEST_ID_PATH = "/root/data_imagenet/testing_id.txt"
 
