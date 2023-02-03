@@ -13,7 +13,5 @@ LOGDIR=logs/imagenet/testing
 mkdir -p $LOGDIR
 LOGFILE=${LOGDIR}/train_origin.log
 rm -rf ${WORKDIR}
-python -u -m scripts.train.prepare_train_data
---source_path=${TRAIN_ID}
---img_dir=${IMGDIR} --label_dir=${LABELDIR} --target_dir=${WORKDIR} --dataset=${DATASET} --num_epoch=$num_epoch --cfg_path=$original_cfg_path > ${LOGFILE}
+python -u -m scripts.train.prepare_train_data --source_path=${TRAIN_ID} --img_dir=${IMGDIR} --label_dir=${LABELDIR} --target_dir=${WORKDIR} --dataset=${DATASET} --num_epoch=$num_epoch --cfg_path=$original_cfg_path > ${LOGFILE}
 python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$GPU >> ${LOGFILE}
