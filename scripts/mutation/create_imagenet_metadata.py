@@ -65,7 +65,7 @@ def create_label_file(label_path, image_path):
         get_label_int = get_label_int_from_label_str(label_str)
         normalised_coordinates = normalise_bbox(image_path, bbox_corr)
         line_to_add_to_label_file += f"{get_label_int} {normalised_coordinates[0]} {normalised_coordinates[1]} {normalised_coordinates[2]} {normalised_coordinates[3]}\n"
-    f = open(os.path.join(DEST_VAL_LABEL_DIR), f'{label_path.split("/")[-1].replace(".xml", ".txt")}')
+    f = open(os.path.join(DEST_VAL_LABEL_DIR, f'{label_path.split("/")[-1].replace(".xml", ".txt")}'), 'w')
     f = open(f'/root/data_imagenet/labels/', "w")
     f.write(line_to_add_to_label_file)
     f.close()
