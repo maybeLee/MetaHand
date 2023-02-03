@@ -64,7 +64,7 @@ def create_label_file(label_path, image_path):
         bbox_corr = [int(xmin), int(xmax), int(ymin), int(ymax)]
         get_label_int = get_label_int_from_label_str(label_str)
         normalised_coordinates = normalise_bbox(image_path, bbox_corr)
-        line_to_add_to_label_file += f"{get_label_int} {normalised_coordinates[0]} {normalised_coordinates[1]} {normalised_coordinates[2]} {normalised_coordinates[3]}\n"
+        line_to_add_to_label_file += f"{int(get_label_int)-1} {normalised_coordinates[0]} {normalised_coordinates[1]} {normalised_coordinates[2]} {normalised_coordinates[3]}\n"
     f = open(os.path.join(DEST_VAL_LABEL_DIR, f'{label_path.split("/")[-1].replace(".xml", ".txt")}'), 'w')
     f.write(line_to_add_to_label_file)
     f.close()
@@ -72,17 +72,17 @@ def create_label_file(label_path, image_path):
 
 def copy_image_val():
     for image_path in Path(SOURCE_VAL_IMG_DIR).rglob('*.JPEG'):
-        shutil.copy(image_path.resolve(), DEST_VAL_IMG_DIR)
+        # shutil.copy(image_path.resolve(), DEST_VAL_IMG_DIR)
         create_label_file(str(image_path.resolve()).replace("Data", "Annotations").replace(".JPEG", ".xml"),
                           str(image_path.resolve()))
 
 
 def write_training_testing_id(train_img_dir, test_img_dir):
     with open(TRAIN_ID_PATH, 'w') as file:
-        for train_path in Path(train_img_dir).rglob('*.JPEG'):
+        for train_path in Path(train_img_dir).rglob('*.jpg'):
             file.write(f'{train_path.resolve()}\n')  # resolve will get the absolute path
     with open(TEST_ID_PATH, 'w') as file:
-        for test_path in Path(test_img_dir).rglob('*.JPEG'):
+        for test_path in Path(test_img_dir).rglob('*.jpg'):
             file.write(f'{test_path.resolve()}\n')  # resolve will get the absolute path
 
 
