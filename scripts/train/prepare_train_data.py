@@ -7,7 +7,7 @@ import shutil
 import argparse
 import sys
 logger = Logger()
-MAPPING_DICT = {"popsquare": "./data_company", "coco": "./data_coco", "voc": "./data_voc", "egohands": "./data_egohands"}
+MAPPING_DICT = {"popsquare": "./data_company", "coco": "./data_coco", "voc": "./data_voc", "egohands": "./data_egohands", "imagenet": "./data_imagenet"}
 BATCH_SIZE = 64
 
 
@@ -100,6 +100,8 @@ class PreTrainData(object):
                 mutate_id = img[:-4]
                 img_id = mutate_id.split("-")[0]
                 label_path = os.path.join(self.img_dir, f"{mutate_id}.txt")
+                # We check if there are some existing labels we can copy from.
+                # If the Labels or labels directory exist, we do so, otherwise we raise an exception.
                 if os.path.exists(f"{self.data_root_dir}/Labels/"):
                     shutil.copy(f"{self.data_root_dir}/Labels/{img_id}.txt", f"{label_path}")
                 elif os.path.exists(f"{self.data_root_dir}/labels/"):
@@ -174,6 +176,8 @@ class PreTrainData(object):
                 file.write("hands")
         elif self.dataset == "coco":
             shutil.copy("./cfg/coco.names", obj_names_path)
+        elif self.dataset == "imagenet":
+            shutil.copy("./cfg/imagenet.names", obj_names_path)
         elif self.dataset == "voc":
             shutil.copy("./cfg/voc.names", obj_names_path)
         else:
@@ -182,7 +186,9 @@ class PreTrainData(object):
             if self.dataset == "coco":
                 file.write("classes = 80\n")
                 file.write(f"eval=coco\n")
-            if self.dataset == "voc":
+            elif self.dataset == "imagenet":
+                file.write("classes = 200\n")
+            elif self.dataset == "voc":
                 file.write("classes = 20\n")
             elif self.dataset == "popsquare" or self.dataset == "egohands":
                 file.write("classes = 1\n")
@@ -198,7 +204,8 @@ class PreTrainData(object):
             self.prepare_img()
         self.prepare_label()
         self.prepare_train_valid_test()
-        self.update_cfg()
+        if self.dataset == "coco" or self.dataset == "imagenet":
+            self.update_cfg()
         self.prepare_obj()
 
 
