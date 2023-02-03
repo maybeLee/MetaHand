@@ -80,10 +80,10 @@ def copy_image_val():
 def write_training_testing_id(train_img_dir, test_img_dir):
     with open(TRAIN_ID_PATH, 'w') as file:
         for train_path in Path(train_img_dir).rglob('*.JPEG'):
-            file.write(train_path.resolve())  # resolve will get the absolute path
+            file.write(str(train_path.resolve()))  # resolve will get the absolute path
     with open(TEST_ID_PATH, 'w') as file:
         for test_path in Path(test_img_dir).rglob('*.JPEG'):
-            file.write(test_path.resolve())  # resolve will get the absolute path
+            file.write(str(test_path.resolve()))  # resolve will get the absolute path
 
 
 if __name__ == "__main__":
