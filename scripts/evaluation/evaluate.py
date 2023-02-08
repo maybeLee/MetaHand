@@ -24,7 +24,7 @@ class MetaTester(object):
         flags.only_train: for popsquare only, flags for considering training images
         flags.output_dir: the directory storing model's prediction result on each image
         flags.mr: 1: MR-1 (corrupting object-relevant features), 2: MR-2 (corrupting object-irrelevant features)
-        flags.dataset: the type of dataset (e.g., coco, popsquare, egohands)
+        flags.dataset: the type of dataset (e.g., coco, popsquare, egohands, imagenet)
         flags.threshold: threshold used to determine the mis-detection
         flags.jogs: number of parallel jobs
         """
@@ -88,11 +88,13 @@ class MetaTester(object):
             cfg_path = "./cfg/yolov3.cfg"
         elif self.dataset == "egohands":
             cfg_path = "./cfg/egohands.cfg"
+        elif self.dataset == "imagenet":
+            cfg_path = "./cfg/yolov3-imagenet.cfg"
         else:
             raise ValueError("Undefined Dataset Found!!")
         if not os.path.exists(origin_output_dir):
             # predict on original image
-            logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Hand Detection")
+            logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Object Detection")
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.origin_img_dir} "
                       f"-w={self.weights_path} "
@@ -107,7 +109,7 @@ class MetaTester(object):
         self.origin_pred = self._get_label(origin_output_dir)
         if not os.path.exists(mutate_output_dir):
             # predict on mutate image
-            logger.info(f"Detection on {mutate_output_dir} Does Not Exist, Conducting Hand Detection")
+            logger.info(f"Detection on {mutate_output_dir} Does Not Exist, Conducting Object Detection")
             os.system(f"python -u -m scripts.evaluation.detect "
                       f"-i=all --img_dir={self.mutate_img_dir} "
                       f"-w={self.weights_path} "
@@ -149,7 +151,7 @@ class MetaTester(object):
         img_id_list = []
         if self.only_train == 1:
             # We only evaluate the image that belong to the training_id.txt
-            # No need for this under coco or egohands scenario because we did not involve test images when mutating
+            # No need for this under coco, imagenet or egohands scenario because we did not involve test images when mutating
             with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
                 content = file.read().split("\n")[:-1]
             for line in content:

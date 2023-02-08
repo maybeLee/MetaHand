@@ -75,18 +75,11 @@ class Detector(object):
 
     @staticmethod
     def load_weights(dataset, yolo_cfg, weights_path, yolo_size, yolo_confidence):
+        name_dict = {"coco": "./cfg/coco.names", "voc": "./cfg/voc.names", "imagenet": "./cfg/imagenet.names"}
         if dataset == "popsquare" or dataset == "egohands":
             yolo = YOLO(yolo_cfg, weights_path, ["hand"])
-        elif dataset == "coco":
-            name_path = "./cfg/coco.names"
-            with open(name_path, "r") as file:
-                content = file.read().split("\n")[:-1]
-            label_list = []
-            for label in content:
-                label_list.append(label)
-            yolo = YOLO(yolo_cfg, weights_path, label_list)
-        elif dataset == "voc":
-            name_path = "./cfg/voc.names"
+        elif dataset in name_dict.keys():
+            name_path = name_dict[dataset]
             with open(name_path, "r") as file:
                 content = file.read().split("\n")[:-1]
             label_list = []
