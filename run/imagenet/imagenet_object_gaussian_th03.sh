@@ -5,7 +5,7 @@ GPU=0,1,2
 data_dir=data_imagenet
 log_dir=logs/imagenet/testing/${MutateType}
 weights_path=./${data_dir}/working_dir/testing/origin_model/backup/yolov3_best.weights
-output_dir=./outputs/coco
+output_dir=./outputs/imagenet
 mkdir -p $log_dir
 mkdir -p $output_dir
 th=0.3
