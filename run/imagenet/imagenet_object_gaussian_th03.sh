@@ -10,7 +10,7 @@ mkdir -p $log_dir
 mkdir -p $output_dir
 th=0.3
 # std_list="1_0 2_0 4_0 8_0 16_0 32_0 64_0 128_0"
-ratio_list="02"
+ratio_list="03"
 # for std in $std_list
 num_epoch=100
 original_cfg_path=./cfg/yolov3-imagenet.cfg
