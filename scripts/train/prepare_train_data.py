@@ -205,7 +205,9 @@ class PreTrainData(object):
         self.prepare_label()
         self.prepare_train_valid_test()
         if self.dataset == "coco" or self.dataset == "imagenet":
-            self.update_cfg()
+            if "yolov7" not in self.target_dir:
+                # we don't reconfigure the epoch for yolov7
+                self.update_cfg()
         self.prepare_obj()
 
 
