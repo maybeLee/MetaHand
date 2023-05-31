@@ -3,6 +3,7 @@ import glob
 import os
 from scripts.utils.logger import Logger
 from multiprocessing import Pool
+import time
 
 
 logger = Logger()
@@ -18,9 +19,9 @@ def detect_parallel_yolov7(args):
     param save_dir: directory to save the prediction result
     :return: total number of detection
     """
-    weights_path, yolo_size, yolo_confidence, img_dir, i_start, i_end, save_dir = args
+    weights_path, yolo_size, yolo_confidence, img_dir, i_start, i_end, save_dir, base_name = args
     os.system(f"cd tools/yolov7/;python detect.py --weights {weights_path} "
-              f"--source {img_dir} --img-size {yolo_size} --i_start {i_start} --i_end {i_end} --save-txt;cd ../../")
+              f"--source {img_dir} --img-size {yolo_size} --name {base_name} --i_start {i_start} --i_end {i_end} --save-txt >/dev/null 2>&1;cd ../../")
 
 
 class Detector(object):
@@ -30,6 +31,7 @@ class Detector(object):
         self.yolo_confidence = flags.confidence
         self.jobs = flags.jobs
         self.img_dir = flags.img_dir.rstrip("/")
+        self.base_name = os.path.basename(self.img_dir.rstrip("/*"))
         self.save_dir = flags.save_dir.rstrip("/")
         self.weights_path = flags.weights_path
         self.images = []
@@ -50,6 +52,7 @@ class Detector(object):
 
     def detect(self,):
         logger.info(f"Start Parallel Prediction With {self.jobs} Jobs.")
+        s_time = time.time()
 
         # Start parallel prediction
         args = []
@@ -61,17 +64,19 @@ class Detector(object):
             args.append(
                 (
                     self.weights_path, self.yolo_size, self.yolo_confidence,
-                    self.img_dir, i_start, i_end, self.save_dir
+                    self.img_dir, i_start, i_end, self.save_dir, self.base_name
                 )
             )
         with Pool(self.jobs) as p:
             parallel_result = p.map(detect_parallel_yolov7, args)
-        logger.info("Finish detecting")
+        logger.info("Finish detecting, merging the detection results")
+        e_time = time.time()
+        logger.info(f"Total Time Used: {e_time - s_time}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--img_dir", default="./coco/images/val2017", type=str, help="The dir of image data")
+    parser.add_argument("--img_dir", default="./coco/images/train2017", type=str, help="The dir of image data")
     parser.add_argument('-w', '--weights_path', default="./runs/train/yolov7/weights/best.pt", help="Path to model weights")
     parser.add_argument('--save_dir', default="./outputs", help="The dir of yolo output")
     parser.add_argument('-j', '--jobs', type=int, default=1, help='Number of parallel jobs')
