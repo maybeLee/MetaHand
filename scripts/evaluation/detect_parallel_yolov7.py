@@ -48,7 +48,6 @@ class Detector(object):
         """
         self.img_dir.rstrip("*")
         self.images = sorted(glob.glob(os.path.join("tools/yolov7/", self.img_dir, '*.*')))  # dir
-        print(self.images)
 
     def detect(self,):
         logger.info(f"Start Parallel Prediction With {self.jobs} Jobs.")
