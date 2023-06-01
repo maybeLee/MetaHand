@@ -89,5 +89,5 @@ def write_training_testing_id(train_img_dir, test_img_dir):
 if __name__ == "__main__":
     Path(DEST_VAL_IMG_DIR).mkdir(parents=True, exist_ok=True)
     Path(DEST_VAL_LABEL_DIR).mkdir(parents=True, exist_ok=True)
-    copy_image_val()
+    # copy_image_val()
     write_training_testing_id(DEST_TRAIN_IMG_DIR, DEST_VAL_IMG_DIR)
