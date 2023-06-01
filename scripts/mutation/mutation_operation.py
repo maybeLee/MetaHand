@@ -37,7 +37,7 @@ class mutation_operation:
 
   def center_to_topleft(self,label):
     return [label[0]-label[2]/2, label[1]-label[3]/2, label[2], label[3]]
-
+    
   def unnormalize(self,labels,dataset,img):
     obj = img.copy()
     HEIGHT = len(obj)
@@ -49,6 +49,7 @@ class mutation_operation:
         # print("DEBUG: label original: " + str(label))
       print(f"dataset is: {dataset}")
       if dataset == "company" or dataset=="ego" or dataset=="coco":
+          #xywh: label[1] is x-center, label[2] is y-center, label[3] is x-length, label[4] is y-length
           return_labels.append(self.center_to_topleft([label[1]*WIDTH, label[2]*HEIGHT, label[3]*WIDTH, label[4]*HEIGHT]))
       # elif dataset == "coco":
       #     return_labels.append([label[1], label[2], label[3], label[4]])
