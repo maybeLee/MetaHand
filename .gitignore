@@ -66,6 +66,7 @@ src/version.h
 lib/
 share/
 darknet/include/darknet/
+tools/yolov7/runs/*
 uselib
 uselib_track
 vcpkg/
