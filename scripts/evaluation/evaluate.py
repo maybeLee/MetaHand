@@ -221,6 +221,7 @@ class MetaTester(object):
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
                 continue
+            # some images cannot be found on the mutated lists, for these cases, we just ignore it.
             img_labels = labels[img_id] if img_id in labels else []
             origin_preds = self.origin_pred[img_id] if img_id in self.origin_pred else []
             mutate_preds = self.mutate_pred[mutate_id] if mutate_id in self.mutate_pred else []
