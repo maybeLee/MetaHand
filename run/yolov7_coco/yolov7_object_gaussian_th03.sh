@@ -51,7 +51,7 @@ do
     python -m torch.distributed.launch --nproc_per_node 3 \
     --master_port 9527 train.py \
     --workers 8 \
-    --device 0,1,2 --sync-bn \
+    --device 0,1 --sync-bn \
     --batch-size 66 \
     --data ${v7_base}/coco.yaml \
     --img 320 320 --cfg cfg/training/yolov7.yaml \
