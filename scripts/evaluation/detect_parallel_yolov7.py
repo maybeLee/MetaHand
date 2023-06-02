@@ -20,6 +20,8 @@ def detect_parallel_yolov7(args):
     :return: total number of detection
     """
     weights_path, yolo_size, yolo_confidence, img_dir, i_start, i_end, save_dir, base_name = args
+    weights_path = weights_path.replace("tools/yolov7", "")
+    img_dir = img_dir.replace("tools/yolov7", "")
     os.system(f"cd tools/yolov7/;python detect.py --weights {weights_path} "
               f"--source {img_dir} --img-size {yolo_size} --name {base_name} --i_start {i_start} --i_end {i_end} --save-txt --increment_path >/dev/null 2>&1;cd ../../")
 
@@ -47,7 +49,7 @@ class Detector(object):
         :return: None
         """
         self.img_dir.rstrip("*")
-        self.images = sorted(glob.glob(os.path.join("tools/yolov7/", self.img_dir, '*.*')))  # dir
+        self.images = sorted(glob.glob(os.path.join(self.img_dir, '*.*')))  # dir
 
     def detect(self,):
         logger.info(f"Start Parallel Prediction With {self.jobs} Jobs.")
@@ -75,8 +77,8 @@ class Detector(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--img_dir", default="./coco/images/train2017", type=str, help="The dir of image data")
-    parser.add_argument('-w', '--weights_path', default="./runs/train/yolov7/weights/best.pt", help="Path to model weights")
+    parser.add_argument("--img_dir", default="./tools/yolov7/coco/images/train2017", type=str, help="The dir of image data")
+    parser.add_argument('-w', '--weights_path', default="./tools/yolov7/runs/train/yolov7/weights/best.pt", help="Path to model weights")
     parser.add_argument('--save_dir', default="./outputs", help="The dir of yolo output")
     parser.add_argument('-j', '--jobs', type=int, default=1, help='Number of parallel jobs')
     parser.add_argument('-d', '--device', default=0, help='Device to use')
