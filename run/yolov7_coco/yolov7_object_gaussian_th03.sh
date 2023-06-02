@@ -30,34 +30,30 @@ do
     --jobs=8 \
     --threshold=${th} > ${log_dir}/${MutateName}_${th}.log
 
-#    base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
-#    mkdir -p $base_dir
-#    mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt
-#
-#    TRAIN_ID=${base_dir}/${MutateName}_violations.txt
-#    IMGDIR=./${data_dir}/${MutateType}/$MutateName
-#    WORKDIR=$base_dir/data
-#
-#    python -u -m scripts.train.prepare_train_data \
-#    --source_path=${TRAIN_ID} \
-#    --img_dir=${IMGDIR} \
-#    --label_dir=${LABELDIR} \
-#    --target_dir=${WORKDIR} \
-#    --dataset=${DATASET} --num_epoch=$num_epoch --cfg_path=$original_cfg_path >> ${log_dir}/${MutateName}_${th}.log
+    base_dir=./tools/yolov7/runs/train/${MutateType}/${MutateName}_${th}
+    v7_base=./runs/train/${MutateType}/${MutateName}_${th}
+    mkdir -p $base_dir
+    mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt
 
+    train_txt=${base_dir}/${MutateName}_violations.txt
+    cp ./tools/yolov7/data/coco.yaml ${base_dir}/coco.yaml
+    # This line should use \" instead of \'
+    sed -i "s/train: .\/coco\/train2017.txt  # 118287 images/train: ${train_txt}/" ${base_dir}/coco.yaml
+
+    gpu_id=0,1,2
+    cd tools/yolov7
+    python -m torch.distributed.launch --nproc_per_node 3 \
+    --master_port 9527 train.py \
+    --workers 8 \
+    --device ${gpu_id} --sync-bn \
+    --batch-size 66 \
+    --data ${v7_base}/coco.yaml \
+    --img 320 320 --cfg cfg/training/yolov7.yaml \
+    --weights '' \
+    --name yolov7_${MutateName} \
+    --hyp data/hyp.scratch.p5.yaml
+    cd ../../
 done
-
-#gpu_id=0,1,2
-#for ratio in $ratio_list
-#do
-#    MutateName=object_gaussian_160_fixMutRatio_centerXY_${ratio}
-#    base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
-#    WORKDIR=$base_dir/data
-#    CFGPATH=${WORKDIR}/yolov3.cfg
-#    OBJPATH=${WORKDIR}/obj.data
-#    base_dir=./${data_dir}/working_dir/testing/${MutateType}/${MutateName}_${th}
-#    python -u -m scripts.train.train --obj_path=${OBJPATH} --cfg_path=$CFGPATH --retrain=1 --gpu=$gpu_id >> ${log_dir}/${MutateName}_${th}.log
-#done
 
 echo $"Finish All Jobs"
 

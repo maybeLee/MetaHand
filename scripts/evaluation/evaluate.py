@@ -221,9 +221,9 @@ class MetaTester(object):
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
                 continue
-            img_labels = labels[img_id]
-            origin_preds = self.origin_pred[img_id]
-            mutate_preds = self.mutate_pred[mutate_id]
+            img_labels = labels[img_id] if img_id in labels else []
+            origin_preds = self.origin_pred[img_id] if img_id in self.origin_pred else []
+            mutate_preds = self.mutate_pred[mutate_id] if mutate_id in self.mutate_pred else []
             for j in range(len(img_labels)):
                 origin_detection = self._is_detected(img_labels[j], origin_preds)
                 mutate_detection = self._is_detected(img_labels[j], mutate_preds)
