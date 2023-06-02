@@ -117,7 +117,7 @@ class MetaTester(object):
         mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
         if self.dataset == "yolov7":
             origin_output_dir = os.path.join(origin_output_dir, "labels")
-            mutate_output_dir = os.path.join(origin_output_dir, "labels")
+            mutate_output_dir = os.path.join(mutate_output_dir, "labels")
 
         if self.dataset == "popsquare":
             cfg_path = "./cfg/cross-hands.cfg"
