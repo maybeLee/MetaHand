@@ -1,4 +1,4 @@
-# cd ../../
+cd ../../
 MutateType=ObjectGaussianMutation
 DATASET=yolov7
 GPU=0,1,2
