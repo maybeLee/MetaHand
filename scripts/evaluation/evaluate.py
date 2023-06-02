@@ -269,6 +269,8 @@ class MetaTester(object):
                     text += violate_mutate_id + "\n"
                 else:
                     violate_mutate_path = os.path.join(self.mutate_img_dir, f"{violate_mutate_id}.jpg")
+                    if self.dataset == "yolov7":
+                        violate_mutate_path = violate_mutate_path.replace("tools/yolov7/", "")
                     text += violate_mutate_path + "\n"
             file.write(text)
 
