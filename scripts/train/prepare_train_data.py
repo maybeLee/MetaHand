@@ -222,6 +222,17 @@ if __name__ == "__main__":
     parser.add_argument("--num_epoch", type=int, default=100, help="Epoch to train the model")
     parser.add_argument("--cfg_path", type=str, help="The path of configuration")
     flags, _ = parser.parse_known_args(sys.argv[1:])
-    preTrainData = PreTrainData(flags)
-    preTrainData.load_data()
-    preTrainData.prepare_darknet_data()
+    if flags.dataset != "yolov7":
+        preTrainData = PreTrainData(flags)
+        preTrainData.load_data()
+        preTrainData.prepare_darknet_data()
+    else:
+        # special consideration on yolov7
+        with open(flags.source_path, "r") as t:
+            mutate_img_list = t.read().strip().splitlines()
+        with open("./tools/yolov7/coco/train2017.txt", "r") as t:
+            origin_img_list = t.read().strip().splitlines()
+        mutate_img_list.extend(origin_img_list)
+        with open(os.path.join(flags.target_dir, "train.txt"), "w") as file:
+            for img in mutate_img_list:
+                file.write(str(img) + '\n')

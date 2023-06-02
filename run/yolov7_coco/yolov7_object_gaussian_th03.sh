@@ -19,10 +19,10 @@ do
     MR=2
     LABELDIR=same
     echo "Preparing Data For ${MutateName}"
-
+    IMGDIR=./${data_dir}/${MutateType}/${MutateType}/${MutateName}
     python -u -m scripts.evaluation.evaluate \
     -oi=./${data_dir}/images/train2017 \
-    -mi=./${data_dir}/${MutateType}/${MutateType}/${MutateName} \
+    -mi=${IMGDIR} \
     -ol=./${data_dir}/labels/train2017 \
     -w=${weights_path} \
     -od=${output_dir} \
@@ -36,10 +36,16 @@ do
     mkdir -p $base_dir
     mv ${MutateName}_violations.txt ${base_dir}/${MutateName}_violations.txt
 
-    train_txt=${base_dir}/${MutateName}_violations.txt
+    # new train file will be saved in ./{base_dir}/train.txt
+    python -u -m scripts.train.prepare_train_data \
+    --source_path=${base_dir}/${MutateName}_violations.txt \
+    --target_dir=${base_dir} \
+    --dataset=${DATASET}
+
+    train_txt=${base_dir}/train.txt
     cp ./tools/yolov7/data/coco.yaml ${base_dir}/coco.yaml
     # This line should use \" instead of \'
-    sed -i "s/train: .\/coco\/train2017.txt  # 118287 images/train: ${train_txt}/" ${base_dir}/coco.yaml
+    sed -i "s|train: .\/coco\/train2017.txt  # 118287 images|train: ${train_txt}|" ${base_dir}/coco.yaml
 
     gpu_id=0,1,2
     cd tools/yolov7
