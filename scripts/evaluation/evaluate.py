@@ -129,6 +129,8 @@ class MetaTester(object):
             cfg_path = "./cfg/egohands.cfg"
         elif self.dataset == "imagenet":
             cfg_path = "./cfg/yolov3-imagenet.cfg"
+        elif self.dataset == "yolov7":
+            pass
         else:
             raise ValueError("Undefined Dataset Found!!")
         if not os.path.exists(origin_output_dir):
