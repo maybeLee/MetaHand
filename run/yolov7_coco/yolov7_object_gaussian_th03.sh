@@ -21,7 +21,7 @@ do
 
     python -u -m scripts.evaluation.evaluate \
     -oi=./${data_dir}/images/train2017 \
-    -mi=./${data_dir}/${MutateType}/${MutateName} \
+    -mi=./${data_dir}/${MutateType}/${MutateType}/${MutateName} \
     -ol=./${data_dir}/labels/train2017 \
     -w=${weights_path} \
     -od=${output_dir} \
