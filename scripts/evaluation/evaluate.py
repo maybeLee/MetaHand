@@ -184,7 +184,7 @@ class MetaTester(object):
         # labels: {img_id1: [label1, label2], img_id2: [label1, label2]}
         labels = self._get_label(self.origin_label_dir, self.dataset == "yolov7")
         img_id_list = []
-        if self.only_train == 1 and self.dataset is not "yolov7":
+        if self.only_train == 1 and self.dataset != "yolov7":
             # We only evaluate the image that belong to the training_id.txt
             # No need for this under coco, imagenet or egohands scenario because we did not involve test images when mutating
             with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
