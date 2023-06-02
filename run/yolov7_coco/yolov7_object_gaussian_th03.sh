@@ -1,3 +1,4 @@
+#!/bin/bash
 cd ../../
 MutateType=ObjectGaussianMutation
 DATASET=yolov7
