@@ -233,7 +233,7 @@ if __name__ == "__main__":
         with open("./tools/yolov7/coco/train2017.txt", "r") as t:
             origin_img_list = t.read().strip().splitlines()
         for line in origin_img_list:
-            mutate_img_list.append(os.path.abspath("tools/yolov7/"+line))
+            mutate_img_list.append(os.path.abspath("tools/yolov7/coco/"+line))
         with open(os.path.join(flags.target_dir, "train.txt"), "w") as file:
             for img in mutate_img_list:
                 file.write(str(img) + '\n')
