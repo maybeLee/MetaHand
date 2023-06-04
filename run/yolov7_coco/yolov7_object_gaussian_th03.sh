@@ -47,11 +47,12 @@ do
     # This line should use \" instead of \'
     sed -i "s|train: .\/coco\/train2017.txt  # 118287 images|train: ${train_txt}|" ${base_dir}/coco.yaml
 
+    gpu_id=0,1,2
     cd tools/yolov7
     python -m torch.distributed.launch --nproc_per_node 3 \
     --master_port 9527 train.py \
     --workers 8 \
-    --device 0,1 --sync-bn \
+    --device ${gpu_id} --sync-bn \
     --batch-size 66 \
     --data ${v7_base}/coco.yaml \
     --img 320 320 --cfg cfg/training/yolov7.yaml \
