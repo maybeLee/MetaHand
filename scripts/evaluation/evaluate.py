@@ -65,7 +65,7 @@ class MetaTester(object):
         self.jobs = flags.jobs
 
     @staticmethod
-    def _get_label(label_dir, segments=False):
+    def _get_label(label_dir, whether_segments=False):
         """
         :param label_dir: The dir of label files
         :param segments: Whether the label is stored in the segments format, if so, we need to convert it to xywh
@@ -76,7 +76,7 @@ class MetaTester(object):
         for label_path in glob.glob(f"{label_dir}/*.txt"):
             file_name = os.path.basename(label_path)[:-4]
             labels[file_name] = []
-            if segments is True:
+            if whether_segments is True:
                 with open(label_path, 'r') as file:
                     l = [x.split() for x in file.read().strip().splitlines()]
                     if any([len(x) > 8 for x in l]):  # is segment
