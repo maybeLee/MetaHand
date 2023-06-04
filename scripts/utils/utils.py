@@ -59,9 +59,11 @@ class YoloUtils:
         return [label[0] - label[2] / 2, label[1] - label[3] / 2, label[2], label[3]]
 
     @staticmethod
-    def overlapping(label, pred):
+    def overlapping(label, pred, pred_center=True):
         # calculation of overlapping ratio in IoU
         label = [label[0]] + YoloUtils.center_to_topleft(label[1:5])
+        if pred_center is True:
+            pred = [pred[0]] + YoloUtils.center_to_topleft(pred[1:5])
         x1 = label[1]
         y1 = label[2]
         w1 = label[3]

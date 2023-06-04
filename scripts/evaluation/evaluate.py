@@ -68,7 +68,7 @@ class MetaTester(object):
     def _get_label(label_dir, whether_segments=False):
         """
         :param label_dir: The dir of label files
-        :param segments: Whether the label is stored in the segments format, if so, we need to convert it to xywh
+        :param whether_segments: Whether the label is stored in the segments format, if so, we need to convert it to xywh
         :return: {file_name1: [label1, label2], file_name2: [label1, label2]}
         Note that the file_name does not keep the extension
         """
@@ -194,7 +194,7 @@ class MetaTester(object):
             pred_label = pred[0]
             if pred_label != label[0]:
                 continue
-            threshold = YoloUtils.overlapping(label, pred)
+            threshold = YoloUtils.overlapping(label, pred, self.dataset=="yolov7")
             if threshold > self.threshold:
                 status = True
         return status
