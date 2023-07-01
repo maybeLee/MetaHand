@@ -344,6 +344,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       # print(id+" -- done", len(labels), "labels")
       # hv_label += 1
       # mut += len(labels)
+      print(f"Finish Processing {id}")
       return 
   
 
@@ -402,7 +403,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
       if True or os.name == 'nt':
           # print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset)
-          if count == 3:
+          if count == 20:
              break
       else:
           # perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset)
