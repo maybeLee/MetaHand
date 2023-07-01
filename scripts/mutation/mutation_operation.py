@@ -463,5 +463,5 @@ if __name__ == "__main__":
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
-    # raise ValueError("Test error")
+    #raise ValueError("Test error")
     main(image_path,label_path,mutate_path,float(random_erase),float(guassian_sigma),random_erase_mode,dataset_normalization_type,object_or_background,dataset)
