@@ -390,7 +390,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     mut = 0
     #iterate through a list of labels
     print("Initiating multi-processes")
-    n_jobs_parameter=8
+    n_jobs_parameter=2
     # if __debug__:
     #   label_list = label_list[:12]
     #   n_jobs_parameter=5
@@ -400,7 +400,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     print("label_list: " + str(len(label_list)))
     for count,id in enumerate(label_list):
       print("INFO: processing id " + str(id))
-      if True or os.name == 'nt':#set this to true for debugging
+      if False:#set this to true for debugging
           print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset)
           if count == 20:
