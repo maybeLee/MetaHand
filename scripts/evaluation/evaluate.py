@@ -9,6 +9,25 @@ import numpy as np
 from scripts.train.prepare_train_data import MAPPING_DICT
 
 
+def xyxy2xywh(x):
+    # Convert nx4 boxes from [x1, y1, x2, y2] to [x, y, w, h] where xy1=top-left, xy2=bottom-right
+    y = np.copy(x)
+    y[:, 0] = (x[:, 0] + x[:, 2]) / 2  # x center
+    y[:, 1] = (x[:, 1] + x[:, 3]) / 2  # y center
+    y[:, 2] = x[:, 2] - x[:, 0]  # width
+    y[:, 3] = x[:, 3] - x[:, 1]  # height
+    return y
+
+
+def segments2boxes(segments):
+    # Convert segment labels to box labels, i.e. (cls, xy1, xy2, ...) to (cls, xywh)
+    boxes = []
+    for s in segments:
+        x, y = s.T  # segment xy
+        boxes.append([x.min(), y.min(), x.max(), y.max()])  # cls, xyxy
+    return xyxy2xywh(np.array(boxes))  # cls, xywh
+
+
 class MetaTester(object):
     """MetaTester for evaluating a trained model on mutated images
     """
@@ -46,9 +65,10 @@ class MetaTester(object):
         self.jobs = flags.jobs
 
     @staticmethod
-    def _get_label(label_dir):
+    def _get_label(label_dir, whether_segments=False):
         """
         :param label_dir: The dir of label files
+        :param whether_segments: Whether the label is stored in the segments format, if so, we need to convert it to xywh
         :return: {file_name1: [label1, label2], file_name2: [label1, label2]}
         Note that the file_name does not keep the extension
         """
@@ -56,19 +76,34 @@ class MetaTester(object):
         for label_path in glob.glob(f"{label_dir}/*.txt"):
             file_name = os.path.basename(label_path)[:-4]
             labels[file_name] = []
-            with open(label_path, "r") as file:
-                content = file.read().split("\n")[:-1]
-            for line in content:
-                arr = line.split(" ")
-                new_arr = []
-                for i in arr:
-                    try:
-                        new_arr.append(float(i))
-                    except:
-                        pass
-                arr = new_arr
-                arr[0] = int(arr[0])
-                labels[file_name].append(arr)
+            if whether_segments is True:
+                with open(label_path, 'r') as file:
+                    l = [x.split() for x in file.read().strip().splitlines()]
+                    if any([len(x) > 8 for x in l]):  # is segment
+                        classes = np.array([x[0] for x in l], dtype=np.float32)
+                        segments = [np.array(x[1:], dtype=np.float32).reshape(-1, 2) for x in l]  # (cls, xy1...)
+                        l = np.concatenate((classes.reshape(-1, 1), segments2boxes(segments)), 1)  # (cls, xywh)
+                    l = np.array(l, dtype=np.float32)
+                if len(l):
+                    assert l.shape[1] == 5, 'labels require 5 columns each'
+                    assert (l >= 0).all(), 'negative labels'
+                    assert (l[:, 1:] <= 1).all(), 'non-normalized or out of bounds coordinate labels'
+                    assert np.unique(l, axis=0).shape[0] == l.shape[0], 'duplicate labels'
+                labels[file_name] = l.tolist()
+            else:
+                with open(label_path, "r") as file:
+                    content = file.read().split("\n")[:-1]
+                for line in content:
+                    arr = line.split(" ")
+                    new_arr = []
+                    for i in arr:
+                        try:
+                            new_arr.append(float(i))
+                        except:
+                            pass
+                    arr = new_arr
+                    arr[0] = int(arr[0])
+                    labels[file_name].append(arr)
         return labels
 
     def get_prediction(self):
@@ -80,6 +115,10 @@ class MetaTester(object):
         mutate_img_name = os.path.basename(self.mutate_img_dir)
         origin_output_dir = os.path.join(self.output_dir, origin_img_name)
         mutate_output_dir = os.path.join(self.output_dir, mutate_img_name)
+        if self.dataset == "yolov7":
+            origin_output_dir = os.path.join(origin_output_dir, "labels")
+            mutate_output_dir = os.path.join(mutate_output_dir, "labels")
+
         if self.dataset == "popsquare":
             cfg_path = "./cfg/cross-hands.cfg"
         elif self.dataset == "voc":
@@ -90,19 +129,28 @@ class MetaTester(object):
             cfg_path = "./cfg/egohands.cfg"
         elif self.dataset == "imagenet":
             cfg_path = "./cfg/yolov3-imagenet.cfg"
+        elif self.dataset == "yolov7":
+            pass
         else:
             raise ValueError("Undefined Dataset Found!!")
         if not os.path.exists(origin_output_dir):
             # predict on original image
             logger.info(f"Detection on {origin_img_name} Does Not Exist, Conducting Object Detection")
-            os.system(f"python -u -m scripts.evaluation.detect "
-                      f"-i=all --img_dir={self.origin_img_dir} "
-                      f"-w={self.weights_path} "
-                      f"-j={self.jobs} "
-                      f"--save_dir={origin_output_dir} "
-                      f"--cfg={cfg_path} "
-                      f"--dataset={self.dataset}"
-                      )
+            if self.dataset == "yolov7":
+                os.system(f"python -u -m scripts.evaluation.detect_parallel_yolov7 "
+                          f"--img_dir={self.origin_img_dir} "
+                          f"-w={self.weights_path} "
+                          f"-j={self.jobs} "
+                          )
+            else:
+                os.system(f"python -u -m scripts.evaluation.detect "
+                          f"-i=all --img_dir={self.origin_img_dir} "
+                          f"-w={self.weights_path} "
+                          f"-j={self.jobs} "
+                          f"--save_dir={origin_output_dir} "
+                          f"--cfg={cfg_path} "
+                          f"--dataset={self.dataset}"
+                          )
         else:
             logger.info(f"Detection on {origin_img_name} Exists, Loading the Detection")
         # origin_pred: {file_name: [label1, label2], ..., }
@@ -110,14 +158,21 @@ class MetaTester(object):
         if not os.path.exists(mutate_output_dir):
             # predict on mutate image
             logger.info(f"Detection on {mutate_output_dir} Does Not Exist, Conducting Object Detection")
-            os.system(f"python -u -m scripts.evaluation.detect "
-                      f"-i=all --img_dir={self.mutate_img_dir} "
-                      f"-w={self.weights_path} "
-                      f"-j={self.jobs} "
-                      f"--save_dir={mutate_output_dir} "
-                      f"--cfg={cfg_path} "
-                      f"--dataset={self.dataset}"
-                      )
+            if self.dataset == "yolov7":
+                os.system(f"python -u -m scripts.evaluation.detect_parallel_yolov7 "
+                          f"--img_dir={self.mutate_img_dir} "
+                          f"-w={self.weights_path} "
+                          f"-j={self.jobs} "
+                          )
+            else:
+                os.system(f"python -u -m scripts.evaluation.detect "
+                          f"-i=all --img_dir={self.mutate_img_dir} "
+                          f"-w={self.weights_path} "
+                          f"-j={self.jobs} "
+                          f"--save_dir={mutate_output_dir} "
+                          f"--cfg={cfg_path} "
+                          f"--dataset={self.dataset}"
+                          )
         else:
             logger.info(f"Detection on {mutate_output_dir} Exists, Loading the Detection")
         # mutate_pred: {file_name: [label1, label2]}
@@ -139,7 +194,7 @@ class MetaTester(object):
             pred_label = pred[0]
             if pred_label != label[0]:
                 continue
-            threshold = YoloUtils.overlapping(label, pred)
+            threshold = YoloUtils.overlapping(label, pred, self.dataset=="yolov7")
             if threshold > self.threshold:
                 status = True
         return status
@@ -147,9 +202,9 @@ class MetaTester(object):
     def compare_prediction(self, ):
         res_id_list = {"11": [], "10": [], "01": [], "00": []}
         # labels: {img_id1: [label1, label2], img_id2: [label1, label2]}
-        labels = self._get_label(self.origin_label_dir)
+        labels = self._get_label(self.origin_label_dir, self.dataset == "yolov7")
         img_id_list = []
-        if self.only_train == 1:
+        if self.only_train == 1 and self.dataset != "yolov7":
             # We only evaluate the image that belong to the training_id.txt
             # No need for this under coco, imagenet or egohands scenario because we did not involve test images when mutating
             with open(f"{MAPPING_DICT[self.dataset]}/testing_id.txt") as file:
@@ -166,9 +221,10 @@ class MetaTester(object):
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
                 continue
-            img_labels = labels[img_id]
-            origin_preds = self.origin_pred[img_id]
-            mutate_preds = self.mutate_pred[mutate_id]
+            # some images cannot be found on the mutated lists, for these cases, we just ignore it.
+            img_labels = labels[img_id] if img_id in labels else []
+            origin_preds = self.origin_pred[img_id] if img_id in self.origin_pred else []
+            mutate_preds = self.mutate_pred[mutate_id] if mutate_id in self.mutate_pred else []
             for j in range(len(img_labels)):
                 origin_detection = self._is_detected(img_labels[j], origin_preds)
                 mutate_detection = self._is_detected(img_labels[j], mutate_preds)
@@ -213,6 +269,10 @@ class MetaTester(object):
                     text += violate_mutate_id + "\n"
                 else:
                     violate_mutate_path = os.path.join(self.mutate_img_dir, f"{violate_mutate_id}.jpg")
+                    if self.dataset == "yolov7":
+                        # change relative path to absolute path
+                        violate_mutate_path = os.path.abspath(violate_mutate_path)
+                        # violate_mutate_path = violate_mutate_path.replace("tools/yolov7/", "")
                     text += violate_mutate_path + "\n"
             file.write(text)
 
