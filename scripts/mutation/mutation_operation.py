@@ -389,7 +389,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     hv_label = 0
     mut = 0
     #iterate through a list of labels
-    print("Initiating multi-processes")
+    # print("Initiating multi-processes")
     n_jobs_parameter=2
     # if __debug__:
     #   label_list = label_list[:12]
@@ -463,4 +463,5 @@ if __name__ == "__main__":
     # image_path = "/data1/wcleungag/ImageSet/"
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
+    # raise ValueError("Test error")
     main(image_path,label_path,mutate_path,float(random_erase),float(guassian_sigma),random_erase_mode,dataset_normalization_type,object_or_background,dataset)

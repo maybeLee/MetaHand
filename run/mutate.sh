@@ -57,7 +57,7 @@ do
             o_or_b="object"
             fi
     fi
-    echo "running guassian noise ${guass_noise} and randon erase ${rand_erase}, mutation target is ${o_or_b}"
+    # echo "running guassian noise ${guass_noise} and randon erase ${rand_erase}, mutation target is ${o_or_b}"
     python -O ./scripts/mutation/mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_sigma $guass_noise --object_or_background $o_or_b --dataset ${which_dataset}
 done
 done
