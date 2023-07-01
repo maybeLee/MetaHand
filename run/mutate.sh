@@ -18,7 +18,7 @@ elif [[ ${which_dataset} == "coco" ]]
 then
     img=/root/tools/yolov7/coco/images/train2017/   #Public dataset原始图像的路径
     label=/root/tools/yolov7/coco/labels/train2017/ #Public dataset标签的路径
-    mutate=/root/tools/yolov7/coco/ObjectGaussianMutation/     #Public dataset变异图像的路径
+    mutate=/root/tools/yolov7/coco/test_image/     #Public dataset变异图像的路径
 elif [[ ${which_dataset} == "imagenet" ]]
 then
     if [[ ! -d /root/data_imagenet/images ]]; then
