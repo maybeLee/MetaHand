@@ -18,7 +18,7 @@ elif [[ ${which_dataset} == "coco" ]]
 then
     img=/ssddata1/users/dlproj/MetaHand/tools/yolov7/coco/images/train2017/   #Public dataset原始图像的路径
     label=/ssddata1/users/dlproj/MetaHand/tools/yolov7/coco/labels/train2017/ #Public dataset标签的路径
-    mutate=/ssddata1/users/toli/MetaHand/data_coco/mutated/      #Public dataset变异图像的路径
+    mutate=/data/toli/MetaHand_test/data_coco/mutated/      #Public dataset变异图像的路径
 elif [[ ${which_dataset} == "imagenet" ]]
 then
     if [[ ! -d /root/data_imagenet/images ]]; then

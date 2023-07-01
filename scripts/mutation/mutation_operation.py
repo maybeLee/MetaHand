@@ -38,7 +38,7 @@ class mutation_operation:
   #center to topleft needs to be called when the given bbox corrdinate is x_center,y_center,x_width,y_width
   def center_to_topleft(self,label):
     unnormalized_corr = [label[0]-label[2]/2, label[1]-label[3]/2, label[2], label[3]]
-    print(f"retrieved corrdinate: xmin{unnormalized_corr[0]}, xmax {unnormalized_corr[0] + unnormalized_corr[2]}. ymin {unnormalized_corr[1]}, ymax {unnormalized_corr[1] + unnormalized_corr[3]}")
+    # print(f"retrieved corrdinate: xmin{unnormalized_corr[0]}, xmax {unnormalized_corr[0] + unnormalized_corr[2]}. ymin {unnormalized_corr[1]}, ymax {unnormalized_corr[1] + unnormalized_corr[3]}")
     return unnormalized_corr
 
   def process_coco_label(self,label):
@@ -70,14 +70,14 @@ class mutation_operation:
     for label in labels:
       # if __debug__:
         # print("DEBUG: label original: " + str(label))
-      print(f"dataset is: {dataset}")
+      # print(f"dataset is: {dataset}")
       # if dataset == "company" or dataset=="ego" or dataset=="coco" or dataset=="imagenet":
       #xywh: label[1] is x-center, label[2] is y-center, label[3] is x-length, label[4] is y-length
       if dataset == "coco":
         label = self.process_coco_label(label)
       return_labels.append(self.center_to_topleft([label[1]*WIDTH, label[2]*HEIGHT, label[3]*WIDTH, label[4]*HEIGHT]))
-      print("DEBUG: img height length " + str(len(obj)))
-      print("DEBUG: img width length " + str(len(obj[0])))
+      # print("DEBUG: img height length " + str(len(obj)))
+      # print("DEBUG: img width length " + str(len(obj[0])))
       
       # elif dataset == "coco":
       #     return_labels.append([label[1], label[2], label[3], label[4]])
@@ -150,8 +150,8 @@ class mutation_operation:
         obj[i][j] = [obj[i][j][0] + np.random.normal(mean, guassian_sigma),obj[i][j][1] + np.random.normal(mean, guassian_sigma),obj[i][j][2] + np.random.normal(mean, guassian_sigma)]
     if len(bbox) != 0:
       # cnt = 0
-      if __debug__:
-        print("DEBUG: bbox is " + str(bbox))
+      # if __debug__:
+      #   print("DEBUG: bbox is " + str(bbox))
       for box in bbox:
         x, y, w, h = int(box[0]), int(box[1]), int(box[2]), int(box[3])
         
@@ -160,12 +160,12 @@ class mutation_operation:
             target_i = min(y+i,max_i-1)
             target_j = min(x+j,max_j-1)
             obj[target_i][target_j] = img[target_i][target_j]
-      print("saving mutated image")
+      # print("saving mutated image")
       writeStatus = cv2.imwrite(self.write_path + "BackgroundGaussianMutation/background_gaussian_" + str(guassian_sigma).replace(".","_") + "/" + filename[:-4] + ".jpg", obj)      #save image
-      if writeStatus is False:
-        print("cv2 write failed")
-      else:
-        print("cv2 write successful")
+      # if writeStatus is False:
+      #   print("cv2 write failed")
+      # else:
+      #   print("cv2 write successful")
         # raise ValueError("cv2 write failed")
     else:
       raise ValueError("Should not encounter empty bbox")
@@ -215,14 +215,14 @@ class mutation_operation:
           cnt = 0
           crop_img = img.copy()
           for box in bbox:
-              if __debug__:
-                print("the bbox being proceesed: " + str(box))
+              # if __debug__:
+              #   print("the bbox being proceesed: " + str(box))
               x, y, w, h = int(box[0]), int(box[1]), max(int(box[2]),1), max(int(box[3]),1)
               original_area = w*h
-              if __debug__:
-                print("DEBUG: w is : " + str(w))
-                print("DEBUG: h is : " + str(h))
-                print("DEBUG: original_area is : " + str(original_area))
+              # if __debug__:
+              #   print("DEBUG: w is : " + str(w))
+              #   print("DEBUG: h is : " + str(h))
+              #   print("DEBUG: original_area is : " + str(original_area))
               if random_erase > 0.0:
                 if "varyXY" in random_erase_mode:
                   x = int(x+w*random.uniform(0.0, 1.0-random_erase))
@@ -243,17 +243,17 @@ class mutation_operation:
                 # if h == -1 or w == -1:
                 #   raise ValueError("invlid operation, random erase mode must be varyMutRatio or fixMutRatio")
                 
-              print("the random erase shrinks by " + str(w*h/original_area*100))
+              # print("the random erase shrinks by " + str(w*h/original_area*100))
               
               y_start = y if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else y-h/2
               y_end = y+h if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else y+h/2
               x_start = x if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else x-w/2
               x_end = x+w if "varyXY" in random_erase_mode or "fixXY" in random_erase_mode else x+w/2
-              if __debug__:
-                print("DEBUG: y_start is : " + str(y_start))
-                print("DEBUG: y_end is : " + str(y_end))
-                print("DEBUG: x_start is : " + str(x_start))
-                print("DEBUG: x_end is : " + str(x_end))
+              # if __debug__:
+              #   print("DEBUG: y_start is : " + str(y_start))
+              #   print("DEBUG: y_end is : " + str(y_end))
+              #   print("DEBUG: x_start is : " + str(x_start))
+              #   print("DEBUG: x_end is : " + str(x_end))
               for i in range(int(y_start),int(y_end) + 1):
                   for j in range(int(x_start),int(x_end)+1):
                     #y+i can exceed 480, x+j cannot exceed 640 i.e., image size
@@ -308,11 +308,11 @@ class mutation_operation:
   #   f.close()
     
 def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset):
-      print("INFO: processing id: " + str(id) + "\n")
+      # print("INFO: processing id: " + str(id) + "\n")
       labels = mo.get_label(id)
       id = os.path.basename(id)
       if len(labels)==0:#print message to show that the label does not exist
-          print(id+" -- no label")
+          # print(id+" -- no label")
           # no_label+=1
           return
 
@@ -334,14 +334,14 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       # mo.rm_not_obj(id[:-4]+".jpg", bbox) #make objects other than hands become black
       # mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=False) #make all objects (including hands) become black
       if object_or_background == "background":
-          print("INFO: mutation operator: guassian noise to background")
+          # print("INFO: mutation operator: guassian noise to background")
           mo.add_guassian_noise_to_bg(id[:-4]+".jpg", bbox, guassian_sigma)
       elif object_or_background == "object":
-          print("INFO: mutation operator: random erase object")
+          # print("INFO: mutation operator: random erase object")
           mo.rm_all_obj(id[:-4]+".jpg", bbox, random_erase=random_erase,random_erase_mode=random_erase_mode,guassian_sigma=guassian_sigma)
       else:
         raise ValueError("invalid parameter value: expected background or object but got " + str(object_or_background))
-      print(id+" -- done", len(labels), "labels")
+      # print(id+" -- done", len(labels), "labels")
       # hv_label += 1
       # mut += len(labels)
       return 
@@ -397,11 +397,11 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_sigma) for id in label_list)
     pool = Pool(processes=n_jobs_parameter)
     start_time = time.time()
-    print("label_list: " + str(len(label_list)))
+    # print("label_list: " + str(len(label_list)))
     for count,id in enumerate(label_list):
-      print("INFO: processing id " + str(id))
+      # print("INFO: processing id " + str(id))
       if True or os.name == 'nt':#set this to true for debugging
-          print(f"processing label id {id}")
+          # print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset)
           if count == 20:
              break
@@ -411,6 +411,7 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     # print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
     pool.close()
     pool.join()
+    print("Mutation completes!")
       # p = Process(target=perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma))
       # p.start()
       # p.join()
