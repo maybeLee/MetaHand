@@ -12,20 +12,23 @@ then
     echo "Found Image Directory" 
 else
     echo "Error: Image Directory $1 does not exists."
+    exit 1
 fi
 
 if [ -d $2 ] 
 then
     echo "Found Label Directory" 
 else
-    echo "Error: Label Directory $1 does not exists."
+    echo "Error: Label Directory $2 does not exists."
+    exit 1
 fi
 
 if [ -d $3 ] 
 then
     echo "Found Output Directory" 
 else
-    echo "Error: Output Directory $1 does not exists."
+    echo "Error: Output Directory $3 does not exists."
+    exit 1
 fi
 
 # which_dataset=$1
@@ -56,9 +59,8 @@ fi
 # else
 #     echo "Invalid programme input, expected 'company', 'coco', 'ego', or 'imagenet' but got ${which_dataset}"
 #     exit 1
-fi
 
-mkdir -p $mutate
+#mkdir -p $mutate
 # chmod 777 -R $mutate
 # mkdir -p ${mutate}
 # mkdir -p ${mutate}log #for recording which process finishes during multi-processing
@@ -83,7 +85,7 @@ do
             fi
     fi
     # echo "running guassian noise ${guass_noise} and randon erase ${rand_erase}, mutation target is ${o_or_b}"
-    python -O ./scripts/mutation/mutation_operation.py --image_path $img --label_path $label --mutate_path $mutate --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_sigma $guass_noise --object_or_background $o_or_b --dataset ${which_dataset}
+    python -O ./scripts/mutation/mutation_operation.py --image_path $1 --label_path $2 --mutate_path $3 --random_erase $rand_erase --random_erase_mode fixMutRatio_centerXY --guassian_sigma $guass_noise --object_or_background $o_or_b --dataset ${which_dataset}
 done
 done
 
