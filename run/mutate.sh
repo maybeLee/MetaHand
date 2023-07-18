@@ -28,6 +28,11 @@ then
     img=/root/data_imagenet/images/   #Public dataset原始图像的路径
     label=/root/data_imagenet/labels/ #Public dataset标签的路径
     mutate=/root/data_imagenet/      #Public dataset变异图像的路径
+elif [[ ${which_dataset} == "pilot" ]]
+then
+    img=/root/data_pilot/images/   #Public dataset原始图像的路径
+    label=/root/data_pilot/labels/ #Public dataset标签的路径
+    mutate=/root/data_pilot/ObjactGaussianMutation/      #Public dataset变异图像的路径
 else
     echo "Invalid programme input, expected 'company', 'coco', 'ego', or 'imagenet' but got ${which_dataset}"
     exit 1
