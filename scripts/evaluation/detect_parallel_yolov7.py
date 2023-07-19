@@ -83,10 +83,6 @@ class Detector(object):
         e_time = time.time()
         logger.info(f"Total Time Used: {e_time - s_time}")
 
-    def detect_single(self):
-        args = (self.weights_path, self.yolo_size, self.yolo_confidence, self.img_dir, None, None, self.save_dir, self.base_name)
-        detect_parallel_yolov7(args)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
