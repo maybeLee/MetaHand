@@ -48,8 +48,17 @@ class Detector(object):
         Load images stored in `self.img_dir` to detect, the image paths will be stored in list, e.g., [path1, path2, ...]
         :return: None
         """
-        self.img_dir.rstrip("*")
-        self.images = sorted(glob.glob(os.path.join(self.img_dir, '*.*')))  # dir
+        if os.path.isfile(self.img_dir):
+            # if the image path is a file, invoke detect_single.sh,
+            # otherwise it is a directory, invoke detect_parallel_yolov7.sh
+            if not self.img_dir.endswith(".jpg"):
+                raise ValueError(f"Invalid image format: {self.img_dir}. The image should be .jpg format.")
+            self.images = [self.img_dir]
+        elif os.path.isdir(detector.img_dir):
+            self.img_dir.rstrip("*")
+            self.images = sorted(glob.glob(os.path.join(self.img_dir, '*.*')))  # dir
+        else:
+            raise ValueError(f"Invalid Image Path: {self.img_dir}")
 
     def detect(self,):
         logger.info(f"Start Parallel Prediction With {self.jobs} Jobs.")
@@ -90,16 +99,5 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--confidence', default=0.25, help='Confidence for yolo')
     flags, unknown = parser.parse_known_args()
     detector = Detector(flags)
-    if os.path.isfile(detector.img_dir):
-        # if the image path is a file, invoke detect_single.sh,
-        # otherwise it is a directory, invoke detect_parallel_yolov7.sh
-        if not detector.img_dir.endswith(".jpg"):
-            raise ValueError(f"Invalid image format: {detector.img_dir}. The image should be .jpg format.")
-        detector.detect_single()
-    elif os.path.isdir(detector.img_dir):
-        detector.load_data()
-        detector.detect()
-    else:
-        raise ValueError(f"Invalid Image Path: {detector.img_dir}")
-
-
+    detector.load_data()
+    detector.detect()
