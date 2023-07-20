@@ -16,6 +16,8 @@
 import os
 import random
 import shutil
+import sys
+import argparse
 
 random.seed(1234)
 
@@ -87,8 +89,9 @@ def run(img_dir, label_dir, dest_dir):
     split_train_val(img_dir, dest_dir)
 
 if __name__ == "__main__":
-    source_image_dir = "./data_pilot/images"
-    source_label_dir = "./data_pilot/labels"
-    target_dir = "./tools/yolov7/pilotstudy"
-    run(source_image_dir, source_label_dir, target_dir)
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source_img_dir", type=str, default="./data_pilot/images", help="the directory of images")
+    parser.add_argument("--source_label_dir", type=str, default="./data_pilot/labels", help="The directory of labels")
+    parser.add_argument("--target_dir", type=str, default="./tools/yolov7/pilotstudy", help="The destination of data")
+    flags, _ = parser.parse_known_args(sys.argv[1:])
+    run(flags.source_img_dir, flags.source_label_dir, flags.target_dir)
