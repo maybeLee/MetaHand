@@ -84,7 +84,7 @@ def split_train_val(img_dir, dest_dir):
             f.write(path + "\n")
 
     # add yaml file
-    with open(os.path.join(dest_dir, "data.yaml"), "r") as f:
+    with open(os.path.join(dest_dir, "data.yaml"), "w") as f:
         """
             train: ./pilotstudy/train.txt  # images
             val: ./pilotstudy/val.txt  # images
