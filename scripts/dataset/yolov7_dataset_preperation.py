@@ -113,6 +113,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_img_dir", type=str, default="./data_pilot/images", help="the directory of images")
     parser.add_argument("--src_label_dir", type=str, default="./data_pilot/labels", help="The directory of labels")
-    parser.add_argument("--target_dir", type=str, default="./tools/yolov7/pilotstudy", help="The destination of data")
+    parser.add_argument("--target_dir", type=str, default="./pilotstudy", help="The destination of data")
     flags, _ = parser.parse_known_args(sys.argv[1:])
     run(flags.src_img_dir, flags.src_label_dir, flags.target_dir)
