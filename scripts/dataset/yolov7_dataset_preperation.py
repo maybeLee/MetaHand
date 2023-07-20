@@ -11,6 +11,7 @@
 │ └── val
 ├── train.txt
 └── val.txt
+└── data.yaml
 """
 
 import os
@@ -82,6 +83,26 @@ def split_train_val(img_dir, dest_dir):
         for path in val_img_paths:
             f.write(path + "\n")
 
+    # add yaml file
+    with open(os.path.join(dest_dir, "data.yaml"), "r") as f:
+        """
+            train: ./pilotstudy/train.txt  # images
+            val: ./pilotstudy/val.txt  # images
+
+            # number of classes
+            nc: 1
+
+            # class names
+            names: [ 'hand']
+        """
+        f.write(
+            f"train: {os.path.join(dest_dir, 'train.txt')}\n"
+            f"val: {os.path.join(dest_dir, 'val.txt')}\n"
+            f"nc: 1\n"
+            f"names: [ 'hand' ]\n"
+            f""
+        )
+
 
 def run(img_dir, label_dir, dest_dir):
     os.makedirs(dest_dir, exist_ok=True)
@@ -90,8 +111,8 @@ def run(img_dir, label_dir, dest_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source_img_dir", type=str, default="./data_pilot/images", help="the directory of images")
-    parser.add_argument("--source_label_dir", type=str, default="./data_pilot/labels", help="The directory of labels")
+    parser.add_argument("--src_img_dir", type=str, default="./data_pilot/images", help="the directory of images")
+    parser.add_argument("--src_label_dir", type=str, default="./data_pilot/labels", help="The directory of labels")
     parser.add_argument("--target_dir", type=str, default="./tools/yolov7/pilotstudy", help="The destination of data")
     flags, _ = parser.parse_known_args(sys.argv[1:])
     run(flags.source_img_dir, flags.source_label_dir, flags.target_dir)
