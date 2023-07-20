@@ -31,8 +31,10 @@ def split_train_val(img_dir, dest_dir):
     os.makedirs(train_img_dir, exist_ok=True)
     os.makedirs(val_img_dir, exist_ok=True)
     # prepare the label directory
-    os.makedirs(train_img_dir.replace("images", "labels", 1), exist_ok=True)
-    os.makedirs(val_img_dir.replace("images", "labels", 1), exist_ok=True)
+    img_tag = os.sep + "images" + os.sep  # "/images/"
+    label_tag = os.sep + "labels" + os.sep  # "/labels/"
+    os.makedirs(train_img_dir.replace(img_tag, label_tag, 1), exist_ok=True)
+    os.makedirs(val_img_dir.replace(img_tag, label_tag, 1), exist_ok=True)
 
     # Get the list of image filenames in the image directory
     image_filenames = os.listdir(img_dir)
@@ -51,8 +53,8 @@ def split_train_val(img_dir, dest_dir):
         shutil.copy(src_path, dst_path)
         # copy label
         shutil.copy(
-            'txt'.join(src_path.replace("images", "labels", 1).rsplit(src_path.split('.')[-1], 1)),
-            'txt'.join(dst_path.replace("images", "labels", 1).rsplit(dst_path.split('.')[-1], 1)),
+            'txt'.join(src_path.replace(img_tag, label_tag, 1).rsplit(src_path.split('.')[-1], 1)),
+            'txt'.join(dst_path.replace(img_tag, label_tag, 1).rsplit(dst_path.split('.')[-1], 1)),
         )
         return dst_path
 
