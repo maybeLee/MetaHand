@@ -20,8 +20,10 @@ def detect_parallel_yolov7(args):
     :return: total number of detection
     """
     weights_path, yolo_size, yolo_confidence, img_dir, i_start, i_end, save_dir, base_name = args
-    weights_path = weights_path.replace("tools/yolov7/", "")
-    img_dir = img_dir.replace("tools/yolov7/", "")
+    if not weights_path.startswith("/root"):
+        weights_path = weights_path.replace("tools/yolov7/", "")
+    if not img_dir.startswith("/root"):
+        img_dir = img_dir.replace("tools/yolov7/", "")
     os.system(f"cd tools/yolov7/;python detect.py --weights {weights_path} "
               f"--source {img_dir} --img-size {yolo_size} --name {base_name} --i_start {i_start} --i_end {i_end} --save-txt --increment_path >/dev/null 2>&1;cd ../../")
 
