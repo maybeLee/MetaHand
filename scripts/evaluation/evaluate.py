@@ -217,7 +217,10 @@ class MetaTester(object):
         for i, mutate_id in enumerate(self.mutate_pred):
             if (i + 1) % 500 == 0:
                 logger.info(f'Progress: {str(i + 1)}')
-            img_id = mutate_id.split("-")[0]
+            if not self.dataset == "yolov7":
+                img_id = mutate_id.split("-")[0]
+            else:
+                img_id = mutate_id
             if len(img_id_list) != 0 and img_id in img_id_list:
                 # We only evaluate the image that belong to the training_id.txt
                 logger.info(f"Find Test Images, Exclude!")
