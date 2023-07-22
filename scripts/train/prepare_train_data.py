@@ -214,6 +214,7 @@ class PreTrainData(object):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--source_path", type=str, help="the path of train id")
+    parser.add_argument("--origin_source_path", type=str, default="./tools/yolov7/coco/train2017.txt", help="the path of origin train id")
     parser.add_argument("--img_dir", type=str, help="The dir of image data")
     parser.add_argument("--label_dir", type=str, help="The dir of label data")
     parser.add_argument("--target_dir", type=str, help="The dir of train/test/valid data")
@@ -230,10 +231,10 @@ if __name__ == "__main__":
         # special consideration on yolov7
         with open(flags.source_path, "r") as t:
             mutate_img_list = t.read().strip().splitlines()
-        with open("./tools/yolov7/coco/train2017.txt", "r") as t:
+        with open(flags.origin_source_path, "r") as t:
             origin_img_list = t.read().strip().splitlines()
         for line in origin_img_list:
-            mutate_img_list.append(os.path.abspath("tools/yolov7/coco/"+line))
+            mutate_img_list.append(os.path.abspath(os.path.dirname(flags.origin_source_path) + "/" + line))
         with open(os.path.join(flags.target_dir, "train.txt"), "w") as file:
             for img in mutate_img_list:
                 file.write(str(img) + '\n')
