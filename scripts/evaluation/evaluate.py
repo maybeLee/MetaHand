@@ -53,6 +53,7 @@ class MetaTester(object):
         self.mr = flags.mr
         self.idntfr = ""
         self.origin_label_dir = flags.origin_label_dir.rstrip("/")
+        self.origin_label_format = flags.origin_label_format
         self.output_dir = flags.output_dir
         self.weights_path = flags.weights_path
         self.only_train = flags.only_train
@@ -194,7 +195,7 @@ class MetaTester(object):
             pred_label = pred[0]
             if pred_label != label[0]:
                 continue
-            threshold = YoloUtils.overlapping(label, pred, self.dataset=="yolov7")
+            threshold = YoloUtils.overlapping(label, pred, self.dataset == "yolov7")
             if threshold > self.threshold:
                 status = True
         return status
@@ -202,7 +203,7 @@ class MetaTester(object):
     def compare_prediction(self, ):
         res_id_list = {"11": [], "10": [], "01": [], "00": []}
         # labels: {img_id1: [label1, label2], img_id2: [label1, label2]}
-        labels = self._get_label(self.origin_label_dir, self.dataset == "yolov7")
+        labels = self._get_label(self.origin_label_dir, self.origin_label_format == "segment")
         img_id_list = []
         if self.only_train == 1 and self.dataset != "yolov7":
             # We only evaluate the image that belong to the training_id.txt
@@ -287,6 +288,7 @@ if __name__ == "__main__":
     parser.add_argument("-oi", "--origin_img_dir", type=str, default="./data_company/ImageSet", help="The dir of original images")
     parser.add_argument("-mi", "--mutate_img_dir", type=str, default="./data_company/MutatedSet/objects", help="The dir of mutated images")
     parser.add_argument("-ol", "--origin_label_dir", type=str, default="./data_company/Labels/", help="The dir of original labels")
+    parser.add_argument("-olf", "--origin_label_format", type=str, default="segment", help="The format of original labels: yolov7 or segment")
     parser.add_argument("-od", "--output_dir", default="./outputs", help="The dir of yolo output")
     parser.add_argument('-j', '--jobs', default=1, help='Number of parallel jobs')
     parser.add_argument("-w", "--weights_path", default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
