@@ -140,6 +140,7 @@ class MetaTester(object):
             if self.dataset == "yolov7":
                 os.system(f"python -u -m scripts.evaluation.detect_parallel_yolov7 "
                           f"--img_dir={self.origin_img_dir} "
+                          f"--save_dir={self.output_dir} "
                           f"-w={self.weights_path} "
                           f"-j={self.jobs} "
                           )
@@ -162,6 +163,7 @@ class MetaTester(object):
             if self.dataset == "yolov7":
                 os.system(f"python -u -m scripts.evaluation.detect_parallel_yolov7 "
                           f"--img_dir={self.mutate_img_dir} "
+                          f"--save_dir={self.output_dir} "
                           f"-w={self.weights_path} "
                           f"-j={self.jobs} "
                           )

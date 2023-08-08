@@ -25,7 +25,7 @@ def detect_parallel_yolov7(args):
     if not img_dir.startswith("/root"):
         img_dir = img_dir.replace("tools/yolov7/", "")
     os.system(f"cd tools/yolov7/;python detect.py --weights {weights_path} "
-              f"--source {img_dir} --img-size {yolo_size} --name {base_name} --i_start {i_start} --i_end {i_end} --save-txt --increment_path >/dev/null 2>&1;cd ../../")
+              f"--source {img_dir} --img-size {yolo_size} --name {base_name} --project {save_dir} --i_start {i_start} --i_end {i_end} --save-txt --increment_path >/dev/null 2>&1;cd ../../")
 
 
 class Detector(object):
