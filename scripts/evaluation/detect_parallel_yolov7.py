@@ -93,7 +93,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', default="./outputs", help="The dir of yolo output")
     parser.add_argument('-j', '--jobs', type=int, default=1, help='Number of parallel jobs')
     parser.add_argument('-d', '--device', default=0, help='Device to use')
-    parser.add_argument('-s', '--size', default=320, help='Size for yolo')
+    parser.add_argument('-s', '--size', default=640, help='Size for yolo')
     parser.add_argument('-c', '--confidence', default=0.25, help='Confidence for yolo')
     flags, unknown = parser.parse_known_args()
     detector = Detector(flags)
