@@ -130,7 +130,7 @@ class mutation_operation:
 
   def add_guassian_noise_to_bg(self, filename, bbox, guassian_sigma=0.0):
     # bg = np.uint8(0 * np.ones((480, 640, 3)))       #generate black background
-    img = cv2.imread(self.image_path+filename)
+    img = cv2.imread(self.image_path)
     mean = 0.0
     obj = img.copy()
     max_i = len(obj)
@@ -205,7 +205,7 @@ class mutation_operation:
     
   #Remove all hands in the image
   def rm_all_obj(self, filename, bbox, random_erase=0.0, random_erase_mode="fixMutRatio_varyXY", guassian_sigma=0.0):
-      img = cv2.imread(self.image_path+filename)
+      img = cv2.imread(self.image_path)
       # print("DEBUG: the file path is " + str(self.image_path+filename))
       # print("height of an img: " + str(len(img)))
       height, width, channels = img.shape
@@ -323,7 +323,7 @@ def perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_
       #     img = cv2.imread(mo.image_path+id[:-4]+".JPEG")
       #     print(f"Got image path: {mo.image_path+id[:-4]+'.JPEG'}")
       # else:
-      img = cv2.imread(mo.image_path+id[:-4]+".jpg")
+      img = cv2.imread(mo.image_path)
       if img.any() == None or img.all() == None:
           raise ValueError("img is None")
       bbox = mo.unnormalize(labels,mo.dataset,img)
@@ -380,7 +380,6 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
 
     # copy list of labels
     # os.chdir(label_path)
-    label_list = glob.glob(label_path + "*.txt")
     # label_list = [os.path.basename(i) for i in all_paths] #drop parent directory path
     # print("label path is : " + str(label_path + "*.txt"))
     # print("number of labels obtained: " + str(len(label_list)))
@@ -391,26 +390,19 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
     mut = 0
     #iterate through a list of labels
     # print("Initiating multi-processes")
-    n_jobs_parameter=2
     # if __debug__:
     #   label_list = label_list[:12]
     #   n_jobs_parameter=5
     # Parallel(n_jobs=n_jobs_parameter)(delayed(perform_mutation)(mo,id,random_erase,random_erase_mode,guassian_sigma) for id in label_list)
-    pool = Pool(processes=n_jobs_parameter)
-    start_time = time.time()
     # print("label_list: " + str(len(label_list)))
-    for count,id in enumerate(label_list):
-      if True or os.name == 'nt':
           # print(f"processing label id {id}")
-          perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
-          if count == 20:
-             break
-      else:
+    perform_mutation(mo,label_path,random_erase,random_erase_mode,guassian_sigma,object_or_background)
+          # if count == 20:
+          #    break
+
           # perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset)
-          result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background))
     # print("Number of seconds by using multi-processing: " + str(time.time() - start_time))
-    pool.close()
-    pool.join()
+
     print("Mutation completes!")
       # p = Process(target=perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma))
       # p.start()
@@ -465,4 +457,4 @@ if __name__ == "__main__":
     # label_path = "/data1/wcleungag/labels/"
     # write_path = "/data1/wcleungag/mutated_dataset_all/"
     #raise ValueError("Test error")
-    main(image_path + "/",label_path + "/",mutate_path + "/",float(random_erase),float(guassian_sigma),random_erase_mode,object_or_background,dataset)
+    main(image_path,label_path,mutate_path + "/",float(random_erase),float(guassian_sigma),random_erase_mode,object_or_background,dataset)
