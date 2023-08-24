@@ -130,6 +130,7 @@ class mutation_operation:
 
   def add_guassian_noise_to_bg(self, filename, bbox, guassian_sigma=0.0):
     # bg = np.uint8(0 * np.ones((480, 640, 3)))       #generate black background
+    print(f"processing file {filename}")
     img = cv2.imread(self.image_path+filename)
     mean = 0.0
     obj = img.copy()
@@ -161,6 +162,8 @@ class mutation_operation:
             target_j = min(x+j,max_j-1)
             obj[target_i][target_j] = img[target_i][target_j]
       # print("saving mutated image")
+      if not os.path.exists(f"{self.write_path}BackgroundGaussianMutation/background_gaussian_{str(guassian_sigma).replace('.','_')}"):
+        os.mkdir(f"{self.write_path}BackgroundGaussianMutation/background_gaussian_{str(guassian_sigma).replace('.','_')}")
       writeStatus = cv2.imwrite(self.write_path + "BackgroundGaussianMutation/background_gaussian_" + str(guassian_sigma).replace(".","_") + "/" + filename[:-4] + ".jpg", obj)      #save image
       # if writeStatus is False:
       #   print("cv2 write failed")
@@ -373,6 +376,8 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
         os.mkdir(write_path + 'BwO')
     if not os.path.exists(write_path + 'B'):
         os.mkdir(write_path + 'B')
+    if not os.path.exists(write_path + 'BackgroundGaussianMutation'):
+        os.mkdir(write_path + 'BackgroundGaussianMutation')
     # if not os.path.exists(write_path + 'B_r:andom_erase'):
     #     os.mkdir(write_path + 'B_random_erase')
     # if not os.path.exists(write_path + 'B_random_erase'):
@@ -403,9 +408,8 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
       if True or os.name == 'nt':
           # print(f"processing label id {id}")
           perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background)
-          if count == 20:
-             break
       else:
+          print(f"Processing {id}")
           # perform_mutation(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background,dataset)
           result = pool.apply_async(perform_mutation, args=(mo,id,random_erase,random_erase_mode,guassian_sigma,object_or_background))
     # print("Number of seconds by using multi-processing: " + str(time.time() - start_time))

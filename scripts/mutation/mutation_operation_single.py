@@ -130,11 +130,15 @@ class mutation_operation:
 
   def add_guassian_noise_to_bg(self, filename, bbox, guassian_sigma=0.0):
     # bg = np.uint8(0 * np.ones((480, 640, 3)))       #generate black background
+    #print("!!!Entering add_guassian_noise_to_bg")
+    #print(f"!!!filename {filename}")
+    #print(f"!!!image_path {image_path}")
     img = cv2.imread(self.image_path)
     mean = 0.0
     obj = img.copy()
     max_i = len(obj)
     max_j = len(obj[0])
+    #print(f"!!!img value {img}")
     # bg = np.random.randint(0,high=256,size=(480, 640, 3),dtype=np.uint8)
     # if __debug__:
 
@@ -161,7 +165,10 @@ class mutation_operation:
             target_j = min(x+j,max_j-1)
             obj[target_i][target_j] = img[target_i][target_j]
       # print("saving mutated image")
-      writeStatus = cv2.imwrite(self.write_path + "BackgroundGaussianMutation/background_gaussian_" + str(guassian_sigma).replace(".","_") + "/" + filename[:-4] + ".jpg", obj)      #save image
+      if not os.path.exists(f"{self.write_path}BackgroundGaussianMutation/background_gaussian_{str(guassian_sigma).replace('.','_')}"):
+        os.mkdir(f"{self.write_path}BackgroundGaussianMutation/background_gaussian_{str(guassian_sigma).replace('.','_')}")
+      #print(f"!!!path: {self.write_path}BackgroundGaussianMutation/background_gaussian_{str(guassian_sigma).replace('.','_')}/{filename[:-4]}.jpg")
+      writeStatus = cv2.imwrite(f"{self.write_path}BackgroundGaussianMutation/background_gaussian_{str(guassian_sigma).replace('.','_')}/{filename[:-4]}.jpg", obj)      #save image
       # if writeStatus is False:
       #   print("cv2 write failed")
       # else:
@@ -373,6 +380,8 @@ def main(image_path,label_path,write_path,random_erase,guassian_sigma,random_era
         os.mkdir(write_path + 'BwO')
     if not os.path.exists(write_path + 'B'):
         os.mkdir(write_path + 'B')
+    if not os.path.exists(write_path + 'BackgroundGaussianMutation'):
+        os.mkdir(write_path + 'BackgroundGaussianMutation')
     # if not os.path.exists(write_path + 'B_r:andom_erase'):
     #     os.mkdir(write_path + 'B_random_erase')
     # if not os.path.exists(write_path + 'B_random_erase'):
