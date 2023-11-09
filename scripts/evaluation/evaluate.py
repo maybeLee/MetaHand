@@ -235,6 +235,8 @@ class MetaTester(object):
                 origin_detection = self._is_detected(img_labels[j], origin_preds)
                 mutate_detection = self._is_detected(img_labels[j], mutate_preds)
                 res_id_list[f"{int(origin_detection)}{int(mutate_detection)}"].append(mutate_id)
+        for id_type in res_id_list:
+            res_id_list[id_type] = list(set(res_id_list[id_type]))
         if not os.path.exists("./results"):
             os.makedirs("./results")
         np.save(f"./results/res_{os.path.basename(self.origin_img_dir)}_{os.path.basename(self.mutate_img_dir)}.npy", res_id_list)
@@ -248,25 +250,33 @@ class MetaTester(object):
             # MR-1: An image mutated by corrupting the features of target object(s) should lead to a different object
             # detection result.
             violate_list = ["11", "00"]
+            non_violate_list = ["10", "01"]
         elif self.mr == 2:
             # MR-2: An image mutated by not corrupting the features of target object(s) should lead to the same object
             # detection result
             violate_list = ["01", "10"]
+            non_violate_list = ["11", "00"]
         else:
             raise ValueError("Unsupported Mutation Type!")
         violate_mutate_id_list = []
         for vio in violate_list:
             violate_mutate_id_list += res_id_list[vio]
+        non_violate_mutate_id_list = []
+        for vio in non_violate_list:
+            non_violate_mutate_id_list += res_id_list[vio]
         logger.info("Finish Comparing Detection Result. Start Filtering The Duplicated Images")
         # We filter out duplicated images
-        img_list = []
-        for file_name in violate_mutate_id_list:
-            if file_name not in img_list:
-                img_list.append(file_name)
-            else:
-                continue
-        violate_mutate_id_list = img_list
+        # img_list = []
+        # for file_name in violate_mutate_id_list:
+        #     if file_name not in img_list:
+        #         img_list.append(file_name)
+        #     else:
+        #         continue
+        # violate_mutate_id_list = img_list
+        violate_mutate_id_list = list(set(violate_mutate_id_list))
+        non_violate_mutate_id_list = list(set(non_violate_mutate_id_list))
         logger.info("Finish Filtering the Duplicated Images. Saving The Result")
+        logger.info(f"Number of violating images: {len(violate_mutate_id_list)}, number of non-violating images: {len(non_violate_mutate_id_list)}")
         with open(f"{mutate_base}_violations.txt", "w") as file:
             text = ""
             for violate_mutate_id in violate_mutate_id_list:
