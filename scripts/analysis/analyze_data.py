@@ -33,10 +33,23 @@ class DatasetAnalyzer(object):
         total_size = 0
         for img, hand_list in self.label_dict.items():
             for hand in hand_list:
+                hand = hand.strip()
                 w = float(hand.split(" ")[-2])
                 h = float(hand.split(" ")[-1])
                 total_size += w*h
         return total_size
+
+    def avg_objects_types(self):
+        total_obj_type = 0
+        for img, hand_list in self.label_dict.items():
+            type_list = []
+            for hand in hand_list:
+                hand = hand.strip()
+                obj_type = int(hand.split(" ")[0])
+                if obj_type not in type_list:
+                    type_list.append(obj_type)
+            total_obj_type += len(type_list)
+        return total_obj_type / self.total_imgs()
         
     def avg_objects_size(self):
         return self.total_sizes()/self.total_imgs()
@@ -54,13 +67,15 @@ class DatasetAnalyzer(object):
               f"The total number of hands is: {self.total_objects()}, "
               f"The average hands is: {self.avg_objects()},"
               f"The average hands' size is: {self.avg_objects_size()},"
+              f"The average object type number is: {self.avg_objects_types()},"
               f"The total number of empty img is: {self.empty_imgs()}")
 
 
 if __name__ == "__main__":
     company_label_dir = "/ssddata1/users/dlproj/MetaHand/data_company/Labels"
     egohands_label_dir = "/ssddata1/users/dlproj/MetaHand/data_egohands/labels"
-    companyAnalyzer = DatasetAnalyzer(company_label_dir)
-    companyAnalyzer.analyze()
-    egohandsAnalyzer = DatasetAnalyzer(egohands_label_dir)
-    egohandsAnalyzer.analyze()
+    coco_label_dir = "/ssddata1/users/dlproj/MetaHand/data_coco/labels"
+    # DatasetAnalyzer(company_label_dir).analyze()
+    # DatasetAnalyzer(egohands_label_dir).analyze()
+    DatasetAnalyzer(coco_label_dir).analyze()
+
