@@ -64,6 +64,7 @@ class MetaTester(object):
         self.mutate_pred = {}
         self.threshold = flags.threshold
         self.jobs = flags.jobs
+        self.img_size = flags.img_size
 
     @staticmethod
     def _get_label(label_dir, whether_segments=False):
@@ -142,6 +143,7 @@ class MetaTester(object):
                           f"--img_dir={self.origin_img_dir} "
                           f"--save_dir={self.output_dir} "
                           f"-w={self.weights_path} "
+                          f"-s={self.img_size} "
                           f"-j={self.jobs} "
                           )
             else:
@@ -165,6 +167,7 @@ class MetaTester(object):
                           f"--img_dir={self.mutate_img_dir} "
                           f"--save_dir={self.output_dir} "
                           f"-w={self.weights_path} "
+                          f"-s={self.img_size} "
                           f"-j={self.jobs} "
                           )
             else:
@@ -308,6 +311,7 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--jobs', default=1, help='Number of parallel jobs')
     parser.add_argument("-w", "--weights_path", default="./data_company/working_dir/origin_model/backup/cross-hands_best.weights", type=str, help="The path of model weights")
     parser.add_argument("-t", "--threshold", type=float, default=0.3, help="Confidence threshold to detect hands")
+    parser.add_argument("-img_size", "--image_size", type=int, default=640, help="The size of image for collecting images")
     parser.add_argument('--only_train', type=int, default=1, help="Whether we only consider the training image")
     parser.add_argument("--dataset", type=str, default="popsquare", help="The type of the dataset")
     parser.add_argument("--mr", type=int, default=2, help="MR used. 1: MR-1, 2: MR-2")
