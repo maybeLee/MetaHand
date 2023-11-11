@@ -1,11 +1,9 @@
-# Note
-Please checkout to the voc branch
 
 # MetaHand
 MetaHand is a tool for evaluating and enhancing hand-detection DL models
 
 ## How to run
-We use YoloV3 model as our target subject, and use darknet for Yolo model training.
+We use YOLOv3 and YOLOv7 model as our target subject, and use darknet and pytorch for Yolo model training.
 
 To install darknet
 ```
@@ -17,6 +15,8 @@ docker run --name MetaHand -ti -v /data/{user_name}/Projects/ITF/MetaHand:/root 
 # We also need to compile opencv with GPU for detection (WARNING: don't install opencv from pip, e.g., pip install opencv-python)
 docker exec MetaHand bash -c 'cd /root && ./install_opencv.sh'
 ```
+
+To install YOLOv7 in pytorch's version, remember to clone our project using `git clone --recursive git@github.com:maybeLee/MetaHand.git`
 
 # How to run
 
