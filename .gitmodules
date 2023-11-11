@@ -1,0 +1,3 @@
+[submodule "tools/yolov7"]
+	path = tools/yolov7
+	url = git@github.com:maybeLee/yolov7.git
